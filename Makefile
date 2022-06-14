@@ -1,7 +1,7 @@
 NAME		:= mapcreator
 TAG			:= $$(echo $${BITBUCKET_COMMIT:-$$(git rev-parse HEAD)} | cut -c1-7)
 VERSION			:=  $(shell git describe --dirty)
-REPO		:= repo.labs.greyorange.com
+REPO		:= us-docker.pkg.dev/greymatter-development/apps
 BASENAME	:= ${REPO}/${NAME}
 IMG			:= ${BASENAME}:${TAG}
 STAGING:= ${BASENAME}:staging
