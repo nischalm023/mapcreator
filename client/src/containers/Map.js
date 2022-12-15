@@ -2,7 +2,8 @@
 import React, { Component } from "react";
 import MapViewport from "components/Map/MapViewport";
 import { connect } from "react-redux";
-import { fetchMap, saveMap, downloadMap } from "actions/actions";
+import { fetchMap, saveMap, downloadMap, updateAutocadMap} from "actions/actions";
+import importMap from "common/utils/import-map";
 import { modifyNeighbours } from "actions/barcode";
 import {
   setSuccessMessage,
@@ -22,6 +23,7 @@ import DeleteMap from "components/Map/Forms/DeleteMap";
 import RequestValidation from "components/Map/Forms/RequestValidation";
 import SampleRacksJson from "components/Map/SampleRacksJson";
 import { runSanity } from "actions/actions";
+import _ from "lodash";
 const pendo = window.pendo;
 
 class Map extends Component {
@@ -47,6 +49,57 @@ class Map extends Component {
       pendo.initialize({visitor: {id: mapId, full_name: this.props.nMap.entities.mapObj[mapId].name}, account: {id: "MAPCREATOR"}});
     }
   }
+
+  runHaiMapConversionScriptToMap = (autocad) => {
+      let form = new FormData();
+      form.append("arrFile", autocad)
+      return  fetch('http://localhost:5000/data', {
+          method: 'POST',
+          body: form
+          })
+          .then((response) => response.json())
+          .then(data => {
+                return data;
+            }).catch((error) => {
+              this.setState({'error':error })
+          });
+    };
+
+  handleChange = (evt) => {
+      this.setState({importMap : {["autocad"]: evt.target.files[0]}});
+      console.log("check state in handle chnage",this.state)
+  };
+
+  onSubmit = (e) => {
+    e.preventDefault();
+    // validate the import by converting everything into the map using import function
+    let imported;
+    // const {dispatch}
+    try {
+      if(this.state.importMap["autocad"]){
+          var response = this.runHaiMapConversionScriptToMap(this.state.importMap["autocad"]).then(
+          response=>{
+            imported = importMap(_.omit(response, ["name", "error"]));
+            const { nMap,dispatch,errorMessage,successMessage,queueMode,zoneViewMode,sectorViewMode,directionViewMode } = this.props;
+            const mapId = this.props.nMap ? Object.entries(this.props.nMap.entities.mapObj)[0][1].id : 0;
+            dispatch(updateAutocadMap(
+                  mapId,
+                  imported,
+                  error => dispatch(setErrorMessage(error)),
+                  () =>
+                  dispatch(setSuccessMessage("Successfully saved map."))
+                  )
+                )
+
+          });
+      }
+    } catch (error) {
+      console.log(error.message);
+      this.setState({ error: error.message });
+      return;
+    }
+    
+  };
 
   render() {
     const {
@@ -98,6 +151,22 @@ class Map extends Component {
               sectorViewMode={sectorViewMode}
               directionViewMode={directionViewMode}
             />
+            <form onSubmit={this.onSubmit}>
+                  <div className="form-row">
+                    <label for="fileSelect" >Import autocad file &nbsp;</label>
+                    <div>
+                      <input
+                       type={"file"} 
+                       onChange={this.handleChange}
+                       accept={".csv"} />
+                    </div>
+                    <div>
+                      <button type="submit" style={{'border-radius':'6%','border-color':'lightgrey'}}>
+                        Submit
+                      </button>
+                    </div>
+                  </div>
+              </form>
             <div className="row py-1">
               <div className="btn-group col" role="group">
                 <button

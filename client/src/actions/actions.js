@@ -87,6 +87,16 @@ export const dragStart = (worldCoordinate) => (dispatch, getState) => {
   return Promise.resolve();
 };
 
+export const updateAutocadMap = (mapId,map1,onError,onSuccess) => (dispatch, getState) => {
+  updateMap(mapId, map1).then(handleErrors)
+    .then((res) => res.json())
+    .then((map) => dispatch(newMap(map)))
+    .then(onSuccess)
+    .then(() => setSectorsMxUPreferences(getState))
+    .catch(onError);
+    
+}
+
 export const dragEnd = () => (dispatch, getState) => {
   const state = getState();
   if (state.selectedArea) {

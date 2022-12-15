@@ -32,6 +32,11 @@ class Home extends Component {
               Import an existing map
             </a>
           </LinkContainer>
+          <LinkContainer to="/autocad_import">
+            <a className="list-group-item list-group-item-action">
+              Import autocad map
+            </a>
+          </LinkContainer>
           <LinkContainer to="/version">
             <a className="list-group-item list-group-item-action">Saved maps</a>
           </LinkContainer>

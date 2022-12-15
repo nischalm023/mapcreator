@@ -9,6 +9,7 @@ import Guidelines from "./containers/Guidelines";
 import Map from "./containers/Map";
 import ImportMap from "./containers/ImportMap";
 import CreateMap from "./containers/CreateMap";
+import ImportAutocadMap from "./containers/ImportAutocadMap";
 
 class App extends Component {
   render() {
@@ -21,6 +22,7 @@ class App extends Component {
           <Route path="/map/:id" component={Map} />
           <Route path="/existing" component={ImportMap} />
           <Route path="/new" component={CreateMap} />
+          <Route path="/autocad_import" component={ImportAutocadMap} />
         </div>
       </Router>
     );
