@@ -35,6 +35,72 @@ def getNeighbour(coords,matrix_cord,imstorable,allCords):
 		mainList.append(findNeighbourData(imstorable,ncoord, matrix_cord,allCords))
 	return mainList
 
+def get_rotation(rotation):
+	if rotation == '0':
+		return 0
+	if rotation == '90':
+		return 1
+	if rotation == '180':
+		return 2
+	if rotation == '360':
+		return 3
+
+def createZoneJson(zone_list):
+	data = []
+	for zone_id in zone_list:
+		zone_json = {
+			"zonerec":
+			{
+				"zone_id": str(int(zone_id)),
+				"blocked": False,
+				"paused": False
+			}
+		}
+		data.append(zone_json)
+	zone_json = {"header":
+	{
+		"content-type": "application/json",
+		"accept": "application/json"
+	},
+	"type": "POST",
+	"data":data,
+	"url": "/api/zonerec"
+	}
+
+	# data = json.dumps(zone_json)
+	# with open("zone_mahima.json","w") as f:
+	# 	f.write(data)
+	return zone_json
+
+def createPpsJson(pps_mapping,matrix_cord):
+	ppsList = []
+	for pps in pps_mapping:
+		world_cordinate_location = (pps['Position X'],pps['Position Y'])
+		pps_barcode,coordinate = findBarcodeFromLocation(world_cordinate_location,matrix_cord)
+		pps_json = {
+				"location": pps_barcode,
+				"status": "disconnected",
+				"queue_barcodes":
+				[
+				],
+				"pick_position": pps_barcode,
+				"pick_direction": int(get_rotation(str(pps['Rotation']))),
+				"put_docking_positions":
+				[],
+				"allowed_modes":
+				[
+					"put",
+					"pick",
+					"audit"
+				],
+				"type": pps['PPS_TYPE'].lower(),
+				"pps_id": int(pps['PPS_STATION_ID']),
+				"pps_url": "http://localhost:8181/pps/1/api/"
+		}
+		ppsList.append(pps_json)
+	return ppsList
+
+
 def calculate_size_info(value1, value2):
 	return abs(value1-value2)//2
 
@@ -81,6 +147,15 @@ def create_map(matrix_cord,allCords,matric_cord_name_mapping):
 				mainList.append(myDict)
 			count+=1
 	return mainList
+
+def createSectorJson(matrix_cord,allCords):
+	sector_list = []
+	for coord,loc in matrix_cord.items():
+		if matrix_cord[coord] in allCords:
+			sector_list.append(coord)
+	sectorList = [(re.sub(r'\s+', '', str(i))).replace('(','[').replace(')',']') for i in sector_list]
+	sector_json = [{"0":sectorList}]
+	return sector_json
 	
 def findBarcodeFromLocation(world_cordinate_location,matrix_cord):
 	location = ''
@@ -117,16 +192,21 @@ def my_link():
 	req_file = request.files
 	df = pd.read_csv(req_file["arrFile"])
 	ods_exclude = df[~df['ODS_EXCLUDED'].isnull()]
+	df_pps = df[~df['PPS_STATION_ID'].isnull()]
+	zone_df = df[~df['ZONE_ID'].isnull()]
 	allCords = list(df[['Position X', 'Position Y']].apply(tuple, axis=1))
 	x_loc = sorted(df['Position X'].unique(),reverse=True)
 	y_loc = sorted(df['Position Y'].unique(),reverse=True)
 	matric_cord_name_mapping = df.groupby(['Position X','Position Y'])['Name'].apply(list).to_dict()
 	matrix_cord = create_matrix(x_loc,y_loc)
 	data = create_map(matrix_cord,allCords,matric_cord_name_mapping)
-	create_ods_json = createOdsJson(ods_exclude.to_dict('records'),matrix_cord)
-	return {'mapJson':data , 'odsExcludedJson':create_ods_json}
+	ods_json = createOdsJson(ods_exclude.to_dict('records'),matrix_cord)
+	pps_json = createPpsJson(df_pps.to_dict('records'),matrix_cord)
+	ZoneJson = createZoneJson(list(set(zone_df['ZONE_ID'])))
+	SectorJson = createSectorJson(matrix_cord,allCords)
+	return {'mapJson':data , 'odsExcludedJson':ods_json , 'ppsJson':pps_json , 'zoneJson':ZoneJson , 'sectorJson':SectorJson}
 
  
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	app.run('10.11.4.14', port=5000)
