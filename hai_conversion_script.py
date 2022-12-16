@@ -16,26 +16,6 @@ def create_matrix(x_loc,y_loc):
 			CoordDict[GridCoord] = (x_val, y_val)
 	return CoordDict
 
-def findNeighbourData(imstorable,coords,matrix_cord,allDict):
-	l = [0,0,0]
-	if coords in matrix_cord and matrix_cord[coords] in allDict:
-		l[0] = 1
-		l[1] = 1
-		neighbourstorable = matrix_cord[coords]
-		if imstorable =="s" and neighbourstorable == "s":
-			l[2] =0
-		else:
-			l[2] =1
-	return l
-		
-def getNeighbour(coords,matrix_cord,imstorable,allCords):
-	x,y = coords
-	coordList = [(x,y-1),(x-1,y),(x,y+1),(x+1,y)]
-	mainList = []
-	for ncoord in coordList:
-		mainList.append(findNeighbourData(imstorable,ncoord, matrix_cord,allCords))
-	return mainList
-
 def get_rotation(rotation):
 	if rotation == '0':
 		return 0
@@ -102,22 +82,71 @@ def createPpsJson(pps_mapping,matrix_cord):
 	return ppsList
 
 
+def getSearchDistanceSoFar(worldx,worldy,n_worldx,n_worldy,direction):
+	if direction == "north":
+		direction = abs(worldy - n_worldy)
+	elif direction == "east":
+		direction = abs(worldx - n_worldx)
+	elif direction == "south":
+		direction = abs(n_worldy - worldy)
+	elif direction == "west":
+		direction = abs(n_worldx - worldx)
+	return direction
+
+def getDistance(worldx,worldy,n_worldx,n_worldy,direction):
+	if direction == "north":
+		d = calculate_size_info(worldy,n_worldy)
+	elif direction == "east":
+		d = calculate_size_info(worldx,n_worldx)
+	elif direction == "south":
+		d = calculate_size_info(n_worldy,worldy)
+	elif direction == "west":
+		d = calculate_size_info(n_worldx,worldx)
+	return d
+
+def findNeighbourData(ncoord, direction, matrix_cord, allDict ,coord):
+	l = [0,0,0]
+	d = 750
+	n_x , n_y = ncoord
+	x , y = coord
+	worldx,worldy = matrix_cord[coord]
+
+	if ncoord in matrix_cord:
+		n_worldx,n_worldy = matrix_cord[ncoord] 
+		if matrix_cord[ncoord] in allDict:
+			l = [1,1,1]
+			d = getDistance(worldx,worldy,n_worldx,n_worldy,direction)
+		else:
+			distance = getSearchDistanceSoFar(worldx,worldy,n_worldx,n_worldy,direction)
+			if distance > 1900:
+				l = [0,0,0]
+				d = 750
+			else:
+				if direction == "north":
+					return findNeighbourData((x,n_y-1),"north",matrix_cord,allDict,coord)
+				elif direction == "east":
+					return findNeighbourData((n_x-1,y),"east",matrix_cord,allDict,coord)
+				elif direction == "south":
+					return findNeighbourData((x,n_y+1),"south",matrix_cord,allDict,coord)
+				elif direction == "west":
+					return findNeighbourData((n_x+1,y),"west",matrix_cord,allDict,coord)
+
+	return l,d
+		
+				
+def getNeighbourSizeInfo(x, y ,matrix_cord, allCords):
+	coord = (x,y)
+	coordList = {(x,y-1):"north",(x-1,y):"east",(x,y+1):"south",(x+1,y):"west"}
+	neighbourList = []
+	sizeInfoList = []
+	for ncoord,direction in coordList.items():
+		neighbour,distance = findNeighbourData(ncoord, direction, matrix_cord, allCords , coord)
+		neighbourList.append(neighbour)
+		sizeInfoList.append(int(distance))
+	return neighbourList, sizeInfoList
+
 def calculate_size_info(value1, value2):
 	return abs(value1-value2)//2
-
-def cal_size_info(x, y, matrix_cord,allDict):
-	size_info_list = []
-	north,south,east,west = 750,750,750,750
-
-	if (x,y-1) in matrix_cord and matrix_cord[(x,y-1)] in allDict:
-		north = calculate_size_info(matrix_cord[(x,y)][1], matrix_cord[(x,y-1)][1])
-	if (x-1,y) in matrix_cord and matrix_cord[(x-1,y)] in allDict:
-		east = calculate_size_info(matrix_cord[(x,y)][0], matrix_cord[(x-1,y)][0])
-	if (x,y+1) in matrix_cord and matrix_cord[(x,y+1)] in allDict:
-		south = calculate_size_info(matrix_cord[(x,y+1)][1], matrix_cord[(x,y)][1])
-	if (x+1,y) in matrix_cord and matrix_cord[(x+1,y)] in allDict:
-		west = calculate_size_info(matrix_cord[(x+1,y)][0], matrix_cord[(x,y)][0])
-	return [int(north),int(east),int(south),int(west)]
 
 def create_map(matrix_cord,allCords,matric_cord_name_mapping):
 	myDict = {}
@@ -128,13 +157,12 @@ def create_map(matrix_cord,allCords,matric_cord_name_mapping):
 			rtype = 's' if "storage" in matric_cord_name_mapping[loc_cord][0].lower() else "p"
 			xloc,yloc,rtype,xcoords, ycoords = loc_cord[0],loc_cord[1],rtype,grid_cord[0],grid_cord[1]
 			barcode = "%03d.%03d"%(ycoords,xcoords)
-			neighbours =getNeighbour((xcoords,ycoords),matrix_cord,rtype,allCords)
+			neighbours,size_info = getNeighbourSizeInfo(xcoords,ycoords,matrix_cord,allCords)
 			myDict = {"neighbours": neighbours}
 			if rtype =="p":
 				store_status = 0
 			elif rtype =="s":
 				store_status = 1
-			size_info = cal_size_info(xcoords, ycoords, matrix_cord, allCords)
 			myDict = { "barcode": barcode,
 				"blocked": False,
 				"botid": "null",
@@ -310,7 +338,7 @@ def my_link():
 		data = convertNormalise(new_map)
 
 	return {'mapJson':data , 'odsExcludedJson':ods_json , 'ppsJson':pps_json , 'zoneJson':ZoneJson , 'sectorJson':SectorJson, 'chargerJson':charger_json}
- 
+
 
 if __name__ == '__main__':
 	app.run('10.11.4.14', port=5000)
