@@ -158,7 +158,7 @@ class Map extends Component {
                       <input
                        type={"file"} 
                        onChange={this.handleChange}
-                       accept={".csv"} />
+                       accept={".xls"} />
                     </div>
                     <div>
                       <button type="submit" style={{'border-radius':'6%','border-color':'lightgrey'}}>

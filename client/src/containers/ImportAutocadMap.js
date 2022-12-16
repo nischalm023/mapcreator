@@ -110,7 +110,7 @@ class ImportMap extends Component {
                 <input
                  type={"file"} 
                  onChange={this.handleChange}
-                 accept={".csv"} />
+                 accept={".xls"} />
             </div>
           </div>
           <div className="form-group row">

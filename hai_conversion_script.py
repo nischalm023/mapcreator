@@ -6,6 +6,7 @@ app = Flask(__name__)
 CORS(app)
 import json
 import re
+import ast
 
 def create_matrix(x_loc,y_loc):
 	CoordDict = {}
@@ -68,7 +69,7 @@ def createZoneJson(zone_list):
 	}
 
 	# data = json.dumps(zone_json)
-	# with open("zone_mahima.json","w") as f:
+	# with open("zone_mahima1.json","w") as f:
 	# 	f.write(data)
 	return zone_json
 
@@ -148,6 +149,44 @@ def create_map(matrix_cord,allCords,matric_cord_name_mapping):
 			count+=1
 	return mainList
 
+def getChargerLocation(charger_dict,matrix_cord):
+	world_cord = (charger_dict['Position X'],charger_dict['Position Y'])
+	charger_barcode,coordinate = findBarcodeFromLocation(world_cord,matrix_cord)
+	return charger_barcode,coordinate
+
+def getChargerEntryPoint(charger_dict,matrix_cord):
+	world_cord = tuple(json.loads(charger_dict['CHARGER_ENTRY_POINT']))
+	entrypoint_barcode,coordinate = findBarcodeFromLocation(world_cord,matrix_cord)
+	return entrypoint_barcode,coordinate
+
+
+def createChargerJson(mapping_charger,matrix_cord):
+	chargerJson = {}
+	chargerList = []
+	coordinate_dict = {}
+	reinit_dict = {} 
+	for charger_dict in mapping_charger:
+		charger_location,coordinate = getChargerLocation(charger_dict,matrix_cord)
+		charger_entrypoint,reinit_cordinate = getChargerEntryPoint(charger_dict,matrix_cord)
+		rotation = int(get_rotation(str(charger_dict['Rotation'])))
+		chargerJson = {
+					"charger_location": charger_location,
+					"charger_direction": rotation,
+					"entry_point_location": charger_entrypoint,
+					"entry_point_direction": rotation,
+					"reinit_point_location": charger_entrypoint,
+					"reinit_point_direction": rotation,
+					"status": "disconnected",
+					"mode": "manual",
+					"charger_type": charger_dict['CHARGER_TYPE'].lower().replace(' ','_'),
+					"charger_id": int(charger_dict['CHARGER_ID'])
+				}
+		chargerList.append(chargerJson)
+		coordinate_dict[coordinate]=[rotation,reinit_cordinate]
+
+	return chargerList,coordinate_dict
+
+
 def createSectorJson(matrix_cord,allCords):
 	sector_list = []
 	for coord,loc in matrix_cord.items():
@@ -185,15 +224,73 @@ def createOdsJson(ods_mapping,matrix_cord):
 	}
 	return odsJson
 
+def getAdjcencyCord(get_reinit_neighbour,barcodesDict):
+	adjacency_list = []
+	all_cords = list(barcodesDict.keys())
+	for item in get_reinit_neighbour:
+		if item in all_cords:
+			adjacency_list.append(list(item))
+		else:
+			adjacency_list.append(None)
+	return adjacency_list
 
+
+def addChargers(charger_coord,direction,reinit,barcodesDict):
+	x,y = charger_coord
+	r_x,r_y = reinit
+	reinit_barcode_dict = barcodesDict[reinit]
+	get_reinit_neighbour = [(r_x,r_y-1),(r_x-1,r_y),(r_x,r_y+1),(r_x+1,r_y)]
+	reinit_barcode_dict['neighbours'][direction] = [1, 1, 0]
+	reinit_barcode_dict['neighbours'][(direction + 2) % 4] = [1, 1, 0]
+	get_adjecency_coord = getAdjcencyCord(get_reinit_neighbour,barcodesDict)
+	reinit_barcode_dict['adjacency'] = get_adjecency_coord
+
+	get_charger_neighbour = [(x,y-1),(x-1,y),(x,y+1),(x+1,y)]
+	charger_barcode_dict = barcodesDict[charger_coord]
+	charger_barcode_dict['neighbours'][direction][2] = 0
+	for index,item in enumerate(get_charger_neighbour):
+		if index != direction:
+			charger_barcode_dict['neighbours'][index][1] = 0
+			charger_barcode_dict['neighbours'][index][2] = 0
+	get_charger_adjecency_coord = getAdjcencyCord(get_charger_neighbour,barcodesDict)
+	charger_barcode_dict['adjacency'] = get_charger_adjecency_coord
+
+	e_x,e_y = get_reinit_neighbour[direction]
+	get_entry_barcode_dict = barcodesDict[get_reinit_neighbour[direction]]
+	get_entry_barcode_dict['neighbours'][(direction + 2) % 4][2] = 0
+	get_entry_neighbour = [(e_x,e_y-1),(e_x-1,e_y),(e_x,e_y+1),(e_x+1,e_y)]
+	get_entry_barcode_coord = getAdjcencyCord(get_entry_neighbour,barcodesDict)
+	get_entry_barcode_dict['adjacency'] = get_entry_barcode_coord
+
+
+	for index,item in enumerate(get_charger_neighbour):
+		if item != reinit and item in list(barcodesDict.keys()):
+			barcodesDict[item]['neighbours'][(index + 2) % 4][1] = 0
+			barcodesDict[item]['neighbours'][(index + 2) % 4][2] = 0
+	return barcodesDict
+
+
+def convertNormalise(data):
+	normalise_list = []
+	for k,v in data.items():
+		normalise_list.append(v)
+	return normalise_list
+
+def convertDenormalize(data):
+	denomalize_dict = {}
+	for item in data:
+		coord = tuple(ast.literal_eval(item['coordinate']))
+		denomalize_dict[coord] = item
+	return denomalize_dict
 
 @app.route('/data',methods=['GET', 'POST'])
 def my_link():
 	req_file = request.files
-	df = pd.read_csv(req_file["arrFile"])
+	df = pd.read_excel(req_file["arrFile"])
 	ods_exclude = df[~df['ODS_EXCLUDED'].isnull()]
 	df_pps = df[~df['PPS_STATION_ID'].isnull()]
 	zone_df = df[~df['ZONE_ID'].isnull()]
+	df_charger = df[~df['CHARGER_ID'].isnull()]
 	allCords = list(df[['Position X', 'Position Y']].apply(tuple, axis=1))
 	x_loc = sorted(df['Position X'].unique(),reverse=True)
 	y_loc = sorted(df['Position Y'].unique(),reverse=True)
@@ -204,8 +301,15 @@ def my_link():
 	pps_json = createPpsJson(df_pps.to_dict('records'),matrix_cord)
 	ZoneJson = createZoneJson(list(set(zone_df['ZONE_ID'])))
 	SectorJson = createSectorJson(matrix_cord,allCords)
-	return {'mapJson':data , 'odsExcludedJson':ods_json , 'ppsJson':pps_json , 'zoneJson':ZoneJson , 'sectorJson':SectorJson}
+	charger_json,charger_cordinate = createChargerJson(df_charger.to_dict('records'),matrix_cord)
+	data = create_map(matrix_cord,allCords,matric_cord_name_mapping)
+	convertMapDataDenormalize = convertDenormalize(data)
 
+	for charger_coord,reinit in charger_cordinate.items():
+		new_map = addChargers(charger_coord,reinit[0],reinit[1],convertMapDataDenormalize)
+		data = convertNormalise(new_map)
+
+	return {'mapJson':data , 'odsExcludedJson':ods_json , 'ppsJson':pps_json , 'zoneJson':ZoneJson , 'sectorJson':SectorJson, 'chargerJson':charger_json}
  
 
 if __name__ == '__main__':
