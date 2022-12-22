@@ -88,6 +88,9 @@ export const getTileIdToWorldCoordMapFunc = barcodes => {
           continue;
         }
         var barcodeInfoDict = barcodes[barcode];
+        console.log("barcodeInfoDict.............",barcodeInfoDict)
+        console.log("barcode >>>>-----",barcode)
+        console.log("barcodes[barcode] --->>>>",barcodes[barcode])
         var distanceInfo = barcodeInfoDict.size_info;
         var neighbourWithWorldCoordinate = getNeighbourWithValidWorldCoord(
           barcode,
