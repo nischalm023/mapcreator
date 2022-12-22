@@ -152,7 +152,8 @@ class CreateMap:
 		for grid_cord,loc_cord in matrix_cord.items():
 			if loc_cord in allLocationCords:
 				rtype = 's' if "storage" in location_cord_name_mapping[loc_cord][0].lower() else "p"
-				sector_id = [x for x in sector_mapping[loc_cord] if pd.isnull(x) == False][0]
+				# sector_id = [x for x in sector_mapping[loc_cord] if pd.isnull(x) == False][0]
+				sector_id = 0
 				xloc,yloc,rtype,xcoords, ycoords = loc_cord[0],loc_cord[1],rtype,grid_cord[0],grid_cord[1]
 				barcode = "%03d.%03d"%(ycoords,xcoords)
 				neighbours,size_info,adjacency_list = self.getNeighbourSizeInfo(xcoords,ycoords,matrix_cord,allLocationCords)
@@ -435,10 +436,10 @@ def my_link():
 	except Exception as e:
 		return "Error in Forming zone json of autocad csv",404
 
-	try:
-		SectorJson = createSectorJson(df,matrix_cord,allLocationCords,sector_mapping)
-	except Exception as e:
-		return "Error in Forming sector json of autocad csv",404
+	# try:
+	# 	SectorJson = createSectorJson(df,matrix_cord,allLocationCords,sector_mapping)
+	# except Exception as e:
+	# 	return "Error in Forming sector json of autocad csv",404
 	
 	try:
 		charger_json,charger_cordinate = CreateChargerJson().get_charger_json(df, matrix_cord)
