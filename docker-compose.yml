@@ -16,3 +16,7 @@ services:
       - db
     ports:
       - "5000:3001"
+  autocad:
+    image: map_creator_script:latest
+    ports:
+      - "3000:3000"

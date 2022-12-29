@@ -291,7 +291,7 @@ export var createFloorFromCoordinateData = ({
       var unit = {
         store_status: 0,
         zone: "defzone",
-        sector: 0,
+        sector: "undefined",
         barcode,
         botid: "null",
         neighbours: [[1, 1, 1], [1, 1, 1], [1, 1, 1], [1, 1, 1]],

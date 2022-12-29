@@ -18,6 +18,16 @@ const createMap = (denormalizedMap, name) =>
       name,
     }),
   });
+
+const runHaiMapConversionScriptToMap = (autocad) => {
+      let form = new FormData();
+      form.append("arrFile", autocad)
+      return  fetch('http://127.0.0.1:3000/data', {
+          method: 'POST',
+          body: form
+          }).then((response) => response.json()).then(data => {return data;});
+    };
+
 const deleteMap = (mapId) =>
   fetch(`${BASENAME}/api/deleteMap/${mapId}`, {
     method: "POST",
@@ -46,4 +56,5 @@ export {
   getMaps,
   getAllMaps,
   getSampleRacksJson,
+  runHaiMapConversionScriptToMap
 };

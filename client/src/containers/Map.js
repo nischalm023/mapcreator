@@ -23,6 +23,7 @@ import DeleteMap from "components/Map/Forms/DeleteMap";
 import RequestValidation from "components/Map/Forms/RequestValidation";
 import SampleRacksJson from "components/Map/SampleRacksJson";
 import { runSanity } from "actions/actions";
+import { runHaiMapConversionScriptToMap} from "utils/api";
 import _ from "lodash";
 const pendo = window.pendo;
 
@@ -50,21 +51,6 @@ class Map extends Component {
     }
   }
 
-  runHaiMapConversionScriptToMap = (autocad) => {
-      let form = new FormData();
-      form.append("arrFile", autocad)
-      return  fetch('http://localhost:5000/data', {
-          method: 'POST',
-          body: form
-          })
-          .then((response) => response.json())
-          .then(data => {
-                return data;
-            }).catch((error) => {
-              this.setState({'error':error })
-          });
-    };
-
   handleChange = (evt) => {
       this.setState({importMap : {["autocad"]: evt.target.files[0]}});
       console.log("check state in handle chnage",this.state)
@@ -75,12 +61,15 @@ class Map extends Component {
     // validate the import by converting everything into the map using import function
     let imported;
     // const {dispatch}
-    try {
-      if(this.state.importMap["autocad"]){
-          var response = this.runHaiMapConversionScriptToMap(this.state.importMap["autocad"]).then(
+    if(this.state.importMap["autocad"]){
+          var response = runHaiMapConversionScriptToMap(this.state.importMap["autocad"]).then(
           response=>{
-            imported = importMap(_.omit(response, ["name", "error"]));
             const { nMap,dispatch,errorMessage,successMessage,queueMode,zoneViewMode,sectorViewMode,directionViewMode } = this.props;
+            if(response.status == "404"){
+              dispatch(setErrorMessage(response["content"]))
+            }
+            else{
+            imported = importMap(_.omit(response['content'], ["name", "error"]));
             const mapId = this.props.nMap ? Object.entries(this.props.nMap.entities.mapObj)[0][1].id : 0;
             dispatch(updateAutocadMap(
                   mapId,
@@ -90,16 +79,10 @@ class Map extends Component {
                   dispatch(setSuccessMessage("Successfully saved map."))
                   )
                 )
-
+          }
           });
       }
-    } catch (error) {
-      console.log(error.message);
-      this.setState({ error: error.message });
-      return;
     }
-    
-  };
 
   render() {
     const {

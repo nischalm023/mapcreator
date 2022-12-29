@@ -4,7 +4,7 @@ import JSONFileInput from "components/JSONFileInput";
 import { handleErrors } from "utils/util";
 import { withRouter } from "react-router-dom";
 import SweetAlertError from "components/SweetAlertError";
-import { createMap , RunScript } from "utils/api";
+import { createMap , runHaiMapConversionScriptToMap} from "utils/api";
 import _ from "lodash";
 
 class ImportMap extends Component {
@@ -31,21 +31,9 @@ class ImportMap extends Component {
     this.setState({ [stateKey]: undefined });
   };
 
-  runHaiMapConversionScriptToMap = (autocad) => {
-      console.log(">>>>>",autocad)
-      let form = new FormData();
-      form.append("arrFile", autocad)
-      return  fetch('http://localhost:5000/data', {
-          method: 'POST',
-          body: form
-          })
-          .then((response) => response.json())
-          .then(data => {
-                return data;
-            }).catch((error) => {
-              this.setState({'error':error })
-          });
-    };
+
+
+  
 
   createMap = (imported) => {
     const { name } = this.state;
@@ -64,10 +52,15 @@ class ImportMap extends Component {
     let imported;
     try {
       if(this.state["autocad"]){
-            var response = this.runHaiMapConversionScriptToMap(this.state["autocad"]).then(
+            var response = runHaiMapConversionScriptToMap(this.state["autocad"]).then(
             response=>{
-                  imported = importMap(_.omit(response, ["name", "error"]));
+                  if (response["status"] == "404"){
+                   this.setState({ 'error':response["content"] })
+                  }
+                  else{
+                  imported = importMap(_.omit(response["content"], ["name", "error"]));
                   this.createMap(imported)
+                }
             });
       }
     } catch (error) {
@@ -105,7 +98,7 @@ class ImportMap extends Component {
             </div>
           </div>
           <div className="form-group row justify-content-between">
-            <label for="fileSelect" className="col-form-label col-sm-3">autocad.csv</label>
+            <label for="fileSelect" className="col-form-label col-sm-3">autocad.xls</label>
               <div className="col-sm-9">
                 <input
                  type={"file"} 

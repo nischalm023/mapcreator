@@ -139,7 +139,7 @@ export const setSectorsBarcodeMapping = (dispatch, getState) => {
   normalizedMap.entities.sectorBarcodeMapping = {};
   Object.keys(normalizedMap.entities.barcode).forEach((key) => {
     if (normalizedMap.entities.barcode[key].sector == undefined)
-      normalizedMap.entities.barcode[key].sector = 0;
+      normalizedMap.entities.barcode[key].sector = "undefined";
     if (
       normalizedMap.entities.sectorBarcodeMapping[
         normalizedMap.entities.barcode[key].sector
@@ -152,7 +152,7 @@ export const setSectorsBarcodeMapping = (dispatch, getState) => {
       normalizedMap.entities.barcode[key].sector
     ].push("[" + key + "]");
   });
-  delete normalizedMap.entities.sectorBarcodeMapping[undefined];
+  // delete normalizedMap.entities.sectorBarcodeMapping[undefined];
   return normalizedMap.entities.sectorBarcodeMapping;
 };
 
