@@ -467,7 +467,7 @@ class GetAndCreateMapMatrix:
 			start_index_y = int(list(matrix_cord.keys())[-1][0]) + 100
 		return CoordDict, floor_dict
 
-# validations on autocad file
+# validation
 class ValidationAutocad:
 	def validate_schema(self,df):
 		column_name = ['Count', 'Name', 'Position X', 'Position Y', 'SECTOR_ID', 'ZONE_ID', 'Rotation', 'ELEVATOR_ID', 'ELEVATOR_TYPE', 'ENTRY_BARCODE', 'EXIT_BARCODE', 'PPS_STATION_ID', 'PPS_TYPE', 'CHARGER_ID', 'CHARGER_TYPE', 'FENCE_DISTANCE', 'FLOOR', 'CHARGER_ENTRY_POINT', 'ODS_EXCLUDED']
@@ -496,7 +496,7 @@ class ValidationAutocad:
 		not_duplicate_entity_list = []
 		entity = ['charger', 'pick put station', 'elevator', 'storage']  
 		entity_df = df[df['Name'].str.lower().str.contains('|'.join(entity))]
-		duplicateRowsDF = df[df.duplicated(['Position X', 'Position Y','FLOOR'])]
+		duplicateRowsDF = df[df.duplicated(['Position X', 'Position Y'])]
 		entity_df_list = entity_df[['Position X', 'Position Y']].values.tolist()
 		duplicate_df_list = duplicateRowsDF[['Position X', 'Position Y']].values.tolist()
 		entity_type_diff = list(filter(lambda a: a not in duplicate_df_list, entity_df_list))
