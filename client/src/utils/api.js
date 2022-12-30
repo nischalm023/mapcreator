@@ -1,4 +1,5 @@
 const BASENAME = process.env.REACT_APP_BASENAME || "";
+const BASENAME_AUTOCAD = process.env.REACT_APP_BASENAME_AUTOCAD || "";
 // const BASENAME = "https://mapcreator.labs.greyorange.com" || "";
 const getMap = (mapId) => fetch(`${BASENAME}/api/map/${mapId}`);
 const updateMap = (mapId, map) =>
@@ -22,7 +23,7 @@ const createMap = (denormalizedMap, name) =>
 const runHaiMapConversionScriptToMap = (autocad) => {
       let form = new FormData();
       form.append("arrFile", autocad)
-      return  fetch('http://127.0.0.1:3000/data', {
+      return  fetch(`${BASENAME_AUTOCAD}/data`, {
           method: 'POST',
           body: form
           }).then((response) => response.json()).then(data => {return data;});
