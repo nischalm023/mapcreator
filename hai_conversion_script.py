@@ -507,7 +507,7 @@ class ValidationAutocad:
 	def validate_sector_floor_exist(self,df):
 		barcode_df = df[df['Name'].str.lower().str.contains('barcode')]
 		sector_empty_df = barcode_df[barcode_df['SECTOR_ID'].isna()]
-		floor_empty_df = barcode_df[barcode_df['FLOOR'].isna()]
+		floor_empty_df = df[df['FLOOR'].isna()]
 		sector_empty_list = sector_empty_df[['Name','Position X', 'Position Y','FLOOR']].values.tolist()
 		floor_empty_df = floor_empty_df[['Name','Position X', 'Position Y','FLOOR']].values.tolist()
 		if sector_empty_list:
