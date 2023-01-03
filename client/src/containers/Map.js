@@ -21,6 +21,7 @@ import ChangeFloorDropdown from "components/Map/Forms/ChangeFloorDropdown";
 import CopyMap from "components/Map/Forms/CopyMap";
 import DeleteMap from "components/Map/Forms/DeleteMap";
 import RequestValidation from "components/Map/Forms/RequestValidation";
+import HighLightManualChange from "components/Map/Forms/HighLightManualChange";
 import SampleRacksJson from "components/Map/SampleRacksJson";
 import { runSanity } from "actions/actions";
 import { runHaiMapConversionScriptToMap} from "utils/api";
@@ -112,15 +113,16 @@ class Map extends Component {
               onConfirm={() => dispatch(clearSuccessMessage())}
             />
             <div className="row justify-content-between">
-              <div className="col-5">
+              <div className="col-3">
                 <h3 className="display-5">
                   {nMap ? nMap.entities.mapObj[mapId].name : "..."}
                 </h3>
               </div>
-              <div className="col-7">
+              <div className="col-9">
                 <div className="float-right">
                   <SampleRacksJson />
                   <DeleteMap />
+                  <HighLightManualChange />
                   <RequestValidation />
                   <span className={nMap && nMap.entities.mapObj[mapId].sanity ? "btn btn-success" : "btn btn-danger"}>{nMap && nMap.entities.mapObj[mapId].sanity ? "Valid" : "Invalid"}</span>
                 </div>

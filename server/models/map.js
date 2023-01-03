@@ -3,6 +3,7 @@ module.exports = (sequelize, DataTypes) => {
   var Map = sequelize.define("Map", {
     name: DataTypes.STRING,
     map: DataTypes.JSON,
+    BaseMap: DataTypes.JSON,
     validationRequested: DataTypes.BOOLEAN,
     sanity: DataTypes.BOOLEAN
   }, {});

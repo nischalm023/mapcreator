@@ -31,7 +31,8 @@ app.post(
       throw new Error("name is required");
     }
     // store in db
-    var created = await Map.create({ map, name });
+
+    var created = await Map.create({ map:map, name:name,BaseMap:map});
     // send only id
     res.json(created.id);
   })
