@@ -30,7 +30,7 @@ export const tileNameWithoutEntityDataSelector = createSelector(
       tileSprite = constants.PATH;
     if (barcode.node_status > 0 && !zoneViewMode && !sectorViewMode)
       tileSprite = constants.QUEUE;
-
+    
     Object.keys(odsExcluded).forEach((ods) => {
       if (
         barcode.coordinate === odsExcluded[ods].coordinate &&
@@ -56,6 +56,8 @@ export const tileNameWithoutEntityDataSelector = createSelector(
         }
       }
     });
+    if (barcode.highlight_status > 0 && !zoneViewMode && !sectorViewMode)
+      tileSprite = constants.HIGHLIGHT;
     return tileSprite;
   }
 );
@@ -95,6 +97,7 @@ export const getQueueMap = createSelector(
     return ret;
   }
 );
+
 
 const entitySelectorHelperData = {
   pps: ["pps", constants.PPS],
@@ -157,6 +160,7 @@ export const getParticularEntityMap = createCachedSelector(
         ret[key] = entitySprite;
       }
     });
+
     return ret;
   }
 )((state, { entityName }) => entityName);
@@ -176,6 +180,20 @@ export const getChargerEntryMap = (state) => {
           charger_direction
         ];
         if (eb) ret[eb.coordinate] = constants.CHARGER_ENTRY;
+      }
+    }
+  );
+  return ret;
+};
+
+export const getEditHighlight = (state) => {
+  var chargerEntities = getParticularEntity(state, { entityName: "charger" });
+  var barcodesDict = getBarcodes(state);
+  var ret = {};
+  Object.entries(barcodesDict).forEach(
+    (key) => {
+      if (key[1].highlight_status>0){
+        ret[key[0]] = constants.HIGHLIGHT
       }
     }
   );
@@ -212,6 +230,7 @@ export const tileEntitySpritesMapSelector = (state) => {
   // selected also
   ret = { ...ret, ...getQueueMap(state) };
   ret = { ...ret, ...getPpsQueueMap(state) };
+  ret = { ...ret, ...getEditHighlight(state) };
   return ret;
 };
 

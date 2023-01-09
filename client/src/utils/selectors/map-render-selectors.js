@@ -55,6 +55,7 @@ export const getMainTileSpriteData = createSelector(
         }
       }
     });
+    if ( barcode.highlight_status > 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.HIGHLIGHT;
     return {
       name: tileSprite,
       x: boundingBox.left,

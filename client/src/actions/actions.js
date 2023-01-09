@@ -21,7 +21,6 @@ import copy from "copy-to-clipboard";
 import exportMap from "common/utils/export-map";
 import { SPRITESHEET_PATH } from "../constants";
 import { fitToViewport, setViewportClamp } from "./viewport";
-import _ from "lodash";
 import { setErrorMessage, setSuccessMessage } from "./message";
 import {
   getMap,
@@ -33,6 +32,7 @@ import {
 } from "utils/api";
 import { implicitBarcodeToCoordinate } from "../utils/util";
 import { locateBarcode } from "../actions/barcode";
+import _ from "lodash";
 
 
 // always good idea to return promises from async action creators
@@ -219,6 +219,134 @@ export const removeEntitiesToFloor = ({ currentFloor, floorKey, ids }) => ({
     ids: ids,
   },
 });
+
+export const getUpdatedMap = (getState) => {
+  const state = getState();
+  var mapId = getMapId(state);
+  return getMap(mapId)
+    .then(handleErrors)
+    .then((res) => res.json()).then(data => {return data;})
+
+};
+export const RemoveExtraMapValueKey = (update_map,base_map) => {
+    var rem_list = ['world_coordinate', 'world_coordinate_reference_neighbour', 'path_status','node_status','excluded','highlight_status']
+    var map_list = [update_map,base_map]
+    for (var k = 0; k < map_list.length; k++) {
+        var map = map_list[k]
+        for (var i = 0, len = map.floors.length; i < len; i++) {
+            var map_values = map.floors[i]["map_values"]
+            for (var j = 0, len1 = map_values.length; j < len1; j++)
+                rem_list.forEach(e => delete map_values[j][e])
+            map.floors[i]["map_values"] = map_values
+        }
+    }
+    return update_map,map
+}
+
+
+export const GetMapObjectDelta = (obj1, obj2) => {
+  return _.differenceWith(obj1, obj2, _.isEqual);
+}
+
+export const GetMapObjectDictIntoList = (get_elevator_delta,barcode_diff,key) => {
+    const byPosition = array => array.reduce((obj, data) => {barcode_diff.push(data[key].split("--")[0])
+            return barcode_diff}, {});
+    var result = byPosition(get_elevator_delta)
+    return result
+}
+
+export const GetElevatorMapObjectDiff = (updated_map, base_map) => {
+    var barcode_diff = []
+    for (const [key, value] of Object.entries(updated_map)) {
+        if (key=="elevators"){
+            let get_elevator_delta = GetMapObjectDelta(updated_map["elevators"],base_map["elevators"])
+            if(get_elevator_delta.length>0){
+                barcode_diff = GetMapObjectDictIntoList(get_elevator_delta,barcode_diff,"position")
+            }
+        }
+    }
+    return barcode_diff
+}
+
+export const GetFloorMapObjectDiff = (updated_map,base_map,barcode_diff) => {
+    for (var i = 0, len = updated_map.floors.length; i < len; i++) {
+        var map_key = {"odsExcludeds":"ods_tuple", "ppses":"location", "map_values":"barcode", "chargers":"charger_location","fireEmergencies":"barcode"}
+        for (const [key, value] of Object.entries(map_key)){
+            if (updated_map.floors[i][key]){
+                let get_charger_delta = GetMapObjectDelta(updated_map.floors[i][key],base_map.floors[i][key])
+                if(get_charger_delta.length>0){
+                    var barcode_diff = GetMapObjectDictIntoList(get_charger_delta,barcode_diff,value)
+                }
+            }
+        }
+    }
+    return barcode_diff
+}
+
+export const EncodeBarcodeToCordinate = (barcode_list) => {
+    var coord_list = []
+    for (var i = 0; i < barcode_list.length; i++) {
+        var coord = barcode_list[i].split(".").map(s => s.replace(/^0+/, ""))
+        if (coord[1]==""){
+            coord[1]=0
+        }
+        if (coord[0]==""){
+            coord[0]=0
+        }
+        coord_list.push(coord[1]+","+coord[0])
+    }
+    return coord_list
+}
+
+export const RemoveNewFloor = (updated_map, base_map, barcode_diff) => {
+    let old_floor = updated_map.floors.filter(ar => base_map.floors.find(rm => (rm.floor_id === ar.floor_id)))
+    let new_floor = updated_map.floors.filter(ar => !base_map.floors.find(rm => (rm.floor_id === ar.floor_id)))
+    for (var i = 0; i < new_floor.length; i++) {
+        barcode_diff = GetMapObjectDictIntoList(new_floor[i].map_values,barcode_diff,"barcode")
+    }
+    updated_map.floors = old_floor
+    return updated_map, barcode_diff
+}
+
+
+export const showHighlight = () => (dispatch, getState) => {
+  const { normalizedMap } = getState();
+  const base_map = getUpdatedMap(getState).then(response=>{
+    var base_map = response.BaseMap
+    var updated_map = response.map
+    updated_map,base_map = RemoveExtraMapValueKey(updated_map,base_map)
+    var barcode_diff = GetElevatorMapObjectDiff(updated_map,base_map)
+    updated_map,barcode_diff = RemoveNewFloor(updated_map,base_map,barcode_diff)
+    var barcode_diff = GetFloorMapObjectDiff(updated_map,base_map,barcode_diff)
+    var encode_barcode = EncodeBarcodeToCordinate(barcode_diff)
+    Object.keys(normalizedMap.entities.barcode).forEach((key) => {
+        if (encode_barcode.includes(key)){
+            normalizedMap.entities.barcode[key].highlight_status = 1
+        }
+        else{
+            normalizedMap.entities.barcode[key].highlight_status = 0
+        }
+        });
+    console.log("normalizedMap",normalizedMap.entities.barcode)
+    console.log("encode_barcode",encode_barcode)
+    var highlight = []
+    for (var i = 0; i < encode_barcode.length; i++) {
+        var convert = encode_barcode[i].split(",").map((val) => parseInt(val))
+        highlight.push(convert)
+    }
+
+    if (encode_barcode.length==0){
+        return dispatch(clearTiles)
+    }
+    dispatch({
+        type: "HIGHLIGHT",
+        value: { highlight, highlight_status: 1 },
+    });
+
+    return dispatch(clearTiles);
+    })
+}
+
 
 export const showPath = () => (dispatch, getState) => {
   const state = getState();

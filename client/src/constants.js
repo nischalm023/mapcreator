@@ -60,6 +60,7 @@ export var CHARGER = "charger.png";
 export var CHARGER_ENTRY = "charger-entry.png";
 export var QUEUE = "queue.png";
 export var PATH = "dead.png";
+export var HIGHLIGHT = "autocad.png";
 export var DOCK_POINT = "normal.png";
 export var ODS_EXCLUDED = "ods.png";
 export var ODS_EXCLUDED_TOP = "ods-0.png";

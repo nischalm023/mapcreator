@@ -29,6 +29,8 @@ import ShiftBarcode from "components/Map/Forms/ShiftBarcode";
 import AddTransitBarcode from "components/Map/Forms/AddTransitBarcode";
 import LocateBarcode from "components/Map/Forms/LocateBarcode";
 import SectorMSUMapping from "components/Map/Forms/SectorMSUMapping";
+import HighLightManualChange from "components/Map/Forms/HighLightManualChange";
+
 import {
   QueueCheckbox,
   MultiQueueCheckbox,
@@ -88,7 +90,8 @@ class RightSidebar extends Component {
               Exclude,
               EditSpecialBarcode,
               ShiftBarcode,
-              AddTransitBarcode
+              AddTransitBarcode,
+              HighLightManualChange
             ].map((Elm, idx) => (
               <div
                 key={idx}

@@ -21,7 +21,6 @@ import ChangeFloorDropdown from "components/Map/Forms/ChangeFloorDropdown";
 import CopyMap from "components/Map/Forms/CopyMap";
 import DeleteMap from "components/Map/Forms/DeleteMap";
 import RequestValidation from "components/Map/Forms/RequestValidation";
-import HighLightManualChange from "components/Map/Forms/HighLightManualChange";
 import SampleRacksJson from "components/Map/SampleRacksJson";
 import { runSanity } from "actions/actions";
 import { runHaiMapConversionScriptToMap} from "utils/api";
@@ -98,7 +97,6 @@ class Map extends Component {
     } = this.props;
 
     // mapId may be different from params since it may not have been fetched yet...
-
     const mapId = nMap ? Object.entries(nMap.entities.mapObj)[0][1].id : 0;
     return (
       <div>
@@ -122,7 +120,6 @@ class Map extends Component {
                 <div className="float-right">
                   <SampleRacksJson />
                   <DeleteMap />
-                  <HighLightManualChange />
                   <RequestValidation />
                   <span className={nMap && nMap.entities.mapObj[mapId].sanity ? "btn btn-success" : "btn btn-danger"}>{nMap && nMap.entities.mapObj[mapId].sanity ? "Valid" : "Invalid"}</span>
                 </div>

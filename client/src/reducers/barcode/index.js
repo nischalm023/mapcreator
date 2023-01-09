@@ -55,7 +55,19 @@ export default (state = {}, action) => {
 
       return Object.assign({}, state, newState);
     }
+    case "HIGHLIGHT": {
+      const { highlight, highlight_status } = action.value;
 
+      let newState = {};
+      var k = 0;
+
+      while (k < highlight.length) {
+        newState[highlight[k]] = { ...state[highlight[k]], highlight_status: highlight_status};
+        k++;
+      }
+
+      return Object.assign({}, state, newState);
+    }
     case "DELETE-BARCODES": {
       // iterate over all barcodes and just see if their neighbours exist. if not, make the edge [0,0,0]
       let newState = {};
