@@ -517,6 +517,10 @@ export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
     mapObj.map.floors[0].map_values[coor].path_status = 0;
     mapObj.map.floors[0].map_values[coor].node_status = 0;
     mapObj.map.floors[0].map_values[coor].excluded = 0;
+    if(mapObj.map.floors[0].map_values[coor].highlight_status==1){
+      mapObj.map.floors[0].map_values[coor].highlight_status = 0
+    }
+
   }
 
   return updateMap(mapObj.id, mapObj.map)

@@ -22,7 +22,7 @@ import CopyMap from "components/Map/Forms/CopyMap";
 import DeleteMap from "components/Map/Forms/DeleteMap";
 import RequestValidation from "components/Map/Forms/RequestValidation";
 import SampleRacksJson from "components/Map/SampleRacksJson";
-import { runSanity } from "actions/actions";
+import { runSanity , showHighlight } from "actions/actions";
 import { runHaiMapConversionScriptToMap} from "utils/api";
 import _ from "lodash";
 const pendo = window.pendo;
@@ -110,7 +110,7 @@ class Map extends Component {
               message={successMessage}
               onConfirm={() => dispatch(clearSuccessMessage())}
             />
-            <div className="row justify-content-between">
+            <div className="row justify-content-between p-0">
               <div className="col-3">
                 <h3 className="display-5">
                   {nMap ? nMap.entities.mapObj[mapId].name : "..."}
@@ -134,23 +134,33 @@ class Map extends Component {
               directionViewMode={directionViewMode}
             />
             <form onSubmit={this.onSubmit}>
-                  <div className="form-row">
-                    <label for="fileSelect" >Import autocad file &nbsp;</label>
-                    <div>
-                      <input
-                       type={"file"} 
-                       onChange={this.handleChange}
-                       accept={".xls"} />
-                    </div>
-                    <div>
-                      <button type="submit" style={{'border-radius':'6%','border-color':'lightgrey'}}>
-                        Submit
-                      </button>
-                    </div>
-                  </div>
-              </form>
-            <div className="row py-1">
-              <div className="btn-group col" role="group">
+              <div className="form-row">
+                <label for="fileSelect" >Import autocad file &nbsp;</label>
+                <div>
+                  <input
+                   type={"file"} 
+                   onChange={this.handleChange}
+                   accept={".xls"} />
+                </div>
+                <div>
+                  <button type="submit" style={{'border-radius':'6%','border-color':'lightgrey'}}>
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </form>
+            <div className="row py-2 p-2">
+              <div className="btn-group" role="group">
+                <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  bcolor="orange"
+                  onClick={() => {
+                    dispatch(showHighlight());
+                  }}
+                >
+                  HighLight
+                </button>
                 <button
                   className="btn btn-outline-secondary"
                   type="button"
