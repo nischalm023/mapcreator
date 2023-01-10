@@ -504,14 +504,17 @@ class ValidationAutocad:
 			return False,f"Following Entity should have barcode associated --> {entity_type_diff}"
 		return True,''
 
-	def validate_sector_floor_exist(self,df):
+	def validate_sector_exist(self,df):
 		barcode_df = df[df['Name'].str.lower().str.contains('barcode')]
 		sector_empty_df = barcode_df[barcode_df['SECTOR_ID'].isna()]
-		floor_empty_df = df[df['FLOOR'].isna()]
 		sector_empty_list = sector_empty_df[['Name','Position X', 'Position Y','FLOOR']].values.tolist()
-		floor_empty_df = floor_empty_df[['Name','Position X', 'Position Y','FLOOR']].values.tolist()
 		if sector_empty_list:
 			return False,f"Please mention sector_id on barcode --> {sector_empty_list}"
+		return True,''
+
+	def validate_floor_exist(self,df):
+		floor_empty_df = df[df['FLOOR'].isna()]
+		floor_empty_df = floor_empty_df[['Name','Position X', 'Position Y','FLOOR']].values.tolist()
 		if floor_empty_df:
 			return False,f"Please mention floor_id on barcode --> ->{floor_empty_df}"
 		return True,''
@@ -526,7 +529,29 @@ class ValidationAutocad:
 			return False,f"Following Charger Entry point does not exist --> {diff_list}"
 		return True,''
 
+	def validate_unique_pps_id(self,df):
+		duplicatePpsIdRowsDF = df[df.duplicated(['PPS_STATION_ID']) & ~df['PPS_STATION_ID'].isna()]
+		duplicate_pps_list = duplicatePpsIdRowsDF[['PPS_STATION_ID']].values.tolist()
+		if duplicate_pps_list:
+			return False,f"Duplicate pps id exist --> {duplicate_pps_list}"
+		return True,''
+
+	def validate_unique_elevator_id(self,df):
+		duplicateElevatorIdRowsDF = df[df.duplicated(['ELEVATOR_ID']) & ~df['ELEVATOR_ID'].isna()]
+		duplicate_elevator_list = duplicateElevatorIdRowsDF[['ELEVATOR_ID']].values.tolist()
+		if duplicate_elevator_list:
+			return False,f"Duplicate elevator id exist --> {duplicate_elevator_list}"
+		return True,''
+
+	def validate_unique_charger_id(self,df):
+		duplicateChargerIdRowsDF = df[df.duplicated(['CHARGER_ID']) & ~df['CHARGER_ID'].isna()]
+		duplicate_charger_list = duplicateChargerIdRowsDF[['CHARGER_ID']].values.tolist()
+		if duplicate_charger_list:
+			return False,f"Duplicate charger id exist --> {duplicate_charger_list}"
+		return True,''
+
 	def validation(self,df):
+		error_list = []
 		try:
 			scheme_valitation,error =  self.validate_schema(df)
 			if not scheme_valitation:
@@ -537,38 +562,69 @@ class ValidationAutocad:
 		try:
 			entity_valitation,error =  self.validate_entity(df)
 			if not entity_valitation:
-				return error,404
+				error_list.append(error)
 		except Exception as e:
 			return repr(e),404
 
 		try:
 			duplicate_location_valitation,error =  self.validate_duplicate_location(df)
 			if not duplicate_location_valitation:
-				return error,404
+				error_list.append(error)
 		except Exception as e:
 			return repr(e),404
 
 		try:
 			charger_location_valitation,error =  self.validate_charger_entry_point_location(df)
 			if not charger_location_valitation:
-				return error,404
+				error_list.append(error)
 		except Exception as e:
 			return repr(e),404
 
 		try:
-			sector_floor_exist_valitation,error =  self.validate_sector_floor_exist(df)
-			if not sector_floor_exist_valitation:
-				return error,404
+			sector_exist_valitation,error =  self.validate_sector_exist(df)
+			if not sector_exist_valitation:
+				error_list.append(error)
+		except Exception as e:
+			return repr(e),404
+
+		try:
+			floor_exist_valitation,error =  self.validate_floor_exist(df)
+			if not floor_exist_valitation:
+				error_list.append(error)
 		except Exception as e:
 			return repr(e),404
 
 		try:
 			pps_type_valitation,error =  self.validate_pps_type(df)
 			if not pps_type_valitation:
-				return error,404
+				error_list.append(error)
 		except Exception as e:
 			return repr(e),404
 		
+		try:
+			validate_unique_pps_id,error =  self.validate_unique_pps_id(df)
+			if not validate_unique_pps_id:
+				error_list.append(error)
+		except Exception as e:
+			return repr(e),404
+
+		try:
+			validate_unique_elevator_id,error =  self.validate_unique_elevator_id(df)
+			if not validate_unique_elevator_id:
+				error_list.append(error)
+		except Exception as e:
+			return repr(e),404
+
+		try:
+			validate_unique_charger_id,error =  self.validate_unique_charger_id(df)
+			if not validate_unique_charger_id:
+				error_list.append(error)
+		except Exception as e:
+			return repr(e),404
+
+		if error_list:
+			return error_list,404
+
 		return error,''
 
 

@@ -1,15 +1,14 @@
 # start by pulling the python image
 FROM python:3.8
 
+COPY ./requirements.txt /app/requirements.txt
+
 # switch working directory
 WORKDIR /app
 
 # install the dependencies and packages in the requirements file
 RUN /usr/local/bin/python -m pip install --upgrade pip
-RUN pip install FLASK
-RUN pip install Flask-Cors
-RUN pip install pandas
-RUN pip install xlrd
+RUN pip install -r requirements.txt
 
 ADD hai_conversion_script.py /app
 
