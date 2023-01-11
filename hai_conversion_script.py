@@ -52,34 +52,35 @@ class CreateZoneJson:
 # creating pps json
 class CreatePPSJson:
 	def get_pps_json(self, df, matrix_cord):
-		df_pps = df[~df['PPS_STATION_ID'].isnull()]
 		ppsList = []
-		if not df_pps.empty:
-			pps_mapping = df_pps.to_dict('records')
-			for pps in pps_mapping:
-				world_cordinate_location = (pps['Position X'],pps['Position Y'], pps['FLOOR'])
-				pps_barcode,coordinate = findBarcodeFromLocation(world_cordinate_location,matrix_cord)
-				pps_json = {
-						"location": pps_barcode,
-						"status": "disconnected",
-						"queue_barcodes":
-						[
-						],
-						"pick_position": pps_barcode,
-						"pick_direction": int(get_rotation(str(pps['Rotation']))),
-						"put_docking_positions":
-						[],
-						"allowed_modes":
-						[
-							"put",
-							"pick",
-							"audit"
-						],
-						"type": pps['PPS_TYPE'].lower(),
-						"pps_id": int(pps['PPS_STATION_ID']),
-						"pps_url": "http://localhost:8181/pps/1/api/"
-				}
-				ppsList.append(pps_json)
+		if 'PPS_STATION_ID' in df:
+			df_pps = df[~df['PPS_STATION_ID'].isnull()]
+			if not df_pps.empty:
+				pps_mapping = df_pps.to_dict('records')
+				for pps in pps_mapping:
+					world_cordinate_location = (pps['Position X'],pps['Position Y'], pps['FLOOR'])
+					pps_barcode,coordinate = findBarcodeFromLocation(world_cordinate_location,matrix_cord)
+					pps_json = {
+							"location": pps_barcode,
+							"status": "disconnected",
+							"queue_barcodes":
+							[
+							],
+							"pick_position": pps_barcode,
+							"pick_direction": int(get_rotation(str(pps['Rotation']))),
+							"put_docking_positions":
+							[],
+							"allowed_modes":
+							[
+								"put",
+								"pick",
+								"audit"
+							],
+							"type": pps['PPS_TYPE'].lower(),
+							"pps_id": int(pps['PPS_STATION_ID']),
+							"pps_url": "http://localhost:8181/pps/1/api/"
+					}
+					ppsList.append(pps_json)
 		return ppsList
 
 
@@ -207,27 +208,28 @@ class CreateChargerJson:
 		chargerList = []
 		coordinate_dict = {}
 		reinit_dict = {}
-		df_charger = df[~df['CHARGER_ID'].isnull()]
-		if not df_charger.empty:
-			mapping_charger = df_charger.to_dict('records')
-			for charger_dict in mapping_charger:
-				charger_location,coordinate = self.getChargerLocation(charger_dict,matrix_cord)
-				charger_entrypoint,reinit_cordinate = self.getChargerEntryPoint(charger_dict,matrix_cord)
-				rotation = int(get_rotation(str(charger_dict['Rotation'])))
-				chargerJson = {
-							"charger_location": charger_location,
-							"charger_direction": rotation,
-							"entry_point_location": charger_entrypoint,
-							"entry_point_direction": rotation,
-							"reinit_point_location": charger_entrypoint,
-							"reinit_point_direction": rotation,
-							"status": "disconnected",
-							"mode": "manual",
-							"charger_type": charger_dict['CHARGER_TYPE'].lower().replace(' ','_'),
-							"charger_id": int(charger_dict['CHARGER_ID'])
-						}
-				chargerList.append(chargerJson)
-				coordinate_dict[coordinate]=[rotation,reinit_cordinate]
+		if 'CHARGER_ID' in df: 
+			df_charger = df[~df['CHARGER_ID'].isnull()]
+			if not df_charger.empty:
+				mapping_charger = df_charger.to_dict('records')
+				for charger_dict in mapping_charger:
+					charger_location,coordinate = self.getChargerLocation(charger_dict,matrix_cord)
+					charger_entrypoint,reinit_cordinate = self.getChargerEntryPoint(charger_dict,matrix_cord)
+					rotation = int(get_rotation(str(charger_dict['Rotation'])))
+					chargerJson = {
+								"charger_location": charger_location,
+								"charger_direction": rotation,
+								"entry_point_location": charger_entrypoint,
+								"entry_point_direction": rotation,
+								"reinit_point_location": charger_entrypoint,
+								"reinit_point_direction": rotation,
+								"status": "disconnected",
+								"mode": "manual",
+								"charger_type": charger_dict['CHARGER_TYPE'].lower().replace(' ','_'),
+								"charger_id": int(charger_dict['CHARGER_ID'])
+							}
+					chargerList.append(chargerJson)
+					coordinate_dict[coordinate]=[rotation,reinit_cordinate]
 
 		return chargerList,coordinate_dict
 
@@ -255,23 +257,23 @@ def findBarcodeFromLocation(world_cordinate_location,matrix_cord):
 class CreateOdsJson:
 	
 	def get_ods_json(self, df, matrix_cord):
-		ods_exclude = df[~df['ODS_EXCLUDED'].isnull()]
 		ods_list = []
-		ods_mapping = ods_exclude.to_dict('records')
-		for ods in ods_mapping:
-			world_cordinate_location = (ods['Position X'],ods['Position Y'],ods['FLOOR'])
-			ods_value = (ods["ODS_EXCLUDED"].replace('[','').replace(']','')).split(",")
-			for i,v in enumerate(ods_value):
-				if v:
-					pps_barcode,coordinate = findBarcodeFromLocation(world_cordinate_location,matrix_cord)
-					ods_json = {
-						"excluded": True,
-						"ods_tuple": "{}--{}".format(pps_barcode,i)
-					}
-					ods_list.append(ods_json)
-		odsJson = {
-		"ods_excluded_list":ods_list
-		}
+		if 'ODS_EXCLUDED' in df:
+			ods_exclude = df[~df['ODS_EXCLUDED'].isnull()]
+			ods_mapping = ods_exclude.to_dict('records')
+			for ods in ods_mapping:
+				world_cordinate_location = (ods['Position X'],ods['Position Y'],ods['FLOOR'])
+				ods_value = (ods["ODS_EXCLUDED"].replace('[','').replace(']','')).split(",")
+				for i,v in enumerate(ods_value):
+					if v:
+						pps_barcode,coordinate = findBarcodeFromLocation(world_cordinate_location,matrix_cord)
+						ods_json = {
+							"excluded": True,
+							"ods_tuple": "{}--{}".format(pps_barcode,i)
+						}
+						ods_list.append(ods_json)
+		
+		odsJson = {"ods_excluded_list":ods_list}
 		return odsJson
 
 
@@ -350,51 +352,52 @@ class CreateFenceDistance:
 # create elevator json and update barcode on map json
 class CreateElevatorJson:
 	def get_elevator_json(self, df, matrix_cord):
-		df = df[~df['ELEVATOR_ID'].isnull()]
 		elevator_list = []
 		mapping_elevator_barcode = {}
-		if not df.empty:
-			df = df.sort_values('FLOOR').groupby('ELEVATOR_ID')[('Position X','Position Y','ENTRY_BARCODE','EXIT_BARCODE','FLOOR','Rotation','ELEVATOR_TYPE')].apply(lambda g: list(map(tuple, g.values.tolist()))).to_dict()
-			for elevator_id,elevator_row in df.items():
-				entry_barcode_list = []
-				exit_barcode_list = []
-				coord_list = []
-				edit_coord_for_mapping = []
-				for elevator_data in elevator_row:
-					barcode,coordinate = findBarcodeFromLocation((elevator_data[0],elevator_data[1],elevator_data[4]),matrix_cord)
-					entry_barcode,entry_coord = findBarcodeFromLocation(tuple(json.loads(elevator_data[2]))+(elevator_data[4],),matrix_cord)
-					exit_barcode,exit_coord = findBarcodeFromLocation(tuple(json.loads(elevator_data[3]))+(elevator_data[4],),matrix_cord)
-					entry_barcode_dict = {
-											"barcode": entry_barcode,
-											"boom_barrier_id": 1,
-											"floor_id": elevator_data[4]
-										}
-					exit_barcode_dict = {
-											"barcode": exit_barcode,
-											"boom_barrier_id": 1,
-											"floor_id": elevator_data[4]
-										}
-					coord_dict = {
-									"coordinate": list(coordinate),
-									"direction": int(get_rotation(str(elevator_data[5])))
-								}
-					entry_barcode_list.append(entry_barcode_dict)
-					exit_barcode_list.append(exit_barcode_dict)
-					coord_list.append(coord_dict)
-					edit_coord_for_mapping.append(coordinate)
-				first_floor_position,first_floor_coordinate = findBarcodeFromLocation((elevator_row[0][0],elevator_row[0][1],elevator_row[0][4]),matrix_cord)
-				elevator_dict = {
-									"elevator_id": int(elevator_id),
-									"position": first_floor_position,
-									"type": "_".join(elevator_row[0][-1].lower().split()),
-									"entry_barcodes": entry_barcode_list,
-									"reinit_barcodes": [],
-									"exit_barcodes": exit_barcode_list,
-									"coordinate_list": coord_list
-								}
-				elevator_list.append(elevator_dict)
-				mapping_elevator_barcode[first_floor_coordinate] = edit_coord_for_mapping
-			
+		if 'ELEVATOR_ID' in df:
+			df = df[~df['ELEVATOR_ID'].isnull()]
+			if not df.empty:
+				df = df.sort_values('FLOOR').groupby('ELEVATOR_ID')[('Position X','Position Y','ENTRY_BARCODE','EXIT_BARCODE','FLOOR','Rotation','ELEVATOR_TYPE')].apply(lambda g: list(map(tuple, g.values.tolist()))).to_dict()
+				for elevator_id,elevator_row in df.items():
+					entry_barcode_list = []
+					exit_barcode_list = []
+					coord_list = []
+					edit_coord_for_mapping = []
+					for elevator_data in elevator_row:
+						barcode,coordinate = findBarcodeFromLocation((elevator_data[0],elevator_data[1],elevator_data[4]),matrix_cord)
+						entry_barcode,entry_coord = findBarcodeFromLocation(tuple(json.loads(elevator_data[2]))+(elevator_data[4],),matrix_cord)
+						exit_barcode,exit_coord = findBarcodeFromLocation(tuple(json.loads(elevator_data[3]))+(elevator_data[4],),matrix_cord)
+						entry_barcode_dict = {
+												"barcode": entry_barcode,
+												"boom_barrier_id": 1,
+												"floor_id": elevator_data[4]
+											}
+						exit_barcode_dict = {
+												"barcode": exit_barcode,
+												"boom_barrier_id": 1,
+												"floor_id": elevator_data[4]
+											}
+						coord_dict = {
+										"coordinate": list(coordinate),
+										"direction": int(get_rotation(str(elevator_data[5])))
+									}
+						entry_barcode_list.append(entry_barcode_dict)
+						exit_barcode_list.append(exit_barcode_dict)
+						coord_list.append(coord_dict)
+						edit_coord_for_mapping.append(coordinate)
+					first_floor_position,first_floor_coordinate = findBarcodeFromLocation((elevator_row[0][0],elevator_row[0][1],elevator_row[0][4]),matrix_cord)
+					elevator_dict = {
+										"elevator_id": int(elevator_id),
+										"position": first_floor_position,
+										"type": "_".join(elevator_row[0][-1].lower().split()),
+										"entry_barcodes": entry_barcode_list,
+										"reinit_barcodes": [],
+										"exit_barcodes": exit_barcode_list,
+										"coordinate_list": coord_list
+									}
+					elevator_list.append(elevator_dict)
+					mapping_elevator_barcode[first_floor_coordinate] = edit_coord_for_mapping
+		
 		return elevator_list,mapping_elevator_barcode
 	
 	def update_elevator_barcode(self, mapping_elevator_barcode, mapValueList):
@@ -469,8 +472,9 @@ class GetAndCreateMapMatrix:
 
 # validation
 class ValidationAutocad:
-	def validate_schema(self,df):
-		column_name = ['Count', 'Name', 'Position X', 'Position Y', 'SECTOR_ID', 'ZONE_ID', 'Rotation', 'ELEVATOR_ID', 'ELEVATOR_TYPE', 'ENTRY_BARCODE', 'EXIT_BARCODE', 'PPS_STATION_ID', 'PPS_TYPE', 'CHARGER_ID', 'CHARGER_TYPE', 'FENCE_DISTANCE', 'FLOOR', 'CHARGER_ENTRY_POINT', 'ODS_EXCLUDED']
+	def validate_schema(self, df):
+		# mandatory column names
+		column_name = ['Name', 'Position X', 'Position Y', 'ZONE_ID', 'Rotation', 'FLOOR', 'FENCE_DISTANCE']
 		dataframe_col_headers = list(df.columns.values)
 		diff_list = list(set(column_name) - set(dataframe_col_headers))
 		if diff_list:
@@ -479,11 +483,14 @@ class ValidationAutocad:
 	
 	def validate_pps_type(self,df):
 		pps_type_mapping_list = ["ppp_manual", "ara", "manual"]
-		get_pps_type = sorted(df['PPS_TYPE'].str.lower().dropna().unique())
-		pps_type_diff = list(filter(lambda a: a not in pps_type_mapping_list, get_pps_type))
-		if pps_type_diff:
-			return False,f"Map creator not support {pps_type_diff} pps_type"
-		return True,""
+		if 'PPS_TYPE' in df:
+			get_pps_type = sorted(df['PPS_TYPE'].str.lower().dropna().unique())
+			pps_type_diff = list(filter(lambda a: a not in pps_type_mapping_list, get_pps_type))
+			if pps_type_diff:
+				return False,f"Map creator not support {pps_type_diff} pps_type"
+			return True,""
+		else:
+			return True,""
 
 	def validate_duplicate_location(self,df):
 		duplicateRowsDF = df[df.duplicated(['Name', 'Position X', 'Position Y'])]
@@ -530,25 +537,34 @@ class ValidationAutocad:
 		return True,''
 
 	def validate_unique_pps_id(self,df):
-		duplicatePpsIdRowsDF = df[df.duplicated(['PPS_STATION_ID']) & ~df['PPS_STATION_ID'].isna()]
-		duplicate_pps_list = duplicatePpsIdRowsDF[['PPS_STATION_ID']].values.tolist()
-		if duplicate_pps_list:
-			return False,f"Duplicate pps id exist --> {duplicate_pps_list}"
-		return True,''
+		if 'PPS_STATION_ID' in df:
+			duplicatePpsIdRowsDF = df[df.duplicated(['PPS_STATION_ID']) & ~df['PPS_STATION_ID'].isna()]
+			duplicate_pps_list = duplicatePpsIdRowsDF[['PPS_STATION_ID']].values.tolist()
+			if duplicate_pps_list:
+				return False,f"Duplicate pps id exist --> {duplicate_pps_list}"
+			return True,''
+		else:
+			return True,''
 
 	def validate_unique_elevator_id(self,df):
-		duplicateElevatorIdRowsDF = df[df.duplicated(['ELEVATOR_ID']) & ~df['ELEVATOR_ID'].isna()]
-		duplicate_elevator_list = duplicateElevatorIdRowsDF[['ELEVATOR_ID']].values.tolist()
-		if duplicate_elevator_list:
-			return False,f"Duplicate elevator id exist --> {duplicate_elevator_list}"
-		return True,''
+		if 'ELEVATOR_ID' in df:
+			duplicateElevatorIdRowsDF = df[df.duplicated(['ELEVATOR_ID']) & ~df['ELEVATOR_ID'].isna()]
+			duplicate_elevator_list = duplicateElevatorIdRowsDF[['ELEVATOR_ID']].values.tolist()
+			if duplicate_elevator_list:
+				return False,f"Duplicate elevator id exist --> {duplicate_elevator_list}"
+			return True,''
+		else:
+			return True,''
 
 	def validate_unique_charger_id(self,df):
-		duplicateChargerIdRowsDF = df[df.duplicated(['CHARGER_ID']) & ~df['CHARGER_ID'].isna()]
-		duplicate_charger_list = duplicateChargerIdRowsDF[['CHARGER_ID']].values.tolist()
-		if duplicate_charger_list:
-			return False,f"Duplicate charger id exist --> {duplicate_charger_list}"
-		return True,''
+		if 'CHARGER_ID' in df:
+			duplicateChargerIdRowsDF = df[df.duplicated(['CHARGER_ID']) & ~df['CHARGER_ID'].isna()]
+			duplicate_charger_list = duplicateChargerIdRowsDF[['CHARGER_ID']].values.tolist()
+			if duplicate_charger_list:
+				return False,f"Duplicate charger id exist --> {duplicate_charger_list}"
+			return True,''
+		else:
+			return True,''
 
 	def validation(self,df):
 		error_list = []
