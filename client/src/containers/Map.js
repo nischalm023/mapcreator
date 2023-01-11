@@ -159,7 +159,7 @@ class Map extends Component {
                     dispatch(showHighlight());
                   }}
                 >
-                  HighLight
+                  Highlight Manual Edits
                 </button>
                 <button
                   className="btn btn-outline-secondary"

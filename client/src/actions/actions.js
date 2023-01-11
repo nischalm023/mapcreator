@@ -53,6 +53,7 @@ export const clickOnViewport = (worldCoordinate, onShiftClickOnMapTile) => (
   getState
 ) => {
   const state = getState();
+  const { normalizedMap } = getState();
   const tileIdsMap = tileIdsMapSelector(state);
   const distanceTileRects = distanceTileSpritesSelector(state);
   const isPointOnADistanceTile = distanceTileRects.some((rect) =>
@@ -64,6 +65,11 @@ export const clickOnViewport = (worldCoordinate, onShiftClickOnMapTile) => (
     if (state.selection.shiftKey) return onShiftClickOnMapTile(tileId);
     return dispatch(mapTileClick(tileId));
   } else if (!isPointOnADistanceTile) {
+      Object.keys(normalizedMap.entities.barcode).forEach((key) => {
+          if (normalizedMap.entities.barcode[key].highlight_status == 1){
+              normalizedMap.entities.barcode[key].highlight_status = 0
+          }
+          });
     return dispatch(outsideTilesClick);
   } else {
     return Promise.resolve();
@@ -273,10 +279,18 @@ export const GetFloorMapObjectDiff = (updated_map,base_map,barcode_diff) => {
         var map_key = {"odsExcludeds":"ods_tuple", "ppses":"location", "map_values":"barcode", "chargers":"charger_location","fireEmergencies":"barcode"}
         for (const [key, value] of Object.entries(map_key)){
             if (updated_map.floors[i][key]){
-                let get_charger_delta = GetMapObjectDelta(updated_map.floors[i][key],base_map.floors[i][key])
-                if(get_charger_delta.length>0){
-                    var barcode_diff = GetMapObjectDictIntoList(get_charger_delta,barcode_diff,value)
+                let get_entity_delta = GetMapObjectDelta(updated_map.floors[i][key],base_map.floors[i][key])
+                if(key=="odsExcludeds"){
+                  var get_ods_delta = GetMapObjectDelta(base_map.floors[i][key],updated_map.floors[i][key])
+                  if(get_ods_delta.length>0){
+                    var barcode_diff = GetMapObjectDictIntoList(get_ods_delta,barcode_diff,value)
+                  }
                 }
+                if(get_entity_delta.length>0){
+                    var barcode_diff = GetMapObjectDictIntoList(get_entity_delta,barcode_diff,value)
+                }
+                
+
             }
         }
     }
