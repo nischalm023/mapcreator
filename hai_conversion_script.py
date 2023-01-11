@@ -162,7 +162,11 @@ class CreateMap:
 				get_storable = list(filter(lambda x: 'storage' in x.lower(), location_cord_name_mapping[loc_cord]))
 				rtype = 's' if len(get_storable)>0 else 'p'
 				# sector_id = 0
-				sector_id = [x for x in sector_mapping[loc_cord] if pd.isnull(x) == False][0]
+				sector_id = [x for x in sector_mapping[loc_cord] if pd.isnull(x) == False]
+				if len(sector_id)<1:
+					sector_id = "undefined"
+				else:
+					sector_id = int(sector_id[0])
 				xloc,yloc,rtype,xcoords, ycoords = loc_cord[0],loc_cord[1],rtype,grid_cord[0],grid_cord[1]
 				barcode = "%03d.%03d"%(ycoords,xcoords)
 				neighbours,size_info,adjacency_list = self.getNeighbourSizeInfo(xcoords,ycoords,matrix_cord,allLocationCords)
@@ -180,7 +184,7 @@ class CreateMap:
 					"store_status": store_status,
 					"zone": "defzone",
 					"floor_id" : int(floor_dict[grid_cord]),
-					"sector":int(sector_id),
+					"sector": sector_id,
 					"adjacency":adjacency_list
 				}
 				if len(mapValueDict.keys())>0:
@@ -238,8 +242,12 @@ def createSectorJson(df, matrix_cord, allLocationCords,sector_mapping):
 	sector_dict = defaultdict(list)
 	for coord,loc in matrix_cord.items():
 		if matrix_cord[coord] in allLocationCords:
-			sector_id = [x for x in sector_mapping[loc] if pd.isnull(x) == False][0]
-			sector_dict[int(sector_id)].append("[{},{}]".format(coord[0],coord[1]))
+			sector_id = [x for x in sector_mapping[loc] if pd.isnull(x) == False]
+			if len(sector_id)<1:
+				sector_id = "undefined"
+			else:
+				sector_id = int(sector_id[0])
+			sector_dict[str(sector_id)].append("[{},{}]".format(coord[0],coord[1]))
 	sector_json = [sector_dict]
 	return sector_json
 
@@ -511,14 +519,6 @@ class ValidationAutocad:
 			return False,f"Following Entity should have barcode associated --> {entity_type_diff}"
 		return True,''
 
-	def validate_sector_exist(self,df):
-		barcode_df = df[df['Name'].str.lower().str.contains('barcode')]
-		sector_empty_df = barcode_df[barcode_df['SECTOR_ID'].isna()]
-		sector_empty_list = sector_empty_df[['Name','Position X', 'Position Y','FLOOR']].values.tolist()
-		if sector_empty_list:
-			return False,f"Please mention sector_id on barcode --> {sector_empty_list}"
-		return True,''
-
 	def validate_floor_exist(self,df):
 		floor_empty_df = df[df['FLOOR'].isna()]
 		floor_empty_df = floor_empty_df[['Name','Position X', 'Position Y','FLOOR']].values.tolist()
@@ -592,13 +592,6 @@ class ValidationAutocad:
 		try:
 			charger_location_valitation,error =  self.validate_charger_entry_point_location(df)
 			if not charger_location_valitation:
-				error_list.append(error)
-		except Exception as e:
-			return repr(e),404
-
-		try:
-			sector_exist_valitation,error =  self.validate_sector_exist(df)
-			if not sector_exist_valitation:
 				error_list.append(error)
 		except Exception as e:
 			return repr(e),404
