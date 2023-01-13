@@ -145,13 +145,15 @@ app.post(
     // call verifier API for validation
     requestValidation(req.body)
     .then(response => {
-        if (response.status === 202) {
+        if (response.status === 200 || response.status === 202) {
+          {
           return response.text();
+          }
         } 
         return "Internal server error";
     })
     .then(async (ver_res) => {
-      await map.update({ validationRequested: true},{ silent: true });
+      await map.update({ validationRequested: true ,sanity: true });
       res.send(ver_res);
     })
     .catch((error) => {
