@@ -528,14 +528,17 @@ class ValidationAutocad:
 		return True,''
 
 	def validate_charger_entry_point_location(self,df):
-		barcode_df = df[df['Name'].str.lower().str.contains('barcode')]
-		charger_df = df[df['Name'].str.lower().str.contains('charger')]
-		barcode_list = barcode_df[['Position X', 'Position Y']].values.tolist()
-		charger_list = charger_df.CHARGER_ENTRY_POINT.apply(ast.literal_eval).tolist()
-		diff_list = list(filter(lambda a: a not in barcode_list, charger_list))
-		if diff_list:
-			return False,f"Following Charger Entry point does not exist --> {diff_list}"
-		return True,''
+		if 'CHARGER_ENTRY_POINT' in df:
+			barcode_df = df[df['Name'].str.lower().str.contains('barcode')]
+			charger_df = df[df['Name'].str.lower().str.contains('charger')]
+			barcode_list = barcode_df[['Position X', 'Position Y']].values.tolist()
+			charger_list = charger_df.CHARGER_ENTRY_POINT.apply(ast.literal_eval).tolist()
+			diff_list = list(filter(lambda a: a not in barcode_list, charger_list))
+			if diff_list:
+				return False,f"Following Charger Entry point does not exist --> {diff_list}"
+			return True,''
+		else:
+			return True,''
 
 	def validate_unique_pps_id(self,df):
 		if 'PPS_STATION_ID' in df:
