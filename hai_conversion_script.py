@@ -483,7 +483,7 @@ class GetAndCreateMapMatrix:
 class ValidationAutocad:
 	def validate_schema(self, df):
 		# mandatory column names
-		column_name = ['Name', 'Position X', 'Position Y', 'ZONE_ID', 'Rotation', 'FLOOR', 'FENCE_DISTANCE']
+		column_name = ['Name', 'Position X', 'Position Y', 'ZONE_ID', 'Rotation', 'FLOOR']
 		dataframe_col_headers = list(df.columns.values)
 		diff_list = list(set(column_name) - set(dataframe_col_headers))
 		if diff_list:
