@@ -344,15 +344,16 @@ class CreateChargerDirectionality:
 class CreateFenceDistance:
 	def get_fence_distance(self, df, mapValueList, matrix_cord):
 		data = NormalizedDenormalizedMap().convertDenormalize(mapValueList)
-		df_fence_distance = df[~df['FENCE_DISTANCE'].isnull()]
-		fence_distance = df_fence_distance.to_dict('records')
-		for fence in fence_distance:
-			world_cordinate_location = (fence['Position X'],fence['Position Y'],fence['FLOOR'])
-			pps_barcode,coordinate = findBarcodeFromLocation(world_cordinate_location,matrix_cord)
-			fence_value = (fence["FENCE_DISTANCE"].replace('[','').replace(']','')).split(",")
-			for index,value in enumerate(fence_value):
-				if value:
-					data[coordinate]['size_info'][index] = int(value)
+		if 'FENCE_DISTANCE' in df:
+			df_fence_distance = df[~df['FENCE_DISTANCE'].isnull()]
+			fence_distance = df_fence_distance.to_dict('records')
+			for fence in fence_distance:
+				world_cordinate_location = (fence['Position X'],fence['Position Y'],fence['FLOOR'])
+				pps_barcode,coordinate = findBarcodeFromLocation(world_cordinate_location,matrix_cord)
+				fence_value = (fence["FENCE_DISTANCE"].replace('[','').replace(']','')).split(",")
+				for index,value in enumerate(fence_value):
+					if value:
+						data[coordinate]['size_info'][index] = int(value)
 		map_data = NormalizedDenormalizedMap().getNormalizedMap(list(data.values()))
 		mapValueList = 	list(data.values())	
 		return map_data,mapValueList
