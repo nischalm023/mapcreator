@@ -98,10 +98,12 @@ class Map extends Component {
 
     // mapId may be different from params since it may not have been fetched yet...
     const mapId = nMap ? Object.entries(nMap.entities.mapObj)[0][1].id : 0;
+    const params = new URLSearchParams(window.location.search);
+    let mapVisualize = params.get('visualize') ? eval(params.get('visualize')) : false;
     return (
       <div>
         <div style={{ float: "left" }}>
-          <div className="container content">
+          <div className={mapVisualize ? "d-none" : "container content"}>
             <SweetAlertError
               error={errorMessage}
               onConfirm={() => dispatch(clearErrorMessage())}
