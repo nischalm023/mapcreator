@@ -26,7 +26,7 @@ class LocateBarcode extends Component {
           style={{ width: "150px" }}
         />
         <button
-          disabled={!regex.test(barcodeString)}
+          disabled={!regex.test(barcodeString)|| this.state.selection.conveyorMode === true}
           onClick={e => {
             e.preventDefault();
             dispatch(locateBarcode(barcodeString));

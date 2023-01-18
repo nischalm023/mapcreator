@@ -353,7 +353,6 @@ export const showHighlight = () => (dispatch, getState) => {
         var convert = encode_barcode[i].split(",").map((val) => parseInt(val))
         highlight.push(convert)
     }
-
     if (encode_barcode.length==0){
         return dispatch(clearTiles)
     }
@@ -365,7 +364,6 @@ export const showHighlight = () => (dispatch, getState) => {
     return dispatch(clearTiles);
     })
 }
-
 
 export const showPath = () => (dispatch, getState) => {
   const state = getState();
@@ -769,6 +767,7 @@ export const getData = createSelector(
   }
 );
 
+
 export const misaligned = () => (dispatch, getState) => {
   // console.log("debugger statement 1",Date(Date.now()).toString() )
   const state = getState();
@@ -893,7 +892,7 @@ export const getCompleteDataSanity = createSelector(
   }
 );
 
-const addWorldCoordinateAndDenormalize = (normalizedMap) => {
+export const addWorldCoordinateAndDenormalize = (normalizedMap) => {
   var withWorldCoordinate = addWorldCoordinateToMap(normalizedMap);
   return withWorldCoordinate;
 };

@@ -17,7 +17,9 @@ const PathButton = ({ onClick, disabled }) => (
 );
 
 export default connect(
-  () => ({}),
+  state => ({
+    disabled: state.selection.conveyorMode === true
+  }),
   (dispatch) => ({
     onClick: () => dispatch(misaligned()),
   })

@@ -49,6 +49,11 @@ export default connect(
     if (mapTilesArr.length != 1) {
       return { disabled: true };
     }
+    if (state.selection.conveyorMode === true){
+      return {
+        disabled: true
+      };
+    }
     const tileId = mapTilesArr[0];
     const barcodeString = coordinateKeyToBarcodeSelector(state, {
       tileId: tileId

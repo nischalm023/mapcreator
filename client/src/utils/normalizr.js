@@ -20,7 +20,7 @@ const queueData = new schema.Entity(
   {},
   { idAttribute: "queue_data_id" }
 );
-
+const conveyorTile = new schema.Entity("conveyorTile", {}, { idAttribute: "conveyor_id" });
 const charger = new schema.Entity("charger", {}, { idAttribute: "charger_id" });
 const pps = new schema.Entity("pps", {}, { idAttribute: "pps_id" });
 const odsExcluded = new schema.Entity(
@@ -47,7 +47,7 @@ const floor = new schema.Entity(
     ppses: [pps],
     odsExcludeds: [odsExcluded],
     dockPoints: [dockPoint],
-    fireEmergencies: [fireEmergency]
+    fireEmergencies: [fireEmergency],
   },
   { idAttribute: "floor_id" }
 );
@@ -58,7 +58,8 @@ const mapSchema = new schema.Entity("map", {
   sectors: [sector],
   sectorMxUPreferences: [sectorMxUPreferences],
   queueDatas: [queueData],
-  floors: [floor]
+  floors: [floor],
+  conveyors:[conveyorTile],
 });
 
 // this is the schema on which normalization will be run.

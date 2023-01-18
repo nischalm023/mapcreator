@@ -1,13 +1,18 @@
 // exports mapcreator's represention of map (map.json schema) to multiple output
 // json files (map.json, pps.json, fire_emergency.json etc.)
 import { denormalizeMap } from "utils/normalizr";
+import conveyor_json from "common/utils/conveyor_json";
 
 export default (withWorldCoordinate, singleFloor = false) => {
+  if(Object.keys(withWorldCoordinate.entities.conveyorTile).length > 0){
+    var conveyorJson = conveyor_json(withWorldCoordinate);
+    withWorldCoordinate.entities.DownloadconveyorTile = conveyorJson
+  }
   var mapObj = denormalizeMap(withWorldCoordinate);
   var map = mapObj.map;
   var ret = {};
   ret.elevator = map.elevators;
-  // Why is this like this?
+  ret.conveyor = withWorldCoordinate.entities.DownloadconveyorTile;
   ret.zone = {
     header: {
       "content-type": "application/json",

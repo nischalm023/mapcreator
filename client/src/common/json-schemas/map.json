@@ -6,6 +6,174 @@
   "required": ["elevators", "zones", "sectors", "sectorBarcodeMapping", "sectorMxUPreferences", "queueDatas", "floors"],
   "additionalProperties": true,
   "properties": {
+    "conveyors": {
+      "type": "array",
+      "items": [
+    {
+      "type": "object",
+      "properties": {
+        "conveyor_id": {
+          "type": "integer"
+        },
+        "map_entry_location": {
+          "type": "string"
+        },
+        "map_exit_location": {
+          "type": "string"
+        },
+        "conveyor_entry_location": {
+          "type": "string"
+        },
+        "conveyor_exit_location": {
+          "type": "string"
+        },
+        "conveyor_height": {
+          "type": "integer"
+        },
+        "adjacency": {
+          "type": "array",
+          "items": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "steps": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "coordinate": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "coordinate"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "coordinate": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "coordinate"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "coordinate": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "coordinate"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "coordinate": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "coordinate"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "coordinate": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "coordinate"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "coordinate": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "coordinate"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "conveyor_id",
+        "conveyor_height"
+      ]
+    }
+  ]
+    },
     "elevators": {
       "type": "array",
       "items": {

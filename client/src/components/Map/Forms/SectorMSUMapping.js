@@ -31,7 +31,9 @@ const SectorMSUMapping = ({ onSubmit, disabled, sectorDict, sectorMxUPreferences
 export default connect(
   state => ({
     sectorDict: state.normalizedMap.entities.sector || {},
-    sectorMxUPreferences: state.normalizedMap.entities.sectorMxUPreferences || {}
+    sectorMxUPreferences: state.normalizedMap.entities.sectorMxUPreferences || {},
+    disabled:state.selection.conveyorMode === true
+
     //disabled: Object.keys(state.selection.mapTiles).length === 0
   }),
   dispatch => ({

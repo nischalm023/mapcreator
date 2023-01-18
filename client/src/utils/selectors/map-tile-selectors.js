@@ -56,8 +56,32 @@ export const tileNameWithoutEntityDataSelector = createSelector(
         }
       }
     });
+    
     if (barcode.highlight_status > 0 && !zoneViewMode && !sectorViewMode)
       tileSprite = constants.HIGHLIGHT;
+    // {
+      // conveyor_selected_status = 1 (selected conveyor tile)
+      // conveyor_selected_status = 2 (entry points on conveyor tile)
+      // conveyor_selected_status = 3 (exit points on conveyor tile)
+      // conveyor_selected_status = 4 (end points on conveyor tile)
+      // conveyor_selected_status = 5 (active point on conveyor tile)
+      // remove_conveyor_tile = 1 (remove selected conveyor tile)
+      // conveyor_selected_status = 0 (selected conveyor tile for normal color)
+    // }
+    if (barcode.conveyor_selected_status === 1 && !zoneViewMode && !sectorViewMode)
+      tileSprite = constants.SELECT_CONVEYOR;
+    if (barcode.conveyor_selected_status === 2 && !zoneViewMode && !sectorViewMode)
+      tileSprite = constants.ENTRY_CONVEYOR;
+    if (barcode.conveyor_selected_status === 3 && !zoneViewMode && !sectorViewMode)
+      tileSprite = constants.EXIT_CONVEYOR;
+    if (barcode.conveyor_selected_status === 4 && !zoneViewMode && !sectorViewMode)
+      tileSprite = constants.END_CONVEYOR;
+    if (barcode.conveyor_selected_status === 5 && !zoneViewMode && !sectorViewMode)
+      tileSprite = constants.ACTIVE_CONVEYOR;
+    if (barcode.remove_conveyor_tile === 1 && !zoneViewMode && !sectorViewMode)
+      tileSprite = constants.ODS_EXCLUDED;
+    if (barcode.conveyor_selected_status === 0 && !zoneViewMode && !sectorViewMode)
+      tileSprite = constants.NORMAL;
     return tileSprite;
   }
 );
@@ -272,7 +296,6 @@ export const getSectorToColorMap = createSelector(
   getSectors,
   (sectors) => {
     const newSectorMap = sectorToColorMapper(sectors);
-
     return newSectorMap;
   }
 );

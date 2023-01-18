@@ -24,6 +24,26 @@ export default (state = {}, action) => {
     case "ADD-SECTOR": {
       return addKey(state, "sectors", action.value.sector_id.toString());
     }
+    case "ADD-CONVEYOR": {
+      const { conveyor_id, conveyor_height } = action.value;
+      if (!newState.dummy.hasOwnProperty('conveyors')){
+        newState.dummy.conveyors = [];
+      }
+      newState.dummy.conveyors.push(conveyor_id);
+      newState.dummy.current_conveyor_id = [];
+      newState.dummy.current_conveyor_id.push(conveyor_id);
+      return newState;
+    }
+    case "REMOVE-CONVEYOR-ID": {
+      var conveyor_id = parseInt(action.value.conveyor_id)
+      if (newState.dummy.hasOwnProperty('conveyors')){
+        var newList = newState.dummy.conveyors.filter(function(item) {
+              return item !== conveyor_id
+          })
+        newState.dummy.conveyors = newList
+      }
+      return newState;
+    }
     case "SECTOR-BARCODE-MAPPING": {
       const { entities } = action.value;
       newState.dummy.sectorBarcodeMapping = [];

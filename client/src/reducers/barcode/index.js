@@ -68,6 +68,31 @@ export default (state = {}, action) => {
 
       return Object.assign({}, state, newState);
     }
+    case "CONVEYOR-TILES-STRIPES": {
+      const conveyor_tile = action.value[Object.keys(action.value)[0]] 
+      const conveyor_selected_status = action.value[Object.keys(action.value)[1]] 
+      let newState = {};
+      var k = 0;
+
+      while (k < conveyor_tile.length) {
+        newState[conveyor_tile[k]] = { ...state[conveyor_tile[k]], conveyor_selected_status: conveyor_selected_status};
+        k++;
+      }
+      return Object.assign({}, state, newState);
+    }
+    case "HIGHLIGHT-SELECTED-REMOVED-CONVEYOR":{
+      const { conveyor_tile, remove_conveyor_tile } = action.value;
+
+      let newState = {};
+      var k = 0;
+
+      while (k < conveyor_tile.length) {
+        newState[conveyor_tile[k]] = { ...state[conveyor_tile[k]], remove_conveyor_tile: remove_conveyor_tile};
+        k++;
+      }
+      return Object.assign({}, state, newState);
+
+    }
     case "DELETE-BARCODES": {
       // iterate over all barcodes and just see if their neighbours exist. if not, make the edge [0,0,0]
       let newState = {};

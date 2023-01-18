@@ -37,7 +37,7 @@ export default connect(
   state => ({
     disabled:
       Object.keys(state.selection.mapTiles).length === 0 ||
-      Object.keys(state.normalizedMap.entities.sector) === 0,
+      Object.keys(state.normalizedMap.entities.sector) === 0 || state.selection.conveyorMode === true,
     sectorDict: state.normalizedMap.entities.sector || {}
   }),
   dispatch => ({

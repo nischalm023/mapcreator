@@ -92,11 +92,11 @@ class Map extends Component {
       errorMessage,
       successMessage,
       queueMode,
+      conveyorMode,
       zoneViewMode,
       sectorViewMode,
       directionViewMode
     } = this.props;
-
     // mapId may be different from params since it may not have been fetched yet...
     const mapId = nMap ? Object.entries(nMap.entities.mapObj)[0][1].id : 0;
     const params = new URLSearchParams(window.location.search);
@@ -146,6 +146,7 @@ class Map extends Component {
             <RightSidebar
               dispatch={dispatch}
               queueMode={queueMode}
+              conveyorMode={conveyorMode}
               zoneViewMode={zoneViewMode}
               sectorViewMode={sectorViewMode}
               directionViewMode={directionViewMode}
@@ -269,6 +270,7 @@ class Map extends Component {
 export default connect(state => ({
   nMap: state.normalizedMap,
   queueMode: state.selection.queueMode,
+  conveyorMode: state.selection.conveyorMode,
   successMessage: state.successMessage,
   errorMessage: state.errorMessage,
   zoneViewMode: state.selection.zoneViewMode,

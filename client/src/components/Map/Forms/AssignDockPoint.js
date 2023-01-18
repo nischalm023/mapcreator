@@ -60,7 +60,7 @@ const AssignDockPoint = ({ onSubmit, disabled }) => (
 
 export default connect(
   state => ({
-    disabled: Object.keys(state.selection.mapTiles).length === 0
+    disabled: Object.keys(state.selection.mapTiles).length === 0 || state.selection.conveyorMode === true
   }),
   () => ({
     onSubmit: () => {

@@ -53,6 +53,8 @@ export const dummyState = {
           map_values: []
         }
       ],
+      conveyors: [],
+      downloadConveyor:[],
       elevators: [],
       zones: [],
       sectors: [],
@@ -65,6 +67,8 @@ export const dummyState = {
   selection: {
     mapTiles: {},
     distanceTiles: {},
+    conveyorTile:{},
+    DownloadconveyorTile:{},
     shiftKey: false,
     metaKey: false,
     queueMode: false,

@@ -54,7 +54,7 @@ export default connect(
   state => ({
     // TODO: disabling adding multiple chargers; adding neighbouring chargers together messes up
     // adjacency, should be fixed...
-    disabled: Object.keys(state.selection.mapTiles).length !== 1
+    disabled: Object.keys(state.selection.mapTiles).length !== 1 || state.selection.conveyorMode === true
   }),
   dispatch => ({
     onSubmit: ({ formData }) => {

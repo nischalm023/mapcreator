@@ -346,6 +346,8 @@ export var createMapFromCoordinateData = (
     sectorBarcodeMapping: [{}],
     sectorMxUPreferences: {},
     queueDatas: [],
+    downloadConveyor:[],
+    conveyors:[],
     floors: [
       createFloorFromCoordinateData({
         row_start,

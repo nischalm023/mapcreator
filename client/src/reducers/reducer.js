@@ -5,6 +5,8 @@ import reduceReducers from "reduce-reducers";
 import floorReducer from "./floor";
 import barcodeReducer from "./barcode/index";
 import ppsReducer from "./pps";
+import conveyorReducer from "./conveyor";
+import DownloadConveyorReducer from "./download_conveyor";
 import currentFloorReducer from "./currentFloor";
 import mapReducer from "./map";
 import elevatorReducer from "./elevator";
@@ -19,16 +21,19 @@ export var baseBarcodeReducer = createEntityReducer("BARCODE", "coordinate");
 export var basePPSReducer = createEntityReducer("PPS", "pps_id");
 export var baseElevatorReducer = createEntityReducer("ELEVATOR", "elevator_id");
 export var baseChargerReducer = createEntityReducer("CHARGER", "charger_id");
+export var baseConveyorReducer = createEntityReducer("CONVEYOR", "conveyor_id");
 
 export const entitiesReducer = combineReducers({
   elevator: reduceReducers(elevatorReducer, baseElevatorReducer),
   queueData: createEntityReducer("QUEUE-DATA", "queue_data_id"),
   charger: reduceReducers(charger, baseChargerReducer),
   pps: reduceReducers(basePPSReducer, ppsReducer),
+  conveyorTile: reduceReducers(baseConveyorReducer, conveyorReducer),
   odsExcluded: createEntityReducer("ODS-EXCLUDED", "ods_excluded_id"),
   dockPoint: createEntityReducer("DOCK-POINT", "dock_point_id"),
   fireEmergency: createEntityReducer("FIRE-EMERGENCY", "fire_emergency_id"),
   barcode: reduceReducers(barcodeReducer, baseBarcodeReducer),
+  DownloadconveyorTile: reduceReducers(baseConveyorReducer, conveyorReducer),
   floor: floorReducer,
   map: mapReducer,
   zone: zoneReducer,
@@ -112,6 +117,7 @@ export const selectedDistanceTilesReducer = (state = {}, action) => {
     case "CLICK-OUTSIDE-TILES":
     // should deselect if a map tile is clicked
     case "CLICK-ON-MAP-TILE":
+    case "ADD-CONVEYOR":
     case "CHANGE-FLOOR":
     case "ADD-ELEVATOR":
     case "SHIFT-BARCODE":
@@ -138,9 +144,18 @@ export const selectedMapTilesReducer = (state = {}, action) => {
   }
   return state;
 };
+
 const queueModeReducer = (state = false, action) => {
   switch (action.type) {
     case "TOGGLE-QUEUE-MODE":
+      return !state;
+  }
+  return state;
+};
+
+const conveyorModeReducer = (state = false, action) => {
+  switch (action.type) {
+    case "TOGGLE-CONVEYOR-VIEW-MODE":
       return !state;
   }
   return state;
@@ -182,10 +197,12 @@ export const baseSelectionReducer = combineReducers({
   mapTiles: selectedMapTilesReducer,
   distanceTiles: selectedDistanceTilesReducer,
   queueMode: queueModeReducer,
+  conveyorMode: conveyorModeReducer,
   multiQueueMode: multiQueueModeReducer,
   zoneViewMode: zoneViewModeReducer,
   sectorViewMode: sectorViewModeReducer,
   directionViewMode: directionViewModeReducer,
+  
   metaKey: (e = false) => e,
   shiftKey: (e = false) => e
 });
@@ -204,6 +221,7 @@ export const selectionReducer = (
     metaKey: false,
     shiftKey: false,
     queueMode: false,
+    conveyorMode: false,
     multiQueueMode: false,
     zoneViewMode: false,
     sectorViewMode: false,
@@ -232,6 +250,14 @@ export const selectionReducer = (
         mapTiles: {},
         distanceTiles: {}
       };
+    case "TOGGLE-CONVEYOR-VIEW-MODE":
+
+      return {
+        ...state,
+        mapTiles: {},
+        distanceTiles: {}
+      };
+    
     case "CLICK-ON-MAP-TILE":
       var tileId = action.value;
       if (!state.queueMode) {

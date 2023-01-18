@@ -13,13 +13,15 @@ const schema = {
   }
 };
 
-const AddZone = ({ onSubmit }) => (
-  <BaseJsonForm schema={schema} onSubmit={onSubmit} buttonText={"Add Zone"} />
+const AddZone = ({ onSubmit ,disabled }) => (
+  <BaseJsonForm schema={schema} disabled={disabled} onSubmit={onSubmit} buttonText={"Add Zone"} />
 );
 
 // only connecting to minimal state since don't know if data will be copied in props...
 export default connect(
-  () => ({}),
+  state => ({
+    disabled: state.selection.conveyorMode === true
+  }),
   dispatch => ({
     onSubmit: ({ formData }) => {
       dispatch(addZone(formData));

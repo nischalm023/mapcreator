@@ -2,7 +2,7 @@ import React from "react";
 import ReactTooltip from "react-tooltip";
 import DirectionViewTooltip from "./DirectionViewTooltip";
 
-const QueueCheckbox = ({ val, onChange }) => (
+const QueueCheckbox = ({ val, onChange ,disabled}) => (
   <label
     style={{
       textAlign: "-webkit-center",
@@ -13,6 +13,7 @@ const QueueCheckbox = ({ val, onChange }) => (
     Queue mode:
     <input
       style={{ marginLeft: "10px" }}
+      disabled={disabled}
       name="queuemode"
       type="checkbox"
       checked={val}
@@ -21,7 +22,7 @@ const QueueCheckbox = ({ val, onChange }) => (
   </label>
 );
 
-const MultiQueueCheckbox = ({ val, onChange }) => (
+const MultiQueueCheckbox = ({ val, onChange ,disabled }) => (
   <label
     style={{
       textAlign: "-webkit-center",
@@ -33,6 +34,7 @@ const MultiQueueCheckbox = ({ val, onChange }) => (
     <input
       style={{ marginLeft: "10px" }}
       name="multiqueuemode"
+      disabled={disabled}
       type="checkbox"
       checked={val}
       onChange={onChange}
@@ -40,7 +42,7 @@ const MultiQueueCheckbox = ({ val, onChange }) => (
   </label>
 );
 
-const ZoneViewCheckbox = ({ val, onChange }) => (
+const ZoneViewCheckbox = ({ val, onChange ,disabled}) => (
   <div>
     <ReactTooltip effect="solid" delayShow={100} />
     <label
@@ -54,6 +56,7 @@ const ZoneViewCheckbox = ({ val, onChange }) => (
       <input
         style={{ marginLeft: "10px" }}
         name="zoneview"
+        disabled={disabled}
         type="checkbox"
         checked={val}
         onChange={onChange}
@@ -67,7 +70,7 @@ const ZoneViewCheckbox = ({ val, onChange }) => (
   </div>
 );
 
-const SectorViewCheckbox = ({ val, onChange }) => (
+const SectorViewCheckbox = ({ val, onChange ,disabled}) => (
   <div>
     <ReactTooltip effect="solid" delayShow={100} />
     <label
@@ -81,6 +84,7 @@ const SectorViewCheckbox = ({ val, onChange }) => (
       <input
         style={{ marginLeft: "10px" }}
         name="sectorview"
+        disabled={disabled}
         type="checkbox"
         checked={val}
         onChange={onChange}
@@ -94,7 +98,7 @@ const SectorViewCheckbox = ({ val, onChange }) => (
   </div>
 );
 
-const DirectionViewCheckbox = ({ val, onChange }) => (
+const DirectionViewCheckbox = ({ val, onChange, disabled }) => (
   <div>
     <DirectionViewTooltip />
     <label
@@ -108,6 +112,7 @@ const DirectionViewCheckbox = ({ val, onChange }) => (
       <input
         style={{ marginLeft: "10px" }}
         name="directionalityview"
+        disabled={disabled}
         type="checkbox"
         checked={val}
         onChange={onChange}
@@ -122,4 +127,24 @@ const DirectionViewCheckbox = ({ val, onChange }) => (
   </div>
 );
 
-export { MultiQueueCheckbox, QueueCheckbox, ZoneViewCheckbox, SectorViewCheckbox, DirectionViewCheckbox };
+const ConveyorCheckbox = ({ val, onChange }) => (
+  <label
+    style={{
+      textAlign: "-webkit-center",
+      margin: "3% 5% 3% 5%",
+      color: "orange"
+    }}
+  >
+    Conveyor builder mode:
+    <input
+      style={{ marginLeft: "10px" }}
+      name="queuemode"
+      type="checkbox"
+      checked={val}
+      onChange={onChange}
+    />
+  </label>
+);
+
+
+export { MultiQueueCheckbox, QueueCheckbox, ZoneViewCheckbox, SectorViewCheckbox, DirectionViewCheckbox ,ConveyorCheckbox};

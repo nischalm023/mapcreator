@@ -14,7 +14,6 @@ const InnerForm = ({ handleSubmit, isSubmitting, values }) => {
   const checkDimensions = (msu_dimensions) => {
     return msu_dimensions == 97.9 ? barcodeDistance12xAndNames : barcodeDistance15xAndNames;
   };
-
   return (
     <form onSubmit={handleSubmit}>
       <Field
@@ -111,7 +110,7 @@ class AddFloor extends Component {
   toggle = () => this.setState({ show: !this.state.show });
   render() {
     const { error, show } = this.state;
-    const { nextFloorId, dispatch } = this.props;
+    const { nextFloorId, dispatch,disabled } = this.props;
     return (
       <div>
         <SweetAlertError
@@ -121,6 +120,7 @@ class AddFloor extends Component {
         />
         <ButtonForm
           show={show}
+          disabled={disabled}
           toggle={this.toggle}
           tooltipData={{ id: "add-floor", title: "Add Floor" }}
           buttonText="Add Floor"
@@ -143,5 +143,6 @@ export default connect(state => ({
       ...Object.keys(state.normalizedMap.entities.floor).map(floor_id =>
         parseInt(floor_id)
       )
-    ) + 1
+    ) + 1,
+    disabled:state.selection.conveyorMode === true
 }))(AddFloor);

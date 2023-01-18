@@ -61,6 +61,7 @@ export var CHARGER_ENTRY = "charger-entry.png";
 export var QUEUE = "queue.png";
 export var PATH = "dead.png";
 export var HIGHLIGHT = "autocad.png";
+export var SELECTED_CONVEYOR = "dead.png";
 export var DOCK_POINT = "normal.png";
 export var ODS_EXCLUDED = "ods.png";
 export var ODS_EXCLUDED_TOP = "ods-0.png";
@@ -71,6 +72,12 @@ export var EMERGENCY_EXIT = "emergency-exit.png";
 export var ELEVATOR = "elevator.png";
 export var BARCODE_DOT_SPRITE = "dot.png";
 export var BARCODE_CENTRE_SPRITE = "dot.png";
+export var SELECT_CONVEYOR = "conveyor.png";
+export var ACTIVE_CONVEYOR = "active.png";
+export var END_CONVEYOR = "end.png";
+export var EXIT_CONVEYOR = "exit.png";
+export var ENTRY_CONVEYOR = "entry.png";
+
 // graph directionality edge sprites
 export const DIRECTIONALITY_SPRITES_MAP = {
   "1,0,0": "100.png", // not allowed edge
@@ -133,6 +140,26 @@ export const LEGENDSMAP = [
   {
     name: "Movement Direction",
     icon: "111.png"
+  },
+  {
+    name: "Conveyor Selected",
+    icon1: "conveyor.png"
+  },
+  {
+    name: "Conveyor Active",
+    icon2: "active.png"
+  },
+  {
+    name: "Conveyor End",
+    icon3: "end.png"
+  },
+  {
+    name: "Conveyor Entry",
+    icon4: "entry.png"
+  },
+  {
+    name: "Conveyor Exit",
+    icon5: "exit.png"
   },
 
 ];

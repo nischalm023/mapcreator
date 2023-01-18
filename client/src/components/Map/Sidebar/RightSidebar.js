@@ -12,6 +12,7 @@ import AddPPSQueue from "components/Map/Forms/AddPPSQueue";
 import AddHighwayQueue from "components/Map/Forms/AddHighwayQueue";
 import AssignZone from "components/Map/Forms/AssignZone";
 import AssignSector from "components/Map/Forms/AssignSector";
+import ConveyorCheckboxMode from "components/Map/Forms/ConveyorCheckboxMode"
 import AssignODSExcluded from "components/Map/Forms/AssignODSExcluded";
 import RemoveODSExcluded from "components/Map/Forms/RemoveODSExcluded";
 import AssignEmergencyBarcode from "components/Map/Forms/AssignEmergencyBarcode";
@@ -29,13 +30,16 @@ import ShiftBarcode from "components/Map/Forms/ShiftBarcode";
 import AddTransitBarcode from "components/Map/Forms/AddTransitBarcode";
 import LocateBarcode from "components/Map/Forms/LocateBarcode";
 import SectorMSUMapping from "components/Map/Forms/SectorMSUMapping";
+import RemoveConveyorSystem from "components/Map/Forms/RemoveConveyorSystem";
+import ViewConveyorSystem from "components/Map/Forms/ViewConveyorSystem";
 
 import {
   QueueCheckbox,
   MultiQueueCheckbox,
   ZoneViewCheckbox,
   SectorViewCheckbox,
-  DirectionViewCheckbox
+  DirectionViewCheckbox,
+  ConveyorCheckbox
 } from "./Checkboxes";
 
 class RightSidebar extends Component {
@@ -45,7 +49,7 @@ class RightSidebar extends Component {
   };
 
   render() {
-    const { queueMode, multiQueueMode, zoneViewMode, sectorViewMode, directionViewMode, dispatch } = this.props;
+    const { queueMode, multiQueueMode, zoneViewMode, sectorViewMode, directionViewMode, conveyorMode, dispatch } = this.props;
     const { open } = this.state;
 
     return (
@@ -89,7 +93,7 @@ class RightSidebar extends Component {
               Exclude,
               EditSpecialBarcode,
               ShiftBarcode,
-              AddTransitBarcode
+              AddTransitBarcode,
             ].map((Elm, idx) => (
               <div
                 key={idx}
@@ -100,10 +104,38 @@ class RightSidebar extends Component {
               </div>
             ))}
           </div>
+          <div className="conveyor-buttons">
+            <div className="row">
+              <div className="col">
+                <RemoveConveyorSystem />
+              </div>
+            </div>
+            <div className="row py-1">
+              <div className="col">
+                <ViewConveyorSystem />
+              </div>
+            </div>
+            <div className="row">
+              <div className="col">
+                {this.props.conveyorMode === true ?<ConveyorCheckboxMode />: null}
+              </div>
+            </div>
+          </div>
+          <div className="row">
+            <div className="col">
+              <ConveyorCheckbox
+                val={conveyorMode}
+                onChange={() =>
+                  dispatch({ type: "TOGGLE-CONVEYOR-VIEW-MODE" })
+                }
+              />
+            </div>
+          </div>
           <div className="row">
             <div className="col">
               <QueueCheckbox
                 val={queueMode}
+                disabled={this.props.conveyorMode === true}
                 onChange={() => dispatch({ type: "TOGGLE-QUEUE-MODE" })}
               />
             </div>
@@ -112,6 +144,7 @@ class RightSidebar extends Component {
             <div className="col">
               <MultiQueueCheckbox
                 val={multiQueueMode}
+                disabled={this.props.conveyorMode === true}
                 onChange={() => dispatch({ type: "TOGGLE-MULTI-QUEUE-MODE" })}
               />
             </div>
@@ -120,6 +153,7 @@ class RightSidebar extends Component {
             <div className="col">
               <ZoneViewCheckbox
                 val={zoneViewMode}
+                disabled={this.props.conveyorMode === true}
                 onChange={() => { 
                   if(sectorViewMode) dispatch({ type: "TOGGLE-SECTOR-VIEW-MODE" }); 
                   dispatch({ type: "TOGGLE-ZONE-VIEW-MODE" });
@@ -131,6 +165,7 @@ class RightSidebar extends Component {
             <div className="col">
               <SectorViewCheckbox
                 val={sectorViewMode}
+                disabled={this.props.conveyorMode === true}
                 onChange={() => {
                   if(zoneViewMode) dispatch({ type: "TOGGLE-ZONE-VIEW-MODE" });
                   dispatch({ type: "TOGGLE-SECTOR-VIEW-MODE" });
@@ -138,16 +173,19 @@ class RightSidebar extends Component {
               />
             </div>
           </div>
+
           <div className="row">
             <div className="col">
               <DirectionViewCheckbox
                 val={directionViewMode}
+                disabled={this.props.conveyorMode === true}
                 onChange={() =>
                   dispatch({ type: "TOGGLE-DIRECTION-VIEW-MODE" })
                 }
               />
             </div>
           </div>
+          
           <div className="row">
             <div className="col">
               <div style={{ margin: "0% 5% 3% 5%" }}>

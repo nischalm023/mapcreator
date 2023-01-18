@@ -32,11 +32,12 @@ export const getValidEmptyNeighbours = (selectedMapTiles, barcodes) => {
   return emptyDirTileIdList;
 };
 
-const shouldBeDisabled = (selectedMapTiles, barcodes) => {
+const shouldBeDisabled = (selectedMapTiles, barcodes, state) => {
   return (
     !onlyOneTileSelected(selectedMapTiles) ||
     !hasBarcodeForTile(selectedMapTiles, barcodes) ||
-    getValidEmptyNeighbours(selectedMapTiles, barcodes).length == 0
+    getValidEmptyNeighbours(selectedMapTiles, barcodes).length == 0 ||
+    state.selection.conveyorMode === true
   );
 };
 
@@ -44,8 +45,8 @@ const shouldBeDisabled = (selectedMapTiles, barcodes) => {
 // TODO: support customizing edges of new barcode
 class AddBarcode extends Component {
   render() {
-    const { selectedMapTiles, barcodes, onSubmit } = this.props;
-    const disabled = shouldBeDisabled(selectedMapTiles, barcodes);
+    const { selectedMapTiles, barcodes, onSubmit ,state } = this.props;
+    const disabled = shouldBeDisabled(selectedMapTiles, barcodes, state);
     const tooltipData = {
       id: "add-barcode",
       title: "Add a barcode",
@@ -114,7 +115,8 @@ class AddBarcode extends Component {
 export default connect(
   state => ({
     selectedMapTiles: state.selection.mapTiles,
-    barcodes: getBarcodes(state)
+    barcodes: getBarcodes(state),
+    state:state
   }),
   dispatch => ({
     onSubmit: ({ formData }) => {
