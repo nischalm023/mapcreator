@@ -42,6 +42,12 @@ const requestValidation = (payload) =>
     body: JSON.stringify(payload),
   });
 
+const requestMapUploadToGsb = (data) =>
+  fetch(`${BASENAME}/api/uploadMapDetailsToGsb`, {
+    method: "POST",
+    body: data,
+  });
+
 const getMaps = (query) => fetch(`${BASENAME}/api/maps?str=${query}`);
 const getAllMaps = () => fetch(`${BASENAME}/api/maps`);
 
@@ -54,6 +60,7 @@ export {
   createMap,
   deleteMap,
   requestValidation,
+  requestMapUploadToGsb,
   getMaps,
   getAllMaps,
   getSampleRacksJson,

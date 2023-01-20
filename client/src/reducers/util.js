@@ -40,6 +40,7 @@ export const createEntityReducer = (reducerKey, idField) => (
   return state;
 };
 
+// ? redux data store
 export const dummyState = {
   normalizedMap: normalizeMap({
     id: "1",

@@ -5,11 +5,20 @@ import wrap from "express-async-handler";
 import getRacksJson from "server/scripts/make-racks-json";
 import sequelize, { Op } from "sequelize";
 import { requestValidation } from "./verifier-apis";
+import { requestMapUploadToGsb } from "./gsb-apis";
 import moment from "moment";
+import FormData from 'form-data';
+
 // HACK: adding cors to fetch data from storybook. should remove this later.
 import cors from "cors";
 const app = express();
 app.use(cors());
+
+var bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
+// in latest body-parser use like below.
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb" }));
@@ -30,8 +39,7 @@ app.post(
     if (!name) {
       throw new Error("name is required");
     }
-    // store in db
-
+    // store the map created in db
     var created = await Map.create({ map:map, name:name,BaseMap:map});
     // send only id
     res.json(created.id);
@@ -98,6 +106,7 @@ app.post(
     if (!validate(reqMap)) {
       throw new Error(JSON.stringify(validate.errors));
     }
+    // updating the new map edits in DB
     await map.update({ map: reqMap, validationRequested: false, sanity: false});
     // send back the new map?
     var newMap = await Map.findByPk(id);
@@ -129,6 +138,30 @@ app.get(
     if (!map) throw new Error(`could not find map for id ${id}`);
     var racksJson = await getRacksJson(id);
     res.json(racksJson);
+  })
+);
+
+// upload Map JSONs and Summary to GSB
+app.post(
+  "/api/uploadMapDetailsToGsb",
+  wrap(async (req, res) => {
+    console.log("request body", req.body);
+    // var data = new FormData();
+    // data.append('total_elevators', '4');
+    requestMapUploadToGsb(req.body)
+    .then(response => {
+        if (response.status === 200 || response.status === 202) {
+          {
+            console.log("api hit was success")
+            console.log(response.text())
+            return response.text();
+          }
+        }
+        return response.status(500).json({ message: 'Internal Server Error' });
+    })
+    .catch((error) => {
+      console.log(error);
+    });
   })
 );
 

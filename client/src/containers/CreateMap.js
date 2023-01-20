@@ -95,7 +95,7 @@ const Form = withFormik({
     { name, row_start, row_end, col_start, col_end, msu_dimensions, barcode_distances },
     { props, setSubmitting }
   ) => {
-    // create a map with row_start etc.
+    // creating a map with row_start etc.
     var map = createMapFromCoordinateData(
       row_start,
       row_end,
@@ -105,6 +105,7 @@ const Form = withFormik({
       barcode_distances
     );
     const { onServerError, onSuccess } = props;
+    // API call to save Map created in DB
     createMap(map, name)
       .then(handleErrors)
       .then(res => res.json())

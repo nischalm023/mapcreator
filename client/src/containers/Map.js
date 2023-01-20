@@ -2,7 +2,7 @@
 import React, { Component } from "react";
 import MapViewport from "components/Map/MapViewport";
 import { connect } from "react-redux";
-import { fetchMap, saveMap, downloadMap, updateAutocadMap} from "actions/actions";
+import { fetchMap, saveMap, downloadMap, updateAutocadMap } from "actions/actions";
 import importMap from "common/utils/import-map";
 import { modifyNeighbours } from "actions/barcode";
 import {
@@ -22,6 +22,7 @@ import CopyMap from "components/Map/Forms/CopyMap";
 import DeleteMap from "components/Map/Forms/DeleteMap";
 import RequestValidation from "components/Map/Forms/RequestValidation";
 import SampleRacksJson from "components/Map/SampleRacksJson";
+import UploadMapDetailsToGsb from "components/Map/Forms/UploadMapDetailsToGsb";
 import { runSanity , showHighlight } from "actions/actions";
 import { runHaiMapConversionScriptToMap} from "utils/api";
 import _ from "lodash";
@@ -124,6 +125,8 @@ class Map extends Component {
                   <DeleteMap />
                   <RequestValidation />
                   <span className={nMap && nMap.entities.mapObj[mapId].sanity ? "btn btn-success" : "btn btn-danger"}>{nMap && nMap.entities.mapObj[mapId].sanity ? "Valid" : "Invalid"}</span>
+                  &nbsp;
+                  <UploadMapDetailsToGsb />
                 </div>
               </div>
             </div>

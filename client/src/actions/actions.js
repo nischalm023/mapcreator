@@ -11,6 +11,10 @@ import {
   getTileIdToWorldCoordMapFunc,
   getNormalizedMap,
   getBarcodes,
+  getParticularEntity,
+  getStorableCoordinatesCount,
+  getZoneToColorMap,
+  getSectorToColorMap,
 } from "utils/selectors";
 import { denormalizeMap, formatMapWithDataSuffix } from "utils/normalizr";
 import { runCompleteDataSanity } from "../utils/data-sanity";
@@ -28,7 +32,8 @@ import {
   createMap,
   deleteMap as deleteMapApi,
   getSampleRacksJson,
-  requestValidation as requestValidationApi
+  requestValidation as requestValidationApi,
+  requestMapUploadToGsb as requestMapUploadToGsbApi,
 } from "utils/api";
 import { implicitBarcodeToCoordinate } from "../utils/util";
 import { locateBarcode } from "../actions/barcode";
@@ -534,7 +539,6 @@ export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
     if(mapObj.map.floors[0].map_values[coor].highlight_status==1){
       mapObj.map.floors[0].map_values[coor].highlight_status = 0
     }
-
   }
 
   return updateMap(mapObj.id, mapObj.map)
@@ -624,11 +628,64 @@ export const requestValidation = (id, email, map_updated_time) => (
   const exportedJson = exportMap(withWorldCoordinate, false);
   var payload = formatMapWithDataSuffix(id, exportedJson, map_updated_time);
   payload["email"] = email;
+  // map validation request on Map Validator
   return requestValidationApi(payload)
     .then(handleErrors)
     .then((res) => res.text())
     .then((res) => dispatch(setSuccessMessage(res)))
     .then(() => dispatch(fetchMap(id)))
+    .catch((error) => dispatch(setErrorMessage(error)));
+};
+
+export const requestMapUploadToGsb = () => (
+  dispatch,
+  getState
+) => {
+  const state = getState();
+  let id = getMapId(state);
+  let { normalizedMap } = state;
+  let withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
+  setSectorsBarcodeMapping(dispatch, getState);
+  const exportedJson = exportMap(withWorldCoordinate, false);
+  let chargerDict = getParticularEntity(state, { entityName: "charger" });
+  let chargers = Object.entries(chargerDict).map(([, val]) => val);
+  let ppsDict = getParticularEntity(state, { entityName: "pps" });
+  let ppses = Object.entries(ppsDict).map(([, val]) => val);
+  let elevatorDict = getParticularEntity(state, { entityName: "elevator" });
+  let elevators = Object.entries(elevatorDict).map(([, val]) => val);
+  let storables = getStorableCoordinatesCount(state);
+  let barcodes = getBarcodes(state);
+  let zoneToColorMap = getZoneToColorMap(state);
+  let sectorToColorMap = getSectorToColorMap(state);
+
+  var data = new FormData();
+  let mapData;
+  Object.keys(exportedJson).forEach((keyName) => {
+      if (keyName !== "sector") {
+        if (keyName === "sectorBarcodeMapping"){
+          data.append('sector_data', new File([new Blob([exportedJson[keyName]], { type: 'application/json' })], 'sector.json', {type: "application/json"}));
+        } else if (keyName === "map") {
+          mapData = exportedJson[keyName].length == 1 ? exportedJson[keyName][0]['map_values'] : exportedJson[keyName];
+          data.append('map_data', new File([new Blob([exportedJson[keyName]], { type: 'application/json' })], 'map.json', {type: "application/json"}));
+        } else {
+          data.append(`${keyName}_data`, new File([new Blob([exportedJson[keyName]], { type: 'application/json' })], `${keyName}.json`, {type: "application/json"}));
+        }
+      }
+  });
+  data.append('map_id', JSON.stringify(id));
+  data.append('total_chargers', chargers.length);
+  data.append('total_ppses', ppses.length);
+  data.append('total_elevators', elevators.length);
+  data.append('total_zones', Object.keys(zoneToColorMap).length);
+  data.append('total_sectors', Object.keys(sectorToColorMap).length);
+  data.append('total_storables', storables);
+  data.append('total_barcodes', Object.keys(barcodes).length);
+
+  // Map JSONs and Summary details upload request on Map Validator
+  return requestMapUploadToGsbApi(data)
+    .then(handleErrors)
+    // .then((res) => res.text())
+    .then((res) => dispatch(setSuccessMessage(res)))
     .catch((error) => dispatch(setErrorMessage(error)));
 };
 
