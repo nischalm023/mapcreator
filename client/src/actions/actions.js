@@ -660,19 +660,19 @@ export const requestMapUploadToGsb = () => (
 
   var data = new FormData();
   let mapData;
-  Object.keys(exportedJson).forEach((keyName) => {
-      if (keyName !== "sector") {
-        if (keyName === "sectorBarcodeMapping"){
-          data.append('sector_data', new File([new Blob([exportedJson[keyName]], { type: 'application/json' })], 'sector.json', {type: "application/json"}));
-        } else if (keyName === "map") {
-          mapData = exportedJson[keyName].length == 1 ? exportedJson[keyName][0]['map_values'] : exportedJson[keyName];
-          data.append('map_data', new File([new Blob([exportedJson[keyName]], { type: 'application/json' })], 'map.json', {type: "application/json"}));
-        } else {
-          data.append(`${keyName}_data`, new File([new Blob([exportedJson[keyName]], { type: 'application/json' })], `${keyName}.json`, {type: "application/json"}));
-        }
-      }
-  });
-  data.append('map_id', JSON.stringify(id));
+  // Object.keys(exportedJson).forEach((keyName) => {
+  //     if (keyName !== "sector") {
+  //       if (keyName === "sectorBarcodeMapping"){
+  //         data.append('sector_data', new File([new Blob([exportedJson[keyName]], { type: 'application/json' })], 'sector.json', {type: "application/json"}));
+  //       } else if (keyName === "map") {
+  //         mapData = exportedJson[keyName].length == 1 ? exportedJson[keyName][0]['map_values'] : exportedJson[keyName];
+  //         data.append('map_data', new File([new Blob([exportedJson[keyName]], { type: 'application/json' })], 'map.json', {type: "application/json"}));
+  //       } else {
+  //         data.append(`${keyName}_data`, new File([new Blob([exportedJson[keyName]], { type: 'application/json' })], `${keyName}.json`, {type: "application/json"}));
+  //       }
+  //     }
+  // });
+  data.append('map_id', id);
   data.append('total_chargers', chargers.length);
   data.append('total_ppses', ppses.length);
   data.append('total_elevators', elevators.length);
@@ -684,7 +684,7 @@ export const requestMapUploadToGsb = () => (
   // Map JSONs and Summary details upload request on Map Validator
   return requestMapUploadToGsbApi(data)
     .then(handleErrors)
-    // .then((res) => res.text())
+    .then((res) => res.text())
     .then((res) => dispatch(setSuccessMessage(res)))
     .catch((error) => dispatch(setErrorMessage(error)));
 };

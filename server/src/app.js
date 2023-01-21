@@ -5,20 +5,15 @@ import wrap from "express-async-handler";
 import getRacksJson from "server/scripts/make-racks-json";
 import sequelize, { Op } from "sequelize";
 import { requestValidation } from "./verifier-apis";
-import { requestMapUploadToGsb } from "./gsb-apis";
 import moment from "moment";
-import FormData from 'form-data';
-
 // HACK: adding cors to fetch data from storybook. should remove this later.
 import cors from "cors";
+const multer = require('multer');
 const app = express();
+const FormData = require('form-data'); // added this line
+global.fetch = require("node-fetch");
+const upload = multer();
 app.use(cors());
-
-var bodyParser = require('body-parser');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
-// in latest body-parser use like below.
-app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb" }));
@@ -50,6 +45,8 @@ app.get(
   "/api/map/:id",
   wrap(async (req, res) => {
     const { id } = req.params;
+    // TODO
+    console.log("headers", JSON.stringify(req.headers));
     var map = await Map.findByPk(id);
     if (!map) throw new Error(`could not find map for id ${id}`);
     res.json(map.toJSON());
@@ -141,29 +138,35 @@ app.get(
   })
 );
 
-// upload Map JSONs and Summary to GSB
-app.post(
-  "/api/uploadMapDetailsToGsb",
-  wrap(async (req, res) => {
-    console.log("request body", req.body);
-    // var data = new FormData();
-    // data.append('total_elevators', '4');
-    requestMapUploadToGsb(req.body)
-    .then(response => {
-        if (response.status === 200 || response.status === 202) {
-          {
-            console.log("api hit was success")
-            console.log(response.text())
-            return response.text();
-          }
-        }
-        return response.status(500).json({ message: 'Internal Server Error' });
-    })
-    .catch((error) => {
-      console.log(error);
+app.post('/api/uploadMapDetailsToGsb', upload.array('files'), async (req, res) => {
+  if (!req.files) {
+    return res.status(400).json({ message: 'No files uploaded' });
+  }
+
+  let data = req.body;
+  let formData = new FormData();
+  formData.append("data", JSON.stringify(data));
+  console.log("formData", formData);
+  req.files.forEach((file) => {
+    formData.append("files", file.buffer, file.originalname);
+  });
+  try {
+    const response = await fetch('http://mockapi.free.beeceptor.com/postapi', {
+      method: 'POST',
+      body: formData
     });
-  })
-);
+    console.log(response.status)
+    if (response.status === 200) {
+      return res.json({ message: 'Data and files sent to remote server successfully' });
+    } else {
+      return res.status(500).json({ message: 'Failed to send'})
+    }
+  }
+  catch (err) {
+      console.log(err)
+      return res.status(500).json({ message: 'Failed to send data and files to remote server' });
+    }
+  });
 
 // Request validation of a Map
 app.post(
