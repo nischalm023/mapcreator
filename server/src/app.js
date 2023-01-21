@@ -45,11 +45,14 @@ app.get(
   "/api/map/:id",
   wrap(async (req, res) => {
     const { id } = req.params;
-    // TODO
-    console.log("headers", JSON.stringify(req.headers));
     var map = await Map.findByPk(id);
     if (!map) throw new Error(`could not find map for id ${id}`);
-    res.json(map.toJSON());
+    let mapJson = map.toJSON();
+    // if (req.headers.connection === "keep-alive"){
+    if (req.headers.gsb === "true"){
+      mapJson.gsb = true;
+    }
+    res.json(mapJson);
   })
 );
 

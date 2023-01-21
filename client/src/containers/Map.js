@@ -101,6 +101,7 @@ class Map extends Component {
     const mapId = nMap ? Object.entries(nMap.entities.mapObj)[0][1].id : 0;
     const params = new URLSearchParams(window.location.search);
     let mapVisualize = params.get('visualize') ? eval(params.get('visualize')) : false;
+    const gsb = localStorage.getItem('gsb');
     return (
       <div>
         <div style={{ float: "left" }}>
@@ -126,7 +127,7 @@ class Map extends Component {
                   <RequestValidation />
                   <span className={nMap && nMap.entities.mapObj[mapId].sanity ? "btn btn-success" : "btn btn-danger"}>{nMap && nMap.entities.mapObj[mapId].sanity ? "Valid" : "Invalid"}</span>
                   &nbsp;
-                  <UploadMapDetailsToGsb />
+                  { gsb ? <UploadMapDetailsToGsb /> : "" }
                 </div>
               </div>
             </div>

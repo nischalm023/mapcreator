@@ -190,7 +190,12 @@ export const fetchMap = (mapId) => (dispatch, getState) => {
   return getMap(parseInt(mapId))
     .then(handleErrors)
     .then((res) => res.json())
-    .then((map) => dispatch(newMap(map)))
+    .then((map) => {
+      if (map.gsb){
+        localStorage.setItem('gsb', true);
+      }
+      return dispatch(newMap(map))
+    })
     .then(() => dispatch(setViewportClamp))
     .then(() => dispatch(fitToViewport))
     .then(() => setSectorsMxUPreferences(getState))
