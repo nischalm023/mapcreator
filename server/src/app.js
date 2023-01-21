@@ -146,10 +146,10 @@ app.post('/api/uploadMapDetailsToGsb', upload.array('files'), async (req, res) =
   let data = req.body;
   let formData = new FormData();
   formData.append("data", JSON.stringify(data));
-  console.log("formData", formData);
   req.files.forEach((file) => {
     formData.append("files", file.buffer, file.originalname);
   });
+  console.log("formData ---> ", formData);
   try {
     const response = await fetch('http://mockapi.free.beeceptor.com/postapi', {
       method: 'POST',
