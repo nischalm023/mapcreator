@@ -49,8 +49,8 @@ app.get(
     var map = await Map.findByPk(id);
     if (!map) throw new Error(`could not find map for id ${id}`);
     let mapJson = map.toJSON();
-    if (req.headers.connection === "keep-alive"){
-    // if (req.headers.gsb === "true"){
+    // if (req.headers.connection === "keep-alive"){  // TODO added for testing
+    if (req.headers.gsb === "true"){
       console.log("Application request came from GSB")
       mapJson.gsb = true;
     }
