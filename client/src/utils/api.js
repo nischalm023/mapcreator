@@ -2,11 +2,7 @@ const BASENAME = process.env.REACT_APP_BASENAME || "";
 const BASENAME_AUTOCAD = process.env.REACT_APP_BASENAME_AUTOCAD || "";
 // const BASENAME = "https://mapcreator.labs.greyorange.com" || "";
 
-async function getMap(mapId) {
-  let response = await fetch(`${BASENAME}/api/map/${mapId}`);
-  return response;
-}
-
+const getMap = (mapId) => fetch(`${BASENAME}/api/map/${mapId}`);
 const updateMap = (mapId, map) =>
   fetch(`${BASENAME}/api/map/${mapId}`, {
     method: "POST",

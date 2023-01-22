@@ -193,6 +193,7 @@ export const fetchMap = (mapId) => (dispatch, getState) => {
     .then((map) => {
       if (map.gsb){
         localStorage.setItem('gsb', true);
+        delete map.gsb; // removing key gsb
       }
       return dispatch(newMap(map))
     })
@@ -671,7 +672,7 @@ export const requestMapUploadToGsb = () => (
           data.append('files', new File([new Blob([exportedJson[keyName]], { type: 'application/json' })], 'sector.json', {type: "application/json"}));
         } else if (keyName === "map") {
           mapData = exportedJson[keyName].length == 1 ? exportedJson[keyName][0]['map_values'] : exportedJson[keyName];
-          data.append('files', new File([new Blob([exportedJson[keyName]], { type: 'application/json' })], 'map.json', {type: "application/json"}));
+          data.append('files', new File([new Blob([mapData], { type: 'application/json' })], 'map.json', {type: "application/json"}));
         } else {
           data.append('files', new File([new Blob([exportedJson[keyName]], { type: 'application/json' })], `${keyName}.json`, {type: "application/json"}));
         }

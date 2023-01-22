@@ -9,6 +9,7 @@ import moment from "moment";
 // HACK: adding cors to fetch data from storybook. should remove this later.
 import cors from "cors";
 const multer = require('multer');
+const axios = require('axios');
 const app = express();
 const FormData = require('form-data'); // added this line
 global.fetch = require("node-fetch");
@@ -48,8 +49,9 @@ app.get(
     var map = await Map.findByPk(id);
     if (!map) throw new Error(`could not find map for id ${id}`);
     let mapJson = map.toJSON();
-    // if (req.headers.connection === "keep-alive"){
-    if (req.headers.gsb === "true"){
+    if (req.headers.connection === "keep-alive"){
+    // if (req.headers.gsb === "true"){
+      console.log("Application request came from GSB")
       mapJson.gsb = true;
     }
     res.json(mapJson);
@@ -154,9 +156,15 @@ app.post('/api/uploadMapDetailsToGsb', upload.array('files'), async (req, res) =
   });
   console.log("formData ---> ", formData);
   try {
-    const response = await fetch('http://mockapi.free.beeceptor.com/postapi', {
-      method: 'POST',
-      body: formData
+    // const response = await fetch('http://mockapi.free.beeceptor.com/postapi', {
+    //   method: 'POST',
+    //   body: formData
+    // });
+    const response = await axios({
+      method: 'post',
+      url: 'http://mockapi.free.beeceptor.com/postapi',
+      data: formData,
+      headers: { "Content-Type": "multipart/form-data" },
     });
     console.log(response.status)
     if (response.status === 200) {
