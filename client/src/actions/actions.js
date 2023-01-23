@@ -669,12 +669,12 @@ export const requestMapUploadToGsb = () => (
   Object.keys(exportedJson).forEach((keyName) => {
       if (keyName !== "sector") {
         if (keyName === "sectorBarcodeMapping"){
-          data.append('files', new File([new Blob([exportedJson[keyName]], { type: 'application/json' })], 'sector.json', {type: "application/json"}));
+          data.append('files', new File([new Blob([JSON.stringify(exportedJson[keyName])], { type: 'application/json' })], 'sector.json', {type: "application/json"}));
         } else if (keyName === "map") {
           mapData = exportedJson[keyName].length == 1 ? exportedJson[keyName][0]['map_values'] : exportedJson[keyName];
-          data.append('files', new File([new Blob([mapData], { type: 'application/json' })], 'map.json', {type: "application/json"}));
+          data.append('files', new File([new Blob([JSON.stringify(mapData)], { type: 'application/json' })], 'map.json', {type: "application/json"}));
         } else {
-          data.append('files', new File([new Blob([exportedJson[keyName]], { type: 'application/json' })], `${keyName}.json`, {type: "application/json"}));
+          data.append('files', new File([new Blob([JSON.stringify(exportedJson[keyName])], { type: 'application/json' })], `${keyName}.json`, {type: "application/json"}));
         }
       }
   });
