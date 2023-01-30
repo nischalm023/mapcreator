@@ -1,0 +1,1 @@
+export const UPLOAD_MAP_TO_GSB_API = 'http://mockapi.free.beeceptor.com/postapi'

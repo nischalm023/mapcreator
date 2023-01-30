@@ -5,6 +5,7 @@ import wrap from "express-async-handler";
 import getRacksJson from "server/scripts/make-racks-json";
 import sequelize, { Op } from "sequelize";
 import { requestValidation } from "./verifier-apis";
+import { UPLOAD_MAP_TO_GSB_API } from "./gsb-apis";
 import moment from "moment";
 // HACK: adding cors to fetch data from storybook. should remove this later.
 import cors from "cors";
@@ -48,11 +49,6 @@ app.get(
     var map = await Map.findByPk(id);
     if (!map) throw new Error(`could not find map for id ${id}`);
     let mapJson = map.toJSON();
-    // if (req.headers.connection === "keep-alive"){  // TODO added for testing
-    if (req.headers.gsb === "true"){
-      console.log("Application request came from GSB")
-      mapJson.gsb = true;
-    }
     res.json(mapJson);
   })
 );
@@ -153,9 +149,9 @@ app.post('/api/uploadMapDetailsToGsb', upload.array('files'), async (req, res) =
   req.files.forEach((file) => {
     formData.append("files", file.buffer, file.originalname);
   });
-  console.log("formData ---> ", formData);
   try {
-    const response = await fetch('http://mockapi.free.beeceptor.com/postapi', {
+    let gsbApi = UPLOAD_MAP_TO_GSB_API;
+    const response = await fetch(gsbApi, {
       method: 'POST',
       body: formData
     });

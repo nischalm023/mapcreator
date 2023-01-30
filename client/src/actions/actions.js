@@ -190,13 +190,7 @@ export const fetchMap = (mapId) => (dispatch, getState) => {
   return getMap(parseInt(mapId))
     .then(handleErrors)
     .then((res) => res.json())
-    .then((map) => {
-      if (map.gsb){
-        localStorage.setItem('gsb', true);
-        delete map.gsb; // removing key gsb
-      }
-      return dispatch(newMap(map))
-    })
+    .then((map) => dispatch(newMap(map)))
     .then(() => dispatch(setViewportClamp))
     .then(() => dispatch(fitToViewport))
     .then(() => setSectorsMxUPreferences(getState))
@@ -643,7 +637,7 @@ export const requestValidation = (id, email, map_updated_time) => (
     .catch((error) => dispatch(setErrorMessage(error)));
 };
 
-export const requestMapUploadToGsb = () => (
+export const requestMapUploadToGsb = (solutionId, agentType) => (
   dispatch,
   getState
 ) => {
@@ -663,6 +657,8 @@ export const requestMapUploadToGsb = () => (
   let barcodes = getBarcodes(state);
   let zoneToColorMap = getZoneToColorMap(state);
   let sectorToColorMap = getSectorToColorMap(state);
+  let gsbSolutionId = solutionId;
+  let gsbAgentType = agentType;
 
   var data = new FormData();
   let mapData;
@@ -679,6 +675,8 @@ export const requestMapUploadToGsb = () => (
       }
   });
   data.append('map_id', id);
+  data.append('gsb_solution_id', gsbSolutionId);
+  data.append('gsb_agent_type', gsbAgentType);
   data.append('total_chargers', chargers.length);
   data.append('total_ppses', ppses.length);
   data.append('total_elevators', elevators.length);

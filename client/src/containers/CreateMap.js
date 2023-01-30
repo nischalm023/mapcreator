@@ -127,6 +127,11 @@ class CreateMap extends Component {
   render() {
     const { error } = this.state;
     const { history } = this.props;
+    const params = new URLSearchParams(window.location.search);
+    let gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
+    let gsbSolutionId = params.get('gsbSolutionId');
+    let gsbAgentType = params.get('gsbAgentType');
+    let gsbFunctionalArea = params.get('gsbFunctionalArea');
     return (
       <div className="container">
         <div className="row">
@@ -142,7 +147,13 @@ class CreateMap extends Component {
           <div className="col-12 col-sm-12 col-lg-8 col-md-8">
             <Form
               onServerError={error => this.setState({ error })}
-              onSuccess={id => history.push(`/map/${id}`)}
+              onSuccess={id => {
+                if(gsb){
+                  return history.push(`/map/${id}?gsb=true&gsbSolutionId=${gsbSolutionId}&gsbAgentType=${gsbAgentType}`)
+                } else {
+                  return history.push(`/map/${id}`)
+                }
+              }}
             />
           </div>
           <div className="col-12 col-sm-12 col-lg-4 col-md-4">

@@ -37,11 +37,21 @@ class ImportMap extends Component {
     // save
     const { name } = this.state;
     const { history } = this.props;
+    const params = new URLSearchParams(window.location.search);
+    let gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
+    let gsbSolutionId = params.get('gsbSolutionId');
+    let gsbAgentType = params.get('gsbAgentType');
+    let gsbFunctionalArea = params.get('gsbFunctionalArea');
     createMap(imported, name)
       .then(handleErrors)
       .then(res => res.json())
-
-      .then(id => history.push(`/map/${id}`))
+      .then(id => {
+        if(gsb){
+          return history.push(`/map/${id}?gsb=true&gsbSolutionId=${gsbSolutionId}&gsbAgentType=${gsbAgentType}`)
+        } else {
+          return history.push(`/map/${id}`)
+        }
+      })
       .catch(error => this.setState({ error }));
   };
   
