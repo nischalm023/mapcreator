@@ -637,7 +637,7 @@ export const requestValidation = (id, email, map_updated_time) => (
     .catch((error) => dispatch(setErrorMessage(error)));
 };
 
-export const requestMapUploadToGsb = (solutionId, agentType) => (
+export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid) => (
   dispatch,
   getState
 ) => {
@@ -658,7 +658,9 @@ export const requestMapUploadToGsb = (solutionId, agentType) => (
   let zoneToColorMap = getZoneToColorMap(state);
   let sectorToColorMap = getSectorToColorMap(state);
   let gsbSolutionId = solutionId;
-  let gsbAgentType = agentType;
+  let gsbAgentId = agentId;
+  let gsbFunctionalAreaId = functionalAreaId;
+  let gsbUid = uid;
 
   var data = new FormData();
   let mapData;
@@ -676,7 +678,9 @@ export const requestMapUploadToGsb = (solutionId, agentType) => (
   });
   data.append('map_id', id);
   data.append('gsb_solution_id', gsbSolutionId);
-  data.append('gsb_agent_type', gsbAgentType);
+  data.append('gsb_agent_id', gsbAgentId);
+  data.append('functional_area_id', gsbFunctionalAreaId);
+  data.append('uid', gsbUid);
   data.append('total_chargers', chargers.length);
   data.append('total_ppses', ppses.length);
   data.append('total_elevators', elevators.length);

@@ -102,8 +102,11 @@ class Map extends Component {
     const params = new URLSearchParams(window.location.search);
     let mapVisualize = params.get('visualize') ? eval(params.get('visualize')) : false;
     const gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
-    const solutionId = params.get('gsbSolutionId') ? eval(params.get('gsbSolutionId')) : null;
-    const agentType = params.get('gsbAgentType') ? params.get('gsbAgentType') : null;
+    const solutionId = params.get('gsb_solution_id') ? eval(params.get('gsb_solution_id')) : null;
+    const agentId = params.get('gsb_agent_id') ? params.get('gsb_agent_id') : null;
+    const functionalAreaId = params.get('functional_area_id') ? params.get('functional_area_id') : null;
+    const uid = params.get('uid') ? params.get('uid') : null;
+    
     return (
       <div>
         <div style={{ float: "left" }}>
@@ -129,7 +132,13 @@ class Map extends Component {
                   <RequestValidation />
                   <span className={nMap && nMap.entities.mapObj[mapId].sanity ? "btn btn-success" : "btn btn-danger"}>{nMap && nMap.entities.mapObj[mapId].sanity ? "Valid" : "Invalid"}</span>
                   &nbsp;
-                  { gsb ? <UploadMapDetailsToGsb solutionId={solutionId} agentType={agentType} /> : "" }
+                  {
+                    gsb 
+                      ? 
+                    <UploadMapDetailsToGsb solutionId={solutionId} agentId={agentId} functionalAreaId={functionalAreaId} uid={uid} /> 
+                      : 
+                    "" 
+                  }
                 </div>
               </div>
             </div>

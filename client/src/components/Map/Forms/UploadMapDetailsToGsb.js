@@ -7,13 +7,13 @@ import "./uploadMaptoGsb.css";
 
 class UploadMapDetailsToGsb extends Component {
     render() {
-        const { dispatch, solutionId, agentType } = this.props;
+        const { dispatch, solutionId, agentId, functionalAreaId, uid } = this.props;
         return (
             <button
                 className="btn btn-outline-secondary mr-1 uploadToGsb"
                 type="button"
                 onClick={() =>
-                    dispatch(requestMapUploadToGsb(solutionId, agentType))
+                    dispatch(requestMapUploadToGsb(solutionId, agentId, functionalAreaId, uid))
                 }
             >
                 Save and Close

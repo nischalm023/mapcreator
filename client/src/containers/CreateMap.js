@@ -129,9 +129,10 @@ class CreateMap extends Component {
     const { history } = this.props;
     const params = new URLSearchParams(window.location.search);
     let gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
-    let gsbSolutionId = params.get('gsbSolutionId');
-    let gsbAgentType = params.get('gsbAgentType');
-    let gsbFunctionalArea = params.get('gsbFunctionalArea');
+    let gsbSolutionId = params.get('gsb_solution_id');
+    let gsbAgentId = params.get('gsb_agent_id');
+    let gsbFunctionalAreaId = params.get('functional_area_id');
+    let uid = params.get('uid');
     return (
       <div className="container">
         <div className="row">
@@ -149,7 +150,7 @@ class CreateMap extends Component {
               onServerError={error => this.setState({ error })}
               onSuccess={id => {
                 if(gsb){
-                  return history.push(`/map/${id}?gsb=true&gsbSolutionId=${gsbSolutionId}&gsbAgentType=${gsbAgentType}`)
+                  return history.push(`/map/${id}?gsb=true&gsb_solution_id=${gsbSolutionId}&gsb_agent_id=${gsbAgentId}&functional_area_id=${gsbFunctionalAreaId}&uid=${uid}`)
                 } else {
                   return history.push(`/map/${id}`)
                 }

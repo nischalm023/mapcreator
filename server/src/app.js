@@ -150,14 +150,12 @@ app.post('/api/uploadMapDetailsToGsb', upload.array('files'), async (req, res) =
     formData.append("files", file.buffer, file.originalname);
   });
   try {
-    let gsbApi = UPLOAD_MAP_TO_GSB_API;
-    const response = await fetch(gsbApi, {
+    const response = await fetch(UPLOAD_MAP_TO_GSB_API, {
       method: 'POST',
       body: formData
     });
-    console.log(response.status)
     if (response.status === 200) {
-      return res.json({ message: 'Data and files sent to remote server successfully' });
+      return res.json({ message: 'Successfully uploaded map details and files to GSB' });
     } else {
       return res.status(500).json({ message: 'Failed to send'})
     }
