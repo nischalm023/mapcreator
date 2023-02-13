@@ -105,13 +105,16 @@ const Form = withFormik({
       barcode_distances
     );
     const { onServerError, onSuccess } = props;
+    const params = new URLSearchParams(window.location.search);
+    let gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
+    let uid = params.get('uid');
     // API call to save Map created in DB
-    createMap(map, name)
+    createMap(map, name, gsb, uid, 'manual')
       .then(handleErrors)
       .then(res => res.json())
       .then(id => {
         setSubmitting(false);
-        onSuccess(id);
+        onSuccess(id);    // render the map created on UI
       })
       .catch(error => {
         setSubmitting(false);

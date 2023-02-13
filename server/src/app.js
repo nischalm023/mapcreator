@@ -5,7 +5,7 @@ import wrap from "express-async-handler";
 import getRacksJson from "server/scripts/make-racks-json";
 import sequelize, { Op } from "sequelize";
 import { requestValidation } from "./verifier-apis";
-import { UPLOAD_MAP_TO_GSB_API } from "./gsb-apis";
+import { UPLOAD_MAP_TO_GSB_API, SUBMIT_BTN_API_HIT_TO_GSB } from "./gsb-apis";
 import moment from "moment";
 // HACK: adding cors to fetch data from storybook. should remove this later.
 import cors from "cors";
@@ -28,7 +28,8 @@ app.post(
     // expect internal representation json here.
     // should be correct but validating anyway
     var validate = getLoadedAjv().getSchema("map");
-    const { map, name } = req.body;
+    const { map, name, gsb, uid, source } = req.body;
+    console.log("Create API hit made via. GSB application", gsb);
     if (!validate(map)) {
       throw new Error(JSON.stringify(validate.errors));
     }
@@ -37,6 +38,21 @@ app.post(
     }
     // store the map created in db
     var created = await Map.create({ map:map, name:name,BaseMap:map});
+    if (gsb) {
+      // notifying GSB that Submit button has been clicked on Map Creator
+      const response = await fetch(SUBMIT_BTN_API_HIT_TO_GSB, {
+        method: "POST",
+        body: JSON.stringify({
+          "map_tool_id": created.id,
+          "uid": uid, 
+          "title": name, 
+          "source": source
+        })}
+      );
+      if (response.status !== 200){
+        throw new Error("GSB call upon click of Submit button failed");
+      }
+    }
     // send only id
     res.json(created.id);
   })
