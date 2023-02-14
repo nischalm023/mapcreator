@@ -182,6 +182,25 @@ app.post('/api/uploadMapDetailsToGsb', upload.array('files'), async (req, res) =
     }
   });
 
+app.post('/api/cloneMap', async (req, res) => {
+  try {
+    let data = req.body;
+    let mapId = data.map_id
+    // get the requested map from DB
+    var map = await Map.findByPk(mapId);
+    if (!map){
+      return res.status(500).json({ message: `Could not find map for id ${mapId}`})
+    } 
+    // ? create a clone for map having id -> `mapId`
+    let mapJson = map.toJSON();
+    var created = await Map.create({ map:mapJson.map, name:`${mapJson.name}_clone`, BaseMap:mapJson.map});
+    return res.json({"cloned_map_id": created.id});
+  }
+  catch (err) {
+      return res.status(500).json({ message: 'Failed to clone map' });
+    }
+  });
+
 // Request validation of a Map
 app.post(
   "/api/requestValidation",
