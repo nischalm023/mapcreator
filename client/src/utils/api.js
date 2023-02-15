@@ -11,7 +11,7 @@ const updateMap = (mapId, map) =>
       map,
     }),
   });
-const createMap = (denormalizedMap, name, gsb, uid, source) =>
+const createMap = (denormalizedMap, name, gsb, uid, source, solution_id, agent_id, fa_id) =>
   fetch(`${BASENAME}/api/createMap`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -21,6 +21,9 @@ const createMap = (denormalizedMap, name, gsb, uid, source) =>
       gsb: gsb,
       uid: uid,
       source: source,
+      solution_id: solution_id,
+      agent_id: agent_id,
+      fa_id: fa_id,
     }),
   });
 

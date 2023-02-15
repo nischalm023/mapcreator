@@ -28,7 +28,7 @@ app.post(
     // expect internal representation json here.
     // should be correct but validating anyway
     var validate = getLoadedAjv().getSchema("map");
-    const { map, name, gsb, uid, source } = req.body;
+    const { map, name, gsb, uid, source, solution_id, agent_id, fa_id } = req.body;
     console.log("Create API hit made via. GSB application", gsb);
     if (!validate(map)) {
       throw new Error(JSON.stringify(validate.errors));
@@ -39,8 +39,17 @@ app.post(
     // store the map created in db
     var created = await Map.create({ map:map, name:name,BaseMap:map});
     if (gsb) {
+      String.prototype.format = function () {
+        var i = 0, args = arguments;
+        return this.replace(/{}/g, function () {
+          return typeof args[i] != 'undefined' ? args[i++] : '';
+        });
+      };
+
+      let api = SUBMIT_BTN_API_HIT_TO_GSB.format(solution_id, fa_id, agent_id);
+      console.log("GSB Submit API", api);
       // notifying GSB that Submit button has been clicked on Map Creator
-      const response = await fetch(SUBMIT_BTN_API_HIT_TO_GSB, {
+      const response = await fetch(api, {
         method: "POST",
         body: JSON.stringify({
           "map_tool_id": created.id,
@@ -166,7 +175,16 @@ app.post('/api/uploadMapDetailsToGsb', upload.array('files'), async (req, res) =
     formData.append("files", file.buffer, file.originalname);
   });
   try {
-    const response = await fetch(UPLOAD_MAP_TO_GSB_API, {
+    String.prototype.format = function () {
+      var i = 0, args = arguments;
+      return this.replace(/{}/g, function () {
+        return typeof args[i] != 'undefined' ? args[i++] : '';
+      });
+    };
+
+    let api = UPLOAD_MAP_TO_GSB_API.format(data.gsb_solution_id, data.functional_area_id, data.gsb_agent_id);
+    console.log("GSB Save and Close API", api);
+    const response = await fetch(api, {
       method: 'POST',
       body: formData
     });

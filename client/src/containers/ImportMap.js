@@ -43,7 +43,7 @@ class ImportMap extends Component {
     let gsbAgentId = params.get('gsb_agent_id');
     let gsbFunctionalAreaId = params.get('functional_area_id');
     let uid = params.get('uid');
-    createMap(imported, name, gsb, uid, 'import')
+    createMap(imported, name, gsb, uid, 'import', gsbSolutionId, gsbAgentId, gsbFunctionalAreaId)
       .then(handleErrors)
       .then(res => res.json())
       .then(id => {

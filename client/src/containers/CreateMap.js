@@ -107,9 +107,12 @@ const Form = withFormik({
     const { onServerError, onSuccess } = props;
     const params = new URLSearchParams(window.location.search);
     let gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
+    let gsbSolutionId = params.get('gsb_solution_id');
+    let gsbAgentId = params.get('gsb_agent_id');
+    let gsbFunctionalAreaId = params.get('functional_area_id');
     let uid = params.get('uid');
     // API call to save Map created in DB
-    createMap(map, name, gsb, uid, 'manual')
+    createMap(map, name, gsb, uid, 'manual', gsbSolutionId, gsbAgentId, gsbFunctionalAreaId)
       .then(handleErrors)
       .then(res => res.json())
       .then(id => {

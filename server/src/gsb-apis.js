@@ -1,2 +1,2 @@
-export const UPLOAD_MAP_TO_GSB_API = 'http://mockapi.free.beeceptor.com/postapi'
-export const SUBMIT_BTN_API_HIT_TO_GSB = 'http://mockapi.free.beeceptor.com/postapi'
+export const UPLOAD_MAP_TO_GSB_API = 'http://gsb-core:8000/gsb-core/api/v1/solutions/{}/design/functional-areas/{}/agents/{}/maps/save_map_details/'
+export const SUBMIT_BTN_API_HIT_TO_GSB = 'http://gsb-core:8000/gsb-core/api/v1/solutions/{}/design/functional-areas/{}/agents/{}/maps/update_map/'
