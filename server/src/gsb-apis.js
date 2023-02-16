@@ -1,2 +1,4 @@
-export const UPLOAD_MAP_TO_GSB_API = 'http://gsb-core:8000/gsb-core/api/v1/solutions/{}/design/functional-areas/{}/agents/{}/maps/save_map_details/'
-export const SUBMIT_BTN_API_HIT_TO_GSB = 'http://gsb-core:8000/gsb-core/api/v1/solutions/{}/design/functional-areas/{}/agents/{}/maps/update_map/'
+var base_url = process.env.GSB_BASE_URL || "http://gsb-core:8000/gsb-core/api/v1/";
+
+export const UPLOAD_MAP_TO_GSB_API = `${base_url}solutions/{}/design/functional-areas/{}/agents/{}/maps/save_map_details/`
+export const SUBMIT_BTN_API_HIT_TO_GSB = `${base_url}solutions/{}/design/functional-areas/{}/agents/{}/maps/update_map/`
