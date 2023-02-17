@@ -676,7 +676,7 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
         }
       }
   });
-  data.append('map_id', id);
+  data.append('map_tool_id', id);
   data.append('gsb_solution_id', gsbSolutionId);
   data.append('gsb_agent_id', gsbAgentId);
   data.append('functional_area_id', gsbFunctionalAreaId);

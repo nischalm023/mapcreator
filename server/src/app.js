@@ -51,6 +51,7 @@ app.post(
       // notifying GSB that Submit button has been clicked on Map Creator
       const response = await fetch(api, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           "map_tool_id": created.id,
           "uid": uid, 
@@ -168,21 +169,30 @@ app.post('/api/uploadMapDetailsToGsb', upload.array('files'), async (req, res) =
     return res.status(400).json({ message: 'No files uploaded' });
   }
 
-  let data = req.body;
+  String.prototype.format = function () {
+    var i = 0, args = arguments;
+    return this.replace(/{}/g, function () {
+      return typeof args[i] != 'undefined' ? args[i++] : '';
+    });
+  };
   let formData = new FormData();
-  formData.append("data", JSON.stringify(data));
-  req.files.forEach((file) => {
-    formData.append("files", file.buffer, file.originalname);
+  let data = req.body;
+  let api = UPLOAD_MAP_TO_GSB_API.format(data.gsb_solution_id, data.functional_area_id, data.gsb_agent_id);
+  let gsbKeyList = ["map_tool_id","gsb_solution_id","gsb_agent_id","functional_area_id","uid"];
+  gsbKeyList.forEach((gsbKey) => {
+    formData.append(gsbKey, data[gsbKey]);
+    delete data[gsbKey]
   });
-  try {
-    String.prototype.format = function () {
-      var i = 0, args = arguments;
-      return this.replace(/{}/g, function () {
-        return typeof args[i] != 'undefined' ? args[i++] : '';
-      });
-    };
 
-    let api = UPLOAD_MAP_TO_GSB_API.format(data.gsb_solution_id, data.functional_area_id, data.gsb_agent_id);
+  formData.append("map_summary_details", JSON.stringify(data));
+  var fileIndex = 0;
+  req.files.forEach((file) => {
+    formData.append(`files[${fileIndex}]file`, file.buffer, file.originalname);
+    formData.append(`files[${fileIndex}]file_type`, file.originalname.replace(".json",""));
+    fileIndex++;
+  });
+  
+  try {    
     console.log("GSB Save and Close API", api);
     const response = await fetch(api, {
       method: 'POST',
