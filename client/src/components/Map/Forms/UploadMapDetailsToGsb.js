@@ -7,7 +7,7 @@ import "./uploadMaptoGsb.css";
 
 class UploadMapDetailsToGsb extends Component {
     render() {
-        const { dispatch, solutionId, agentId, functionalAreaId, uid } = this.props;
+        const { dispatch, solutionId, agentId, functionalAreaId, uid, mapId } = this.props;
         return (
             <button
                 className="btn btn-outline-secondary mr-1 uploadToGsb"
@@ -15,6 +15,7 @@ class UploadMapDetailsToGsb extends Component {
                 onClick={() =>
                     dispatch(requestMapUploadToGsb(solutionId, agentId, functionalAreaId, uid))
                 }
+                disabled={localStorage.getItem(`map_${mapId}_sol_${solutionId}`, false)}
             >
                 Save and Close
             </button>

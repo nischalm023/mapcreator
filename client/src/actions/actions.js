@@ -693,7 +693,12 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
   return requestMapUploadToGsbApi(data)
     .then(handleErrors)
     .then((res) => res.text())
-    .then((res) => dispatch(setSuccessMessage(res)))
+    .then(
+      (res) => {
+        localStorage.setItem(`map_${id}_sol_${gsbSolutionId}`, true)
+        return dispatch(setSuccessMessage(res))
+      }
+    )
     .catch((error) => dispatch(setErrorMessage(error)));
 };
 
