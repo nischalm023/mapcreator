@@ -646,6 +646,8 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
   let { normalizedMap } = state;
   let withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   setSectorsBarcodeMapping(dispatch, getState);
+  const mapObj = denormalizeMap(withWorldCoordinate);
+  // NOTE: exportedJson is `mapObj.map`
   const exportedJson = exportMap(withWorldCoordinate, false);
   let chargerDict = getParticularEntity(state, { entityName: "charger" });
   let chargers = Object.entries(chargerDict).map(([, val]) => val);
@@ -688,6 +690,13 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
   data.append('total_sectors', Object.keys(sectorToColorMap).length);
   data.append('total_storables', storables);
   data.append('total_barcodes', Object.keys(barcodes).length);
+
+  updateMap(id, mapObj.map)
+    .then(handleErrors)
+    .then((res) => res.json())
+    .then(dispatch(setSuccessMessage("Successfully saved map.")))
+    .then(() => setSectorsMxUPreferences(getState))
+    .catch((error) => console.warn(error));
 
   // Map JSONs and Summary details upload request on Map Validator
   return requestMapUploadToGsbApi(data)
