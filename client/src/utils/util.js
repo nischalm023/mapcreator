@@ -19,10 +19,8 @@ function stringify_number(input_number) {
     return "00".concat(input_number.toString());
   } else if (input_number < 100) {
     return "0".concat(input_number.toString());
-  } else if (input_number < 1000) {
-    return input_number.toString();
   } else {
-    return undefined;
+    return input_number.toString();
   }
 }
 

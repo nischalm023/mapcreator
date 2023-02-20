@@ -3,6 +3,7 @@ const BASENAME_AUTOCAD = process.env.REACT_APP_BASENAME_AUTOCAD || "";
 // const BASENAME = "https://mapcreator.labs.greyorange.com" || "";
 
 const getMap = (mapId) => fetch(`${BASENAME}/api/map/${mapId}`);
+
 const updateMap = (mapId, map) =>
   fetch(`${BASENAME}/api/map/${mapId}`, {
     method: "POST",
@@ -30,11 +31,18 @@ const createMap = (denormalizedMap, name, gsb, uid, source, solution_id, agent_i
 const runHaiMapConversionScriptToMap = (autocad) => {
       let form = new FormData();
       form.append("arrFile", autocad)
-      return  fetch(`${BASENAME_AUTOCAD}/data`, {
+      return  fetch("http://127.0.0.1:5000/data", {
           method: 'POST',
           body: form
           }).then((response) => response.json()).then(data => {return data;});
     };
+
+const stitchingTtpRtpMapApi = (stitch_data) => {
+    return  fetch("http://127.0.0.1:5000/data", {
+        method: 'POST',
+        body: stitch_data
+        }).then((response) => response.json()).then(data => {return data;});
+  };
 
 const deleteMap = (mapId) =>
   fetch(`${BASENAME}/api/deleteMap/${mapId}`, {
@@ -71,5 +79,6 @@ export {
   getMaps,
   getAllMaps,
   getSampleRacksJson,
-  runHaiMapConversionScriptToMap
+  runHaiMapConversionScriptToMap,
+  stitchingTtpRtpMapApi
 };

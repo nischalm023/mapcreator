@@ -17,7 +17,7 @@
     "type": "string",
     "pattern": "^\\d*,\\d*$"
   },
-  "barcodeString": { "type": "string", "pattern": "^\\d\\d\\d\\.\\d\\d\\d$" },
+  "barcodeString": { "type": "string" },
   "direction": { "type": "integer", "enum": [0, 1, 2, 3] },
   "barcodeWithoutCoordinate": {
     "title": "Barcode without coordinate schema",
