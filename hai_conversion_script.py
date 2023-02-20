@@ -487,7 +487,7 @@ class ValidationAutocad:
 		dataframe_col_headers = list(df.columns.values)
 		diff_list = list(set(column_name) - set(dataframe_col_headers))
 		if diff_list:
-			return False,f"This column name {diff_list} is not mapped"
+			return False,f"\n* This column name {diff_list} is not mapped"
 		return True,''
 	
 	def validate_pps_type(self,df):
@@ -496,7 +496,7 @@ class ValidationAutocad:
 			get_pps_type = sorted(df['PPS_TYPE'].str.lower().dropna().unique())
 			pps_type_diff = list(filter(lambda a: a not in pps_type_mapping_list, get_pps_type))
 			if pps_type_diff:
-				return False,f"Map creator not support {pps_type_diff} pps_type"
+				return False,f"\n* Map creator not support {pps_type_diff} pps_type"
 			return True,""
 		else:
 			return True,""
@@ -505,7 +505,7 @@ class ValidationAutocad:
 		duplicateRowsDF = df[df.duplicated(['Name', 'Position X', 'Position Y'])]
 		duplicate_list = duplicateRowsDF[['Name', 'Position X', 'Position Y']].values.tolist()
 		if duplicate_list:
-			return False,f"Duplicate Barcode exist --> {duplicate_list}"
+			return False,f"\n* Duplicate Barcode exist --> {duplicate_list}"
 		return True,''
 
 	def validate_entity(self,df):
@@ -517,14 +517,14 @@ class ValidationAutocad:
 		duplicate_df_list = duplicateRowsDF[['Position X', 'Position Y']].values.tolist()
 		entity_type_diff = list(filter(lambda a: a not in duplicate_df_list, entity_df_list))
 		if entity_type_diff:
-			return False,f"Following Entity should have barcode associated --> {entity_type_diff}"
+			return False,f"\n* Following Entity should have barcode associated --> {entity_type_diff}"
 		return True,''
 
 	def validate_floor_exist(self,df):
 		floor_empty_df = df[df['FLOOR'].isna()]
 		floor_empty_df = floor_empty_df[['Name','Position X', 'Position Y','FLOOR']].values.tolist()
 		if floor_empty_df:
-			return False,f"Please mention floor_id on barcode --> ->{floor_empty_df}"
+			return False,f"\n* Please mention floor_id on barcode --> ->{floor_empty_df}"
 		return True,''
 
 	def validate_charger_entry_point_location(self,df):
@@ -535,7 +535,7 @@ class ValidationAutocad:
 			charger_list = charger_df.CHARGER_ENTRY_POINT.apply(ast.literal_eval).tolist()
 			diff_list = list(filter(lambda a: a not in barcode_list, charger_list))
 			if diff_list:
-				return False,f"Following Charger Entry point does not exist --> {diff_list}"
+				return False,f"\n* Following Charger Entry point does not exist --> {diff_list}"
 			return True,''
 		else:
 			return True,''
@@ -545,7 +545,7 @@ class ValidationAutocad:
 			duplicatePpsIdRowsDF = df[df.duplicated(['PPS_STATION_ID']) & ~df['PPS_STATION_ID'].isna()]
 			duplicate_pps_list = duplicatePpsIdRowsDF[['PPS_STATION_ID']].values.tolist()
 			if duplicate_pps_list:
-				return False,f"Duplicate pps id exist --> {duplicate_pps_list}"
+				return False,f"\n* Duplicate pps id exist --> {duplicate_pps_list}"
 			return True,''
 		else:
 			return True,''
@@ -555,7 +555,7 @@ class ValidationAutocad:
 			duplicateElevatorIdRowsDF = df[df.duplicated(['ELEVATOR_ID']) & ~df['ELEVATOR_ID'].isna()]
 			duplicate_elevator_list = duplicateElevatorIdRowsDF[['ELEVATOR_ID']].values.tolist()
 			if duplicate_elevator_list:
-				return False,f"Duplicate elevator id exist --> {duplicate_elevator_list}"
+				return False,f"\n* Duplicate elevator id exist --> {duplicate_elevator_list}"
 			return True,''
 		else:
 			return True,''
@@ -565,7 +565,7 @@ class ValidationAutocad:
 			duplicateChargerIdRowsDF = df[df.duplicated(['CHARGER_ID']) & ~df['CHARGER_ID'].isna()]
 			duplicate_charger_list = duplicateChargerIdRowsDF[['CHARGER_ID']].values.tolist()
 			if duplicate_charger_list:
-				return False,f"Duplicate charger id exist --> {duplicate_charger_list}"
+				return False,f"\n* Duplicate charger id exist --> {duplicate_charger_list}"
 			return True,''
 		else:
 			return True,''
