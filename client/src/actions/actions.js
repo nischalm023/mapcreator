@@ -531,7 +531,6 @@ export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
       : {};
 
   const mapValues = mapObj.map.floors[0].map_values;
-
   for (var coor in mapValues) {
     mapObj.map.floors[0].map_values[coor].path_status = 0;
     mapObj.map.floors[0].map_values[coor].node_status = 0;
@@ -647,7 +646,20 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
   let withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   setSectorsBarcodeMapping(dispatch, getState);
   const mapObj = denormalizeMap(withWorldCoordinate);
-  // NOTE: exportedJson is `mapObj.map`
+  mapObj.sectorMxUPreferences =
+    withWorldCoordinate.entities.map.dummy.sectorMxUPreferences != undefined
+      ? withWorldCoordinate.entities.map.dummy.sectorMxUPreferences
+      : {};
+  const mapValues = mapObj.map.floors[0].map_values;
+  for (var coor in mapValues) {
+    mapObj.map.floors[0].map_values[coor].path_status = 0;
+    mapObj.map.floors[0].map_values[coor].node_status = 0;
+    mapObj.map.floors[0].map_values[coor].excluded = 0;
+    if(mapObj.map.floors[0].map_values[coor].highlight_status==1){
+      mapObj.map.floors[0].map_values[coor].highlight_status = 0
+    }
+  }
+
   const exportedJson = exportMap(withWorldCoordinate, false);
   let chargerDict = getParticularEntity(state, { entityName: "charger" });
   let chargers = Object.entries(chargerDict).map(([, val]) => val);
