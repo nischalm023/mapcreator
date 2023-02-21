@@ -524,24 +524,9 @@ export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
   setSectorsBarcodeMapping(dispatch, getState);
   // denormalize it
   const mapObj = denormalizeMap(withWorldCoordinate);
+  let updatedMapObj = updateMapObj(mapObj, withWorldCoordinate);
 
-  mapObj.sectorMxUPreferences =
-    withWorldCoordinate.entities.map.dummy.sectorMxUPreferences != undefined
-      ? withWorldCoordinate.entities.map.dummy.sectorMxUPreferences
-      : {};
-
-  const mapValues = mapObj.map.floors[0].map_values;
-
-  for (var coor in mapValues) {
-    mapObj.map.floors[0].map_values[coor].path_status = 0;
-    mapObj.map.floors[0].map_values[coor].node_status = 0;
-    mapObj.map.floors[0].map_values[coor].excluded = 0;
-    if(mapObj.map.floors[0].map_values[coor].highlight_status==1){
-      mapObj.map.floors[0].map_values[coor].highlight_status = 0
-    }
-  }
-
-  return updateMap(mapObj.id, mapObj.map)
+  return updateMap(updatedMapObj.id, updatedMapObj.map)
     .then(handleErrors)
     .then((res) => res.json())
     .then((map) => dispatch(newMap(map)))
@@ -646,6 +631,8 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
   let { normalizedMap } = state;
   let withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   setSectorsBarcodeMapping(dispatch, getState);
+  const mapObj = denormalizeMap(withWorldCoordinate);
+  let updatedMapObj = updateMapObj(mapObj, withWorldCoordinate);
   const exportedJson = exportMap(withWorldCoordinate, false);
   let chargerDict = getParticularEntity(state, { entityName: "charger" });
   let chargers = Object.entries(chargerDict).map(([, val]) => val);
@@ -689,11 +676,23 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
   data.append('total_storables', storables);
   data.append('total_barcodes', Object.keys(barcodes).length);
 
+  updateMap(id, updatedMapObj.map)
+    .then(handleErrors)
+    .then((res) => res.json())
+    .then(dispatch(setSuccessMessage("Successfully saved map.")))
+    .then(() => setSectorsMxUPreferences(getState))
+    .catch((error) => console.warn(error));
+
   // Map JSONs and Summary details upload request on Map Validator
   return requestMapUploadToGsbApi(data)
     .then(handleErrors)
     .then((res) => res.text())
-    .then((res) => dispatch(setSuccessMessage(res)))
+    .then(
+      (res) => {
+        localStorage.setItem(`map_${id}_sol_${gsbSolutionId}`, true)
+        return dispatch(setSuccessMessage(res))
+      }
+    )
     .catch((error) => dispatch(setErrorMessage(error)));
 };
 
@@ -899,6 +898,24 @@ const addWorldCoordinateAndDenormalize = (normalizedMap) => {
   var withWorldCoordinate = addWorldCoordinateToMap(normalizedMap);
   return withWorldCoordinate;
 };
+
+const updateMapObj = (mapObj, withWorldCoordinate) => {
+  mapObj.sectorMxUPreferences =
+    withWorldCoordinate.entities.map.dummy.sectorMxUPreferences != undefined
+      ? withWorldCoordinate.entities.map.dummy.sectorMxUPreferences
+      : {};
+
+  const mapValues = mapObj.map.floors[0].map_values;
+  for (var coor in mapValues) {
+    mapObj.map.floors[0].map_values[coor].path_status = 0;
+    mapObj.map.floors[0].map_values[coor].node_status = 0;
+    mapObj.map.floors[0].map_values[coor].excluded = 0;
+    if(mapObj.map.floors[0].map_values[coor].highlight_status==1){
+      mapObj.map.floors[0].map_values[coor].highlight_status = 0
+    }
+  }
+  return mapObj;
+}
 
 // adds the key "world_coordinate" to the normalized map.
 // This is a derived value, so by default is not stored. However

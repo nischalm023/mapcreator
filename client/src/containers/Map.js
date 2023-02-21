@@ -135,7 +135,7 @@ class Map extends Component {
                   {
                     gsb 
                       ? 
-                    <UploadMapDetailsToGsb solutionId={solutionId} agentId={agentId} functionalAreaId={functionalAreaId} uid={uid} /> 
+                    <UploadMapDetailsToGsb solutionId={solutionId} agentId={agentId} functionalAreaId={functionalAreaId} uid={uid} mapId={mapId} /> 
                       : 
                     "" 
                   }
