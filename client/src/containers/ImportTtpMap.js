@@ -6,6 +6,9 @@ import { withRouter } from "react-router-dom";
 import SweetAlertError from "components/SweetAlertError";
 import { fetchMap, saveMap, downloadMap, updateAutocadMap } from "actions/actions";
 import { getMap, stitchingTtpRtpMapApi, createMap} from "utils/api";
+import StitchingDirectionViewTooltip from "components/Map/Sidebar/StitchingDirectionViewTooltip";
+import DistanceStitchingDirectionViewTooltip from "components/Map/Sidebar/DistanceStitchingDirectionViewTooltip";
+
 import _ from "lodash";
 
 class ImportMap extends Component {
@@ -21,6 +24,7 @@ class ImportMap extends Component {
     rtp_map:"",
     delta:"",
     ttp_map:"",
+    rtp_file_upload:false
     // gtp_world_cord_point:""
   };
   
@@ -40,7 +44,10 @@ class ImportMap extends Component {
     const fileReader = new FileReader();
     fileReader.readAsText(evt.target.files[0], "UTF-8");
     fileReader.onload = evt => {
-      this.setState({["rtp_map"]: JSON.parse(evt.target.result || '{}')});
+      this.setState({
+        ["rtp_map"]: JSON.parse(evt.target.result || '{}'),
+        "rtp_file_upload":true
+        });
     };
   };
 
@@ -55,7 +62,7 @@ class ImportMap extends Component {
   }
   
   fetchGetApiData = (map_id) => {
-      return getMap(parseInt(map_id))
+      return getMap(parseInt(map_id)).catch((error) => this.setState({ error }));
   }
 
   createMap = (imported) => {
@@ -73,10 +80,15 @@ class ImportMap extends Component {
   onSubmit = async (e) => {
     e.preventDefault()
     if(this.state.map_id!==""){
-      var response = await this.fetchGetApiData(this.state.map_id)
-      var map_data = await response.json()
-      var rtp_map_data = map_data.map.floors[0].map_values
-      this.setState({"rtp_map":rtp_map_data})
+      var response = await this.fetchGetApiData(this.state.map_id);
+      if(response.ok){
+        var map_data = await response.json()
+        var rtp_map_data = map_data.map.floors[0].map_values
+        this.setState({"rtp_map":rtp_map_data})
+      }else{
+        this.setState({ 'error':"Map Id not valid"})
+        return
+      }
     }
     if(this.state.stitching==="0 0" || this.state.stitching==="0 1"){
       this.setState({ 'direction':"0" })
@@ -154,7 +166,7 @@ class ImportMap extends Component {
           </div>
           <div className="form-group row justify-content-between">
             <label className="col-form-label col-sm-3">RTP Map</label>
-              <div className="form-row col-sm-9">
+              <div className="d-flex justify-content-between col-sm-9">
                 <input
                  type={"file"} 
                  disabled={this.state.map_id!==""}
@@ -170,8 +182,8 @@ class ImportMap extends Component {
                   <input
                     type="text"
                     id="ttp_ref_point"
-                    disabled={this.state.rtp_map!==""}
-                    className="form-control col-sm-3 mx-sm-3"
+                    disabled={this.state.rtp_file_upload===true}
+                    className="form-control col-sm-3"
                     value={this.state.map_id}
                     onChange={(e) => this.setState({ map_id: e.target.value })}
                     pattern="\d+"
@@ -181,7 +193,7 @@ class ImportMap extends Component {
           </div>
           <div className="form-group row">
             <label className="col-form-label col-sm-3">
-              RTP World Coordinate Refrence Point
+              RTP Coordinate Refrence Point
             </label>
             <div className="col-sm-9">
               <input
@@ -190,7 +202,7 @@ class ImportMap extends Component {
                 className="form-control"
                 value={this.state.rtp_ref_point}
                 onChange={(e) => this.setState({ rtp_ref_point: e.target.value })}
-                placeholder="Enter Gtp coordinate space separated (eg -> x y)"
+                placeholder="Enter GTP coordinate space separated (eg -> x y)"
                 pattern="-?\d+\s-?\d+"
                 required
               />
@@ -207,7 +219,7 @@ class ImportMap extends Component {
                 className="form-control"
                 value={this.state.ttp_ref_point}
                 onChange={(e) => this.setState({ ttp_ref_point: e.target.value })}
-                placeholder="Enter ttp point reference space separated (eg -> x y)"
+                placeholder="Enter TTP point reference space separated (eg -> x y)"
                 pattern="-?\d+\s-?\d+"
                 required
               />
@@ -217,7 +229,8 @@ class ImportMap extends Component {
             <label className="col-form-label col-sm-3">
               Distance Between RTP And TTP Refrence Point
             </label>
-            <div className="col-sm-9">
+            <div className="d-flex align-items-center col-sm-9">
+              <DistanceStitchingDirectionViewTooltip />
               <input
                 type="text"
                 id="delta"
@@ -228,21 +241,34 @@ class ImportMap extends Component {
                 pattern="-?\d+\s-?\d+"
                 required
               />
+              <i
+                className="fa fa-question-circle"
+                style={{ marginLeft: "10px", color: "darkgrey" }}
+                data-tip
+                data-for="distance-direction-view-tooltip"
+                />
             </div>
           </div>
-          <div className="form-group row">
-            <label className="col-form-label col-sm-3">
-              Stitching X and Y direction
-            </label>
-            <div className="col-sm-9">
-              <select onChange={(e) => this.setState({ stitching: e.target.value })} className="form-control">
-                <option value="0 0">North/West</option>
-                <option value="0 1">North/East</option>
-                <option value="1 0">South/West</option>
-                <option value="1 1">South/East</option>
-              </select>
+            <div className="form-group row">
+              <label className="col-form-label col-sm-3">
+                Stitching X and Y direction
+              </label>
+              <div className="d-flex align-items-center col-sm-9">
+                <StitchingDirectionViewTooltip />
+                <select onChange={(e) => this.setState({ stitching: e.target.value })} className="form-control">
+                  <option value="0 0">North/West</option>
+                  <option value="0 1">North/East</option>
+                  <option value="1 0">South/West</option>
+                  <option value="1 1">South/East</option>
+                </select>
+                <i
+                className="fa fa-question-circle"
+                style={{ marginLeft: "10px", color: "darkgrey" }}
+                data-tip
+                data-for="stitching-direction-view-tooltip"
+                />
+              </div>
             </div>
-          </div>
           <div className="form-group row">
             <div className="col-sm-10">
               <button type="submit" className="btn btn-primary">

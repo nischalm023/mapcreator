@@ -10,6 +10,7 @@ import Map from "./containers/Map";
 import ImportMap from "./containers/ImportMap";
 import CreateMap from "./containers/CreateMap";
 import ImportAutocadMap from "./containers/ImportAutocadMap";
+import ImportTtpMap from "./containers/ImportTtpMap";
 
 class App extends Component {
   render() {
@@ -23,6 +24,8 @@ class App extends Component {
           <Route path="/existing" component={ImportMap} />
           <Route path="/new" component={CreateMap} />
           <Route path="/autocad_import" component={ImportAutocadMap} />
+          <Route path="/stitch_ttp_rtp_map" component={ImportTtpMap} />
+
         </div>
       </Router>
     );

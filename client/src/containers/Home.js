@@ -39,7 +39,7 @@ class Home extends Component {
           </LinkContainer>
           <LinkContainer to="/stitch_ttp_rtp_map">
             <a className="list-group-item list-group-item-action">
-              Create/Import TTP RTP map
+              Create/Import TTP+RTP map
             </a>
           </LinkContainer>
           <LinkContainer to="/version">
