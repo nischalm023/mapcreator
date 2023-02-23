@@ -7,6 +7,7 @@ CORS(app)
 import json
 import re
 import ast
+import copy
 from collections import defaultdict
 
 # mapped rotation
@@ -717,6 +718,260 @@ def my_link():
 		return {"content":"Error in parsing autocad file --> Elevator Json","status":404}
 
 	return {"content":{'mapJson':data , 'odsExcludedJson':ods_json , 'ppsJson':pps_json, 'zoneJson': zone_json, 'chargerJson':charger_json, 'elevatorJson':elevator_json},"status":200}
+
+
+class StitchTtpRtpMap:
+	""" In this class TTP +RTP map stitches
+# [x,y] => gtp point location
+
+# Possible stitch directions for:
+
+# [0,0] => North (0) / West (3)
+
+# [0,1] => North (0) / East (1)
+
+# [1,0] => South (2) / West (3)
+
+# [1,1] => South (2) / East (1)
+
+#     Top Left   [0,0]  ⬜ ⬜ ⬜ ⬜ ⬜ ⬜ [0,1] Top right 
+#                       ⬜ ⬜ ⬜ ⬜ ⬜ ⬜
+#                       ⬜ ⬜ ⬜ ⬜ ⬜ ⬜
+#                       ⬜ ⬜ ⬜ ⬜ ⬜ ⬜
+#                       ⬜ ⬜ ⬜ ⬜ ⬜ ⬜
+#     Bothom Left [1,0] ⬜ ⬜ ⬜ ⬜ ⬜ ⬜ [1,1] Bottom right
+
+# (GTP MAP)
+#                                 + y (0)
+#                                 |
+#                                 | dy
+#                                 |
+#                         dx      |
+#     (TTP MAP) (1) - x---------- O --------- + x (0) 
+#                                 |
+#                                 |
+#                                 |
+#                                 |
+#                                 -y (1)
+# """
+	def getXYpos(self,code):
+	  pos = code.split(":")
+	  return [int(pos[1]), int(pos[2])]
+
+	def generate_barcode(self,coordinate):
+		x,y = coordinate
+		return str(y)+"."+str(x)
+
+	def getNeighbours(self,code, position, adjacentEdge):
+		x = int(position['x'])
+		y = int(position['y'])
+		adjacentedges = {'east': None, 'north': None, 'south': None, 'west': None}
+		neighbours = [[0,0,0],[0,0,0],[0,0,0],[0,0,0]]
+		adjacencyList = [None, None, None, None]
+		sizeInfo = [750,750,750,750]
+
+		for edge in adjacentEdge:
+			targetpoint = edge['targetPointCode']
+			if targetpoint == code:
+				continue
+			ex, ey = self.getXYpos(targetpoint)
+			if y == ey :
+				if ex > x:
+					adjacentedges['east'] = [ex, ey, targetpoint]
+					neighbours[1] = [1,1,1]
+					adjacencyList[1] = [ex, ey]
+					sizeInfo[1] = abs(x-ex)
+				else:
+					adjacentedges['west'] = [ex, ey, targetpoint]
+					neighbours[3] = [1,1,1]
+					adjacencyList[3] = [ex, ey]
+					sizeInfo[3] = abs(x-ex)
+			else:
+				if ey > y:
+					adjacentedges['north'] = [ex, ey, targetpoint]
+					neighbours[0] = [1,1,1]
+					adjacencyList[0] = [ex, ey]
+					sizeInfo[0] = abs(y-ey)
+				else:
+					adjacentedges['south'] = [ex, ey, targetpoint]
+					neighbours[2] = [1,1,1]
+					adjacencyList[2] = [ex, ey]
+					sizeInfo[2] = abs(y-ey)
+
+		barcode = self.generate_barcode([x,y])
+		gridInfo[code] =  {"store_status": 0, "zone": "ttp_zone", "sector": "undefined", "barcode": barcode, "botid":None, 'size_info': sizeInfo,
+						 "neighbours": neighbours, "blocked": False, 'position': position, 'adjacentedges': adjacentedges, 'coordinate':str([x,y]),
+						'adjacency': adjacencyList, 'block_reasons': None, 'ttp_location' : True, 'grid_attribute' : 'ttp_location' }
+
+	def generate_code(self,coor):
+		x, y = coor
+		point = 'POINT:'+str(x)+':'+str(y)
+		return point
+
+	def calculate_world_coor(self,current, origin, world_coor):
+		x , y = current 
+		ox, oy = origin 
+		wx, wy = world_coor  #world coordinate of origin
+		if y == oy :
+			if ox < x :
+				wx += abs(x - ox)
+			elif ox > x :
+				wx -= abs(x - ox)
+		elif x == ox :
+			if oy < y :
+				wy -= abs(y - oy)
+			elif oy > y :
+				wy += abs(y - oy)
+		
+		return [wx, wy]
+
+	def create_adjacency_and_world_coordinates_for_hai_dfs(self,point, origin, world_coor, gridInfo, visited, visited_points):
+		if point == None:
+		  return 
+		
+		x, y, code = point
+		visited_points.add(code)
+		if code in visited:
+			return 
+
+		visited.add(code)
+		world_coor = self.calculate_world_coor([x,y], origin, world_coor)
+		gridInfo[code].update(world_coordinate = world_coor)
+		temp_data = copy.deepcopy(gridInfo[code])
+		temp_data['world_coordinate'] = str(world_coor)
+		GtpMap.append(temp_data)
+
+		neigbhours = gridInfo[code]["adjacentedges"]
+		for n_point in neigbhours:
+			self.create_adjacency_and_world_coordinates_for_hai_dfs(neigbhours[n_point], [x,y], world_coor, gridInfo, visited, visited_points)
+
+	def stitch_map(self,gtp_coor, gtp_world_coor, direction, ttp_point_ref, delta, x_direction, y_direction):
+	  x, y = ttp_point_ref
+	  stitch_point_wc = self.stitching_coodinates(gtp_world_coor, delta, x_direction, y_direction)
+	  code = self.generate_code(ttp_point_ref)
+	  gridInfo[code]["neighbours"][direction] = [1,0,0]
+	  gridInfo[code]["adjacency"][direction] = gtp_coor
+	  self.create_adjacency_and_world_coordinates_for_hai_dfs([x, y, self.generate_code(ttp_point_ref)], ttp_point_ref, stitch_point_wc, gridInfo, set(), visited_points)
+
+	def stitching_coodinates(self,gtp_world_coor, delta, x_direction, y_direction):
+		dx, dy = delta
+		wx, wy = gtp_world_coor
+		swx = self.stitch_point_world_coodinate(x_direction, wx, dx)
+		swy = self.stitch_point_world_coodinate(y_direction, wy, dy)
+		return [swx, swy]
+
+	def stitch_point_world_coodinate(self,direction, world_coor, delta):
+		if direction == 0:
+			world_coor += delta
+		elif direction == 1:
+			world_coor -= delta
+		else:
+			print("Direction needs to be either 0 or 1")
+		return world_coor
+
+	def getGtpWorldCordinate(self,GtpMap,gtp_ref_point):
+		gtp_ref_point = '[{}]'.format(','.join(map(str, gtp_ref_point)))
+		gtp_world_coordinate = ""
+		for gtp_data in GtpMap:
+			if gtp_data["coordinate"] == gtp_ref_point:
+				gtp_world_coordinate = gtp_data["world_coordinate"]
+				break
+		return gtp_world_coordinate
+
+	def formatCordinateString(self,GtpMap):
+		for map_value in GtpMap:
+			status = bool(re.fullmatch("\d+\,\d+",map_value["coordinate"]))
+			if status:
+				coord = map_value["coordinate"].split(",")
+				map_value["coordinate"] = '[{},{}]'.format(coord[0],coord[1])
+		return GtpMap 
+
+class ValidateStitchingData:
+	
+	def validate_ttp_ref_point(self,ttp_point_ref):
+		code = StitchTtpRtpMap().generate_code(ttp_point_ref)
+		if code not in gridInfo.keys():
+			return False,f"TTP refrence point not exist in TTP json"
+		return True,''
+
+	def validate_gtp_ref_point(self,gtp_ref_point,GtpMap):
+		gtp_ref_point = '[{}]'.format(','.join(map(str, gtp_ref_point)))
+		gtp_coordinate_exist = False
+		for gtp_data in GtpMap:
+			if gtp_data["coordinate"] == gtp_ref_point:
+				gtp_coordinate_exist = True
+				break
+		if not gtp_coordinate_exist:
+			return False,f"RTP cordinate does not exit in RTP json"
+		else:
+			return True,''
+
+	def validate_ttp_file(self,TtpMap):
+		if len(TtpMap) == 0:
+				return False,f"Uploaded TTP file is empty"
+		else:
+			return True,''
+
+	def validate_rtp_file(self,GtpMap):
+		if len(GtpMap) == 0:
+				return False,f"Uploaded RTP file is empty"
+		else:
+			return True,''
+	
+	def validation(self,GtpMap,TtpMap,gtp_ref_point,ttp_point_ref):
+		try:
+			rtp_file_valitation,error =  self.validate_rtp_file(GtpMap)
+			if not rtp_file_valitation:
+				return error,404
+		except Exception as e:
+			return repr(e),404
+
+		try:
+			ttp_file_valitation,error =  self.validate_ttp_file(TtpMap)
+			if not ttp_file_valitation:
+				return error,404
+		except Exception as e:
+			return repr(e),404
+
+		try:
+			gtp_ref_point_valitation,error =  self.validate_gtp_ref_point(gtp_ref_point,GtpMap)
+			if not gtp_ref_point_valitation:
+				return error,404
+		except Exception as e:
+			return repr(e),404
+
+		try:
+			validate_ttp_ref_point,error =  self.validate_ttp_ref_point(ttp_point_ref)
+			if not validate_ttp_ref_point:
+				return error,404
+		except Exception as e:
+			return repr(e),404
+		return error,''
+
+@app.route('/stitch',methods=['GET', 'POST'])
+def my_link():
+	global gridInfo, GtpMap, visited_points
+	req_data = json.loads(request.data)
+	gridInfo = {}
+	visited_points=set()
+	GtpMap = req_data["gtp_json"]
+	TtpMap = req_data["ttp_json"]
+	Points = req_data["ttp_json"]["point"]
+	Locations = req_data["ttp_json"]["location"]
+	GtpMap = StitchTtpRtpMap().formatCordinateString(GtpMap)
+	visited_points=set()
+	for p in Points:
+	   StitchTtpRtpMap().getNeighbours(p['code'], p['position'], p['adjacentEdge'])
+	gtp_ref_point = [int(x) for x in req_data["gtp_ref_point"].split()]
+	delta = [int(x) for x in req_data["delta"].split()]
+	x_dir, y_dir = [int(x) for x in req_data["stitch_cord"].split()]
+	ttp_world_cordinate = [int(x) for x in req_data["ttp_ref_point"].split()]
+	error,status = ValidateStitchingData().validation(GtpMap,TtpMap,gtp_ref_point,ttp_world_cordinate)
+	if error:
+		return {"content":error,"status":status}
+	gtp_world_coor = StitchTtpRtpMap().getGtpWorldCordinate(GtpMap,gtp_ref_point)
+	StitchTtpRtpMap().stitch_map(gtp_ref_point, json.loads(gtp_world_coor), int(req_data["direction"]),  ttp_world_cordinate, delta, x_dir, y_dir)
+	return {"content":{'mapJson':GtpMap },"status":200}
 
 
 if __name__ == '__main__':

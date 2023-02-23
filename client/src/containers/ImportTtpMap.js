@@ -25,7 +25,6 @@ class ImportMap extends Component {
     delta:"",
     ttp_map:"",
     rtp_file_upload:false
-    // gtp_world_cord_point:""
   };
   
 
@@ -193,7 +192,7 @@ class ImportMap extends Component {
           </div>
           <div className="form-group row">
             <label className="col-form-label col-sm-3">
-              RTP Coordinate Refrence Point
+              RTP Coordinate Reference Point
             </label>
             <div className="col-sm-9">
               <input
@@ -210,7 +209,7 @@ class ImportMap extends Component {
           </div>
           <div className="form-group row">
             <label className="col-form-label col-sm-3">
-              TTP Refrence Point
+              TTP Reference Point
             </label>
             <div className="col-sm-9">
               <input
@@ -227,7 +226,7 @@ class ImportMap extends Component {
           </div>
           <div className="form-group row">
             <label className="col-form-label col-sm-3">
-              Distance Between RTP And TTP Refrence Point
+              Distance Between RTP And TTP Reference Point
             </label>
             <div className="d-flex align-items-center col-sm-9">
               <DistanceStitchingDirectionViewTooltip />
