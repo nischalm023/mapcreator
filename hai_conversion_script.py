@@ -643,7 +643,7 @@ class ValidationAutocad:
 
 
 @app.route('/data',methods=['GET', 'POST'])
-def my_link():
+def my_link_1():
 	req_file = request.files
 	df = pd.read_excel(req_file["arrFile"])
 	error,status = ValidationAutocad().validation(df)
@@ -975,4 +975,4 @@ def my_link():
 
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', port=3000)
+	app.run(host='0.0.0.0', port=5001)

@@ -31,14 +31,14 @@ const createMap = (denormalizedMap, name, gsb, uid, source, solution_id, agent_i
 const runHaiMapConversionScriptToMap = (autocad) => {
       let form = new FormData();
       form.append("arrFile", autocad)
-      return  fetch(`${BASENAME_AUTOCAD}/data`, {
+      return  fetch(`http://${window.location.hostname}:5001/data`, {
           method: 'POST',
           body: form
           }).then((response) => response.json()).then(data => {return data;});
     };
 
 const stitchingTtpRtpMapApi = (stitch_data) => {
-    return  fetch(`${BASENAME_AUTOCAD}/stitch`, {
+    return  fetch(`http://${window.location.hostname}:5001/stitch`, {
         method: 'POST',
         body: stitch_data
         }).then((response) => response.json()).then(data => {return data;});

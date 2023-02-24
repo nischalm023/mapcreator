@@ -18,8 +18,8 @@ ENV PUBLIC_URL ${public_url}
 # basename for testing server (needed for react router to work)
 ARG basename
 ENV REACT_APP_BASENAME ${basename}
-ARG basename_autocad
-ENV REACT_APP_BASENAME_AUTOCAD ${basename_autocad}
+#ARG basename_autocad
+#ENV REACT_APP_BASENAME_AUTOCAD ${basename_autocad}
 # to indicate that redux logger should be kept in the build (eg. for testing instance build)
 ARG keep_redux_logger
 ENV REACT_APP_KEEP_REDUX_LOGGER ${keep_redux_logger}
@@ -32,7 +32,7 @@ USER root
 RUN apk update && apk add bash
 WORKDIR /app
 ENV PORT 3001
-ENV DATABASE_URL postgres://gor:apj0702@db:5432/mapcreator
+ENV DATABASE_URL postgres://postgres:postgres@mapcreator_db:5432/mapcreator
 COPY package.json package-lock.json .babelrc ./
 # need node env development for install since for some reason babel is in dev dependencies...
 ENV NODE_ENV development

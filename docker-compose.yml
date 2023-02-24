@@ -1,22 +1,22 @@
 version: "3"
 
 services:
-  db:
+  mapcreator_db:
     image: postgres:9.6
     volumes:
       - /var/lib/postgresql/mapcreator/data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=apj0702
-      - POSTGRES_USER=gor
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
       - POSTGRES_DB=mapcreator
     stop_signal: SIGINT
-  web:
-    image: us-docker.pkg.dev/greymatter-development/apps/mapcreator:latest
+  mapcreator-app:
+    image: map_creator_app:latest
     depends_on:
-      - db
+      - mapcreator_db
     ports:
       - "5000:3001"
-  autocad:
+  mapcreator-autocad:
     image: map_creator_script:latest
     ports:
-      - "3000:3000"
+      - "5001:5001"

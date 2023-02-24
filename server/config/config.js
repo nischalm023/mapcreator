@@ -18,7 +18,7 @@ module.exports = {
   production: {
     url:
       process.env.DATABASE_URL ||
-      "postgres://gor@localhost:5432/mapcreator_react",
+      "postgres://postgres:postgres@mapcreator_db:5432/mapcreator_react",
     logging: false,
     verifier_url: 'http://54.169.12.38:8000'
   }
