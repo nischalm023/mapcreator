@@ -85,13 +85,17 @@ class ImportMap extends Component {
         var rtp_map_data = map_data.map.floors[0].map_values
         this.setState({"rtp_map":rtp_map_data})
       }else{
-        this.setState({ 'error':"Map Id not valid"})
+        this.setState({ 'error':"Map does not exist"})
         return
       }
     }
-    if(this.state.stitching==="0 0" || this.state.stitching==="0 1"){
+    if(this.state.stitching==="0 0"){
       this.setState({ 'direction':"0" })
-    }else{
+    }if(this.state.stitching==="0 1"){
+      this.setState({ 'direction':"1" })
+    }if(this.state.stitching==="1 0"){
+      this.setState({ 'direction':"2" })
+    }if(this.state.stitching==="1 1"){
       this.setState({ 'direction':"3" })
     }
     var gtp_coordinate  = "["+this.state.rtp_ref_point.split(" ").map((val) => parseInt(val))+"]"
@@ -201,7 +205,7 @@ class ImportMap extends Component {
                 className="form-control"
                 value={this.state.rtp_ref_point}
                 onChange={(e) => this.setState({ rtp_ref_point: e.target.value })}
-                placeholder="Enter GTP coordinate space separated (eg -> x y)"
+                placeholder="Enter RTP reference coordinate (eg -> x y)"
                 pattern="-?\d+\s-?\d+"
                 required
               />
@@ -218,7 +222,7 @@ class ImportMap extends Component {
                 className="form-control"
                 value={this.state.ttp_ref_point}
                 onChange={(e) => this.setState({ ttp_ref_point: e.target.value })}
-                placeholder="Enter TTP point reference space separated (eg -> x y)"
+                placeholder=" Enter TTP reference coordinate (eg -> x y)"
                 pattern="-?\d+\s-?\d+"
                 required
               />

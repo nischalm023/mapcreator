@@ -906,15 +906,9 @@ class ValidateStitchingData:
 		else:
 			return True,''
 
-	def validate_ttp_file(self,TtpMap):
-		if len(TtpMap) == 0:
-				return False,f"Uploaded TTP file is empty"
-		else:
-			return True,''
-
 	def validate_rtp_file(self,GtpMap):
 		if len(GtpMap) == 0:
-				return False,f"Uploaded RTP file is empty"
+				return False,f"Uploaded RTP map JSON is empty"
 		else:
 			return True,''
 	
@@ -922,13 +916,6 @@ class ValidateStitchingData:
 		try:
 			rtp_file_valitation,error =  self.validate_rtp_file(GtpMap)
 			if not rtp_file_valitation:
-				return error,404
-		except Exception as e:
-			return repr(e),404
-
-		try:
-			ttp_file_valitation,error =  self.validate_ttp_file(TtpMap)
-			if not ttp_file_valitation:
 				return error,404
 		except Exception as e:
 			return repr(e),404
@@ -956,6 +943,8 @@ def my_link():
 	visited_points=set()
 	GtpMap = req_data["gtp_json"]
 	TtpMap = req_data["ttp_json"]
+	if not TtpMap:
+		return {"content":"Uploaded TTP map JSON is empty","status":"404"}
 	Points = req_data["ttp_json"]["point"]
 	Locations = req_data["ttp_json"]["location"]
 	GtpMap = StitchTtpRtpMap().formatCordinateString(GtpMap)
