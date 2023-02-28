@@ -17,7 +17,6 @@ class ImportMap extends Component {
     map_flag: "",
     error: undefined,
     stitching:"0 0",
-    direction:"0",
     rtp_ref_point:"",
     ttp_ref_point:"",
     map_id:"",
@@ -89,15 +88,6 @@ class ImportMap extends Component {
         return
       }
     }
-    if(this.state.stitching==="0 0"){
-      this.setState({ 'direction':"0" })
-    }if(this.state.stitching==="0 1"){
-      this.setState({ 'direction':"1" })
-    }if(this.state.stitching==="1 0"){
-      this.setState({ 'direction':"2" })
-    }if(this.state.stitching==="1 1"){
-      this.setState({ 'direction':"3" })
-    }
     var gtp_coordinate  = "["+this.state.rtp_ref_point.split(" ").map((val) => parseInt(val))+"]"
 
     var api_data = JSON.stringify({
@@ -107,7 +97,6 @@ class ImportMap extends Component {
         "stitch_cord": this.state.stitching,
         "ttp_ref_point":this.state.ttp_ref_point,
         "gtp_ref_point":this.state.rtp_ref_point,
-        "direction":this.state.direction
         })
     var response = stitchingTtpRtpMapApi(api_data).then(
       response=>{
@@ -259,10 +248,10 @@ class ImportMap extends Component {
               <div className="d-flex align-items-center col-sm-9">
                 <StitchingDirectionViewTooltip />
                 <select onChange={(e) => this.setState({ stitching: e.target.value })} className="form-control">
-                  <option value="0 0">North/West</option>
-                  <option value="0 1">North/East</option>
-                  <option value="1 0">South/West</option>
-                  <option value="1 1">South/East</option>
+                  <option value="0 0">North</option>
+                  <option value="0 1">East</option>
+                  <option value="1 0">South</option>
+                  <option value="1 1">West</option>
                 </select>
                 <i
                 className="fa fa-question-circle"

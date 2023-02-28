@@ -886,6 +886,16 @@ class StitchTtpRtpMap:
 				map_value["coordinate"] = '[{},{}]'.format(coord[0],coord[1])
 		return GtpMap 
 
+	def getStitchDirection(self,stitch_direction):
+		if stitch_direction == '0 0':
+			return 0
+		if stitch_direction == '0 1':
+			return 1
+		if stitch_direction == '1 0':
+			return 2
+		if stitch_direction == '1 1':
+			return 3
+
 class ValidateStitchingData:
 	
 	def validate_ttp_ref_point(self,ttp_point_ref):
@@ -943,6 +953,7 @@ def my_link():
 	visited_points=set()
 	GtpMap = req_data["gtp_json"]
 	TtpMap = req_data["ttp_json"]
+	direction = StitchTtpRtpMap().getStitchDirection(req_data["stitch_cord"])
 	if not TtpMap:
 		return {"content":"Uploaded TTP map JSON is empty","status":"404"}
 	Points = req_data["ttp_json"]["point"]
@@ -959,7 +970,7 @@ def my_link():
 	if error:
 		return {"content":error,"status":status}
 	gtp_world_coor = StitchTtpRtpMap().getGtpWorldCordinate(GtpMap,gtp_ref_point)
-	StitchTtpRtpMap().stitch_map(gtp_ref_point, json.loads(gtp_world_coor), int(req_data["direction"]),  ttp_world_cordinate, delta, x_dir, y_dir)
+	StitchTtpRtpMap().stitch_map(gtp_ref_point, json.loads(gtp_world_coor), direction,  ttp_world_cordinate, delta, x_dir, y_dir)
 	return {"content":{'mapJson':GtpMap },"status":200}
 
 
