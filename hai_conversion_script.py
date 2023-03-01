@@ -896,6 +896,27 @@ class StitchTtpRtpMap:
 		if stitch_direction == '1 1':
 			return 3
 
+	def createStichAdjacency(self,GtpMap,rtp_cordinate,ttp_cordinate,direction,delta):
+		rtp_cord = '[{},{}]'.format(rtp_cordinate[0],rtp_cordinate[1])
+		ttp_cord = '[{},{}]'.format(ttp_cordinate[0],ttp_cordinate[1])
+		for map_value in GtpMap:
+			if map_value["coordinate"] == ttp_cord:
+				if direction == 1 or direction == 3:
+					map_value["size_info"][direction] = delta[0]//2
+				else:
+					map_value["size_info"][direction] = delta[1]//2
+			if map_value["coordinate"] == rtp_cord:
+				if (direction + 2) % 4 == 1 or (direction + 2) % 4 == 3:
+					map_value["size_info"][(direction + 2) % 4] = round(delta[0]/2)
+					if "adjacency" in  map_value.keys():
+						map_value["adjacency"][(direction + 2) % 4] = ttp_cordinate
+				else:
+					map_value["size_info"][(direction + 2) % 4] = round(delta[1]/2)
+					if "adjacency" in  map_value.keys():
+						map_value["adjacency"][(direction + 2) % 4] = ttp_cordinate
+
+		return GtpMap
+
 class ValidateStitchingData:
 	
 	def validate_ttp_ref_point(self,ttp_point_ref):
@@ -946,7 +967,7 @@ class ValidateStitchingData:
 		return error,''
 
 @app.route('/stitch',methods=['GET', 'POST'])
-def my_link():
+def ttp_rtp_map_stitch():
 	global gridInfo, GtpMap, visited_points
 	req_data = json.loads(request.data)
 	gridInfo = {}
@@ -971,6 +992,7 @@ def my_link():
 		return {"content":error,"status":status}
 	gtp_world_coor = StitchTtpRtpMap().getGtpWorldCordinate(GtpMap,gtp_ref_point)
 	StitchTtpRtpMap().stitch_map(gtp_ref_point, json.loads(gtp_world_coor), direction,  ttp_world_cordinate, delta, x_dir, y_dir)
+	GtpMap = StitchTtpRtpMap().createStichAdjacency(GtpMap,gtp_ref_point,ttp_world_cordinate,direction,delta)
 	return {"content":{'mapJson':GtpMap },"status":200}
 
 
