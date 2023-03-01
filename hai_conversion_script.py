@@ -9,6 +9,7 @@ import re
 import ast
 import copy
 from collections import defaultdict
+import math
 
 # mapped rotation
 def get_rotation(rotation):
