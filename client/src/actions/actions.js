@@ -679,7 +679,6 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
   updateMap(id, updatedMapObj.map)
     .then(handleErrors)
     .then((res) => res.json())
-    .then(dispatch(setSuccessMessage("Successfully saved map.")))
     .then(() => setSectorsMxUPreferences(getState))
     .catch((error) => console.warn(error));
 
