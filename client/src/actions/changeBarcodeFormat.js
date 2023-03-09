@@ -1,0 +1,35 @@
+import { setErrorMessage } from "./message";
+
+export const validateBarcodesDistance = (barcodesDict) => {
+  for (var barcode in barcodesDict){
+    var barcodeInfo = barcodesDict[barcode]
+    var world_cordinate = JSON.parse(barcodeInfo["world_coordinate"])
+    if((Math.abs(world_cordinate[0])>100000) || (Math.abs(world_cordinate[1])>100000)){
+      return {
+        error: true,
+        reason: "Distance of barcode should not be greator than 1 km from origin"
+      };
+    }
+  }
+  return { error: false };
+};
+
+
+export const changeBarcodeFormat = barcode_value => (dispatch, getState) => {
+  const state = getState();
+  const { normalizedMap } = state;
+  dispatch({
+    type: "CHANGE-BARCODE-FORMAT-MODE",
+    value: barcode_value
+  });
+  var barcodesDict = normalizedMap.entities.barcode
+  const { error, reason } = validateBarcodesDistance(barcodesDict);
+  if (error) {
+    return dispatch(setErrorMessage(reason));
+  }
+  dispatch({
+    type:"CHANGE-BARCODE-FORMAT-ON-BASIS-OF-MODE",
+    value:{"barcode_value":barcode_value,"barcodesDict":barcodesDict}
+  })
+  return Promise.resolve();
+};

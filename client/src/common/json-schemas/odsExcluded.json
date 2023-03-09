@@ -8,7 +8,7 @@
     "excluded": { "type": "boolean" },
     "ods_tuple": {
       "type": "string",
-      "pattern": "^\\d\\d\\d\\.\\d\\d\\d\\-\\-[0,1,2,3]$"
+      "pattern": ""
     }
   }
 }

@@ -17,13 +17,13 @@ export const directionSchema = {
 export const listOfBarcodesSchema = {
   type: "string",
   title: "Barcodes",
-  pattern: "^\\d\\d\\d\\.\\d\\d\\d( *, *\\d\\d\\d\\.\\d\\d\\d)* *$"
+  pattern: ""
 };
 
 export const barcodeStringSchema = {
   type: "string",
   title: "Barcode",
-  pattern: "^\\d\\d\\d\\.\\d\\d\\d$"
+  pattern: ""
 };
 
 export const neighboursSchema = {
@@ -66,7 +66,7 @@ export const yupBarcodeStringSchema = string()
 
 export const yupEntryExitBarcodesSchema = array().of(
   object().shape({
-    barcode: yupBarcodeStringSchema,
+    // barcode: yupBarcodeStringSchema,
     boom_barrier_id: yupPosIntSchema,
     floor_id: yupPosIntSchema
   })

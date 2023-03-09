@@ -8,11 +8,13 @@ import ppsReducer from "./pps";
 import conveyorReducer from "./conveyor";
 import DownloadConveyorReducer from "./download_conveyor";
 import currentFloorReducer from "./currentFloor";
+import changeBarcodeFormatReducer from "./changeBarcodeFormat";
 import mapReducer from "./map";
 import elevatorReducer from "./elevator";
 import zoneReducer from "./zone";
 import sectorReducer from "./sector";
 import sectorBarcodeMappingReducer from "./sectorBarcodeMapping";
+import mappingBarcodeCoordReducer from "./mappingBarcodeCoordReducer";
 import sectorMxUPreferencesReducer from "./sectorMxUPreferences";
 import charger from "./charger";
 import { successMessageReducer, errorMessageReducer } from "./message";
@@ -40,6 +42,7 @@ export const entitiesReducer = combineReducers({
   sector: sectorReducer,
   sectorBarcodeMapping: sectorBarcodeMappingReducer,
   sectorMxUPreferences: sectorMxUPreferencesReducer,
+  mappingBarcodeCoord:mappingBarcodeCoordReducer,
   // TODO: make reducers for these
   mapObj: m => m || null
 });
@@ -75,6 +78,8 @@ export const mapChangeReducer = (state = dummyState.normalizedMap, action) => {
       var map = action.value.map;
       if(map.sectorBarcodeMapping == undefined) map.sectorBarcodeMapping = [];
       if(map.sectorMxUPreferences == undefined) map.sectorMxUPreferences = {};
+      if(map.mappingBarcodeCoord == undefined) map.mappingBarcodeCoord = {};
+      if(map.mappingBarcodeWorldCoord == undefined) map.mappingBarcodeWorldCoord = {};
       if(map.sectors == undefined) map.sectors = [];
       return normalizeMap(action.value);
   }
@@ -365,6 +370,7 @@ const viewportReducer = (
 export default combineReducers({
   normalizedMap: normalizedMapReducer,
   currentFloor: currentFloorReducer,
+  barcodeFormat:changeBarcodeFormatReducer,
   selection: reduceReducers(selectionReducer, baseSelectionReducer),
   spritesheetLoaded: spritesheetLoadedReducer,
   selectedArea: selectedAreaReducer,

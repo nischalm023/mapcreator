@@ -97,11 +97,12 @@ export const getBarcodeDigitSpritesNames = createSelector(
 );
 
 export const getBarcodeDigitSpritesData = createSelector(
+  getBarcode,
   getBarcodeDigitSpritesNames,
   tileToWorldCoordinate,
   getTileSpriteScale,
   getTileBoundingBox,
-  (digitSpriteNames, { y: centreY }, { xScale, yScale }, boundingBox) => {
+  (barcode,digitSpriteNames, { y: centreY }, { xScale, yScale }, boundingBox) => {
     // Width of barcode sprite
     var barcodeWidth = boundingBox.right - boundingBox.left;
     // vertical distance within which barcode numbers appear
@@ -114,33 +115,47 @@ export const getBarcodeDigitSpritesData = createSelector(
       xScale,
       yScale
     };
-    for (let i = 0; i < 3; i++) {
-      ret[i] = {
-        name: digitSpriteNames[i],
-        x: boundingBox.left + (i * barcodeWidth) / 7,
-        y: boundingBox.top - constants.BARCODE_DIGIT_HEIGHT * yScale,
+    // this support default barcode label calculation
+    if(/^(\d+\.\d+)$/.test(barcode.barcode)){    
+      for (let i = 0; i < 3; i++) {
+        ret[i] = {
+          name: digitSpriteNames[i],
+          x: boundingBox.left + (i * barcodeWidth) / 7,
+          y: boundingBox.top - constants.BARCODE_DIGIT_HEIGHT * yScale,
+          ...scaleData
+        };
+      }
+      // dot sprite
+      ret["3"] = {
+        name: digitSpriteNames[3],
+        x: boundingBox.left-40 + barcodeWidth / 2,
+        y:
+          boundingBox.top -
+          (constants.BARCODE_DIGIT_OFFSET + constants.BARCODE_DIGIT_HEIGHT / 3) *
+            yScale,
         ...scaleData
       };
+      // last 3 sprites
+      for (let i = 4; i < 7; i++) {
+        ret[i] = {
+          name: digitSpriteNames[i],
+          x: boundingBox.right - ((7 - i) * barcodeWidth) / 7,
+          y: boundingBox.top - constants.BARCODE_DIGIT_HEIGHT * yScale,
+          ...scaleData
+        };
+      }
+// this supprt ttp barcode label calculation
+    }else{
+      for (let i = 0; i < 12; i++) {
+        ret[i] = {
+          name: digitSpriteNames[i],
+          x: boundingBox.left + (i * barcodeWidth) / 12,
+          y: boundingBox.top - constants.BARCODE_DIGIT_HEIGHT * yScale,
+          ...scaleData
+        };
+      }
     }
-    // dot sprite
-    ret["3"] = {
-      name: digitSpriteNames[3],
-      x: boundingBox.left + barcodeWidth / 2,
-      y:
-        boundingBox.top -
-        (constants.BARCODE_DIGIT_OFFSET + constants.BARCODE_DIGIT_HEIGHT / 2) *
-          yScale,
-      ...scaleData
-    };
-    // last 3 sprites
-    for (let i = 4; i < 7; i++) {
-      ret[i] = {
-        name: digitSpriteNames[i],
-        x: boundingBox.right - ((7 - i) * barcodeWidth) / 7,
-        y: boundingBox.top - constants.BARCODE_DIGIT_HEIGHT * yScale,
-        ...scaleData
-      };
-    }
+
     return ret;
   }
 );

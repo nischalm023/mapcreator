@@ -9,6 +9,12 @@ import {
   deletePPSQueue,
   deleteElevator,
 } from "./delete-entities";
+import { stringify_number,
+        encode_barcode, 
+        ConvertTTPFormatBarcodeIntoDefaultFormat, 
+        getOffsetValue,
+        calculateGMBarcode
+      } from "utils/util";
 import shiftBarcode from "./shift-barcode";
 import { getNeighbouringBarcodesIncludingDisconnected } from "../../utils/util";
 
@@ -165,6 +171,27 @@ export default (state = {}, action) => {
       return { ...state, ...newBarcodesObj };
     }
 
+    case "CHANGE-BARCODE-FORMAT-ON-BASIS-OF-MODE": {
+      const { barcode_value, barcodesDict } = action.value;
+      var newBarcodeDict = {}
+      if(barcode_value==="default_format"){
+        Object.entries(barcodesDict).forEach(([key, value]) => {
+          var new_barcode = ConvertTTPFormatBarcodeIntoDefaultFormat(key,value)
+          value["barcode"] = new_barcode
+          newBarcodeDict[key] = value
+        })
+        return { ...state, ...newBarcodeDict}
+      }else{
+        var offset_value = getOffsetValue(barcodesDict)
+        for (var barcode in barcodesDict){
+            var barcodeInfo = barcodesDict[barcode]
+            var GM_barcode = calculateGMBarcode(JSON.parse(barcodeInfo["world_coordinate"]),offset_value)
+            barcodeInfo["barcode"] = GM_barcode
+            newBarcodeDict[barcode] = barcodeInfo
+        }
+        return { ...state, ...newBarcodeDict}
+      }
+      }
     case "ASSIGN-ZONE": {
       const { zone_id, mapTiles } = action.value;
       let newState = {};
