@@ -2,7 +2,7 @@
 import React, { Component } from "react";
 import MapViewport from "components/Map/MapViewport";
 import { connect } from "react-redux";
-import { fetchMap, saveMap, downloadMap, updateAutocadMap } from "actions/actions";
+import { fetchMap, saveMap, downloadMap, updateAutocadMap} from "actions/actions";
 import importMap from "common/utils/import-map";
 import { modifyNeighbours } from "actions/barcode";
 import {
@@ -18,6 +18,7 @@ import LeftSidebar from "components/Map/Sidebar/LeftSidebar";
 import RightSidebar from "components/Map/Sidebar/RightSidebar";
 import BarcodeViewPopup from "components/Map/BarcodeViewPopup";
 import ChangeFloorDropdown from "components/Map/Forms/ChangeFloorDropdown";
+import ChangeBarcodeFormat from "components/Map/Forms/ChangeBarcodeFormat";
 import CopyMap from "components/Map/Forms/CopyMap";
 import DeleteMap from "components/Map/Forms/DeleteMap";
 import RequestValidation from "components/Map/Forms/RequestValidation";
@@ -61,7 +62,6 @@ class Map extends Component {
     e.preventDefault();
     // validate the import by converting everything into the map using import function
     let imported;
-    // const {dispatch}
     if(this.state.importMap["autocad"]){
           var response = runHaiMapConversionScriptToMap(this.state.importMap["autocad"]).then(
           response=>{
@@ -227,6 +227,11 @@ class Map extends Component {
               </div>
               <div className="col float-right">
                 <ChangeFloorDropdown />
+              </div>
+              <div>
+              <div className="col float-right">
+                <ChangeBarcodeFormat />
+              </div>
               </div>
             </div>
           </div>

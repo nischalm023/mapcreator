@@ -32,8 +32,9 @@ export const DEFAULT_Y_SCALE =
   TILE_SPRITE_HEIGHT;
 
 export var BARCODE_DIGIT_OFFSET = 5; // in y
-export var BARCODE_DIGIT_HEIGHT = 36;
+export var BARCODE_DIGIT_HEIGHT = 20;
 export var BARCODE_DIGIT_WIDTH = 23;
+export var ADJACENCYDISTANCE = 3500;
 // constants for offsetting barcode string sprites
 export var AFTER_DOT_SPRITE_X_OFFSET = -10;
 // approx ~320k sprites are created for a map of size 200x200. if more than MAX_SPRITES

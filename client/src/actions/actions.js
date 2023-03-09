@@ -1,5 +1,10 @@
 // action creator to make clicked-on-tile action from clicked-on-viewport action
-import { handleErrors } from "utils/util";
+import { handleErrors,
+         ConvertTTPFormatBarcodeIntoDefaultFormat, 
+         ConvertDefaultFormatBarcodeIntoTTPFormat,
+         getOffsetValue,
+         calculateGMBarcode
+       } from "utils/util";
 import { createSelector } from "reselect";
 import {
   worldToTileCoordinate,
@@ -14,7 +19,7 @@ import {
   getParticularEntity,
   getStorableCoordinatesCount,
   getZoneToColorMap,
-  getSectorToColorMap,
+  getSectorToColorMap
 } from "utils/selectors";
 import { denormalizeMap, formatMapWithDataSuffix } from "utils/normalizr";
 import { runCompleteDataSanity } from "../utils/data-sanity";
@@ -25,6 +30,7 @@ import copy from "copy-to-clipboard";
 import exportMap from "common/utils/export-map";
 import { SPRITESHEET_PATH } from "../constants";
 import { fitToViewport, setViewportClamp } from "./viewport";
+import { getLinearWorldCordXY ,mappedNeighbour} from "./AddAdjacency";
 import { setErrorMessage, setSuccessMessage } from "./message";
 import {
   getMap,
@@ -104,6 +110,7 @@ export const updateAutocadMap = (mapId,map1,onError,onSuccess) => (dispatch, get
     .then((map) => dispatch(newMap(map)))
     .then(onSuccess)
     .then(() => setSectorsMxUPreferences(getState))
+    .then((map) => barcodeCordMapping(getState))
     .catch(onError);
     
 }
@@ -185,12 +192,26 @@ export const setSectorsMxUPreferences = (getState) => {
     });
 };
 
+export const barcodeCordMapping = (getState) => {  
+  const state = getState();
+  const normalizedMap = state.normalizedMap;
+  var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
+  var mappingBarcodeCoord = {}
+  Object.keys(normalizedMap.entities.barcode).forEach(function(key) {
+    mappingBarcodeCoord[normalizedMap.entities.barcode[key]["barcode"]]=key
+  });
+  normalizedMap["entities"]["mappingBarcodeCoord"]=mappingBarcodeCoord
+  return normalizedMap
+};
+
+
 export const fetchMap = (mapId) => (dispatch, getState) => {
   dispatch(clearMap);
   return getMap(parseInt(mapId))
     .then(handleErrors)
     .then((res) => res.json())
     .then((map) => dispatch(newMap(map)))
+    .then((map) => barcodeCordMapping(getState))
     .then(() => dispatch(setViewportClamp))
     .then(() => dispatch(fitToViewport))
     .then(() => setSectorsMxUPreferences(getState))
@@ -517,12 +538,15 @@ export const addHighwayQueue = () => (dispatch, getState) => {
 };
 
 export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
-  const { normalizedMap } = getState();
+  var { normalizedMap, barcodeFormat } = getState();
   var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
+  var withAdjacencyWorldCoordinate = addWorldCoordinateAndAdjacency(normalizedMap,barcodeFormat)
+  var convertBarcodeEntities = ConvertEntitiesInBarcodeFormat(dispatch,getState)
+  var { normalizedMap, barcodeFormat } = getState();
   setSectorsBarcodeMapping(dispatch, getState);
   // denormalize it
-  const mapObj = denormalizeMap(withWorldCoordinate);
-  let updatedMapObj = updateMapObj(mapObj, withWorldCoordinate);
+  const mapObj = denormalizeMap(normalizedMap);
+  let updatedMapObj = updateMapObj(mapObj, normalizedMap);
 
   return updateMap(updatedMapObj.id, updatedMapObj.map)
     .then(handleErrors)
@@ -530,6 +554,7 @@ export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
     .then((map) => dispatch(newMap(map)))
     .then(onSuccess)
     .then(() => setSectorsMxUPreferences(getState))
+    .then((map) => barcodeCordMapping(getState))
     .catch(onError);
 };
 
@@ -580,6 +605,11 @@ export const copySampleRacksJsonToClipboard = (dispatch, getState) => {
 export const editSpecialBarcode = ({ coordinate, new_barcode }) => ({
   type: "EDIT-BARCODE",
   value: { coordinate, new_barcode },
+});
+
+export const editChargerBarcode = (charger_location, new_barcode ) => ({
+  type: "EDIT-CHARGER-BARCODE",
+  value: { charger_location, new_barcode },
 });
 
 export const createMapCopy = ({ name }) => (dispatch, getState) => {
@@ -678,6 +708,7 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
     .then(handleErrors)
     .then((res) => res.json())
     .then(() => setSectorsMxUPreferences(getState))
+    .then((map) => barcodeCordMapping(getState))
     .catch((error) => console.warn(error));
 
   // Map JSONs and Summary details upload request on Map Validator
@@ -879,7 +910,6 @@ const misaligned_cal = (coors, barcode, coordinates) => {
 export const getWithWorldCoordinate = createSelector(
   getNormalizedMap,
   (normalizedMap) => {
-    // console.log("getWithWorldCoordinate",normalizedMap)
     return addWorldCoordinateToMap(normalizedMap);
   }
 );
@@ -894,6 +924,11 @@ export const getCompleteDataSanity = createSelector(
 
 export const addWorldCoordinateAndDenormalize = (normalizedMap) => {
   var withWorldCoordinate = addWorldCoordinateToMap(normalizedMap);
+  return withWorldCoordinate;
+};
+
+const addWorldCoordinateAndAdjacency = (normalizedMap,barcodeFormat) => {
+  var withWorldCoordinate = addWorldCoordinateAdjacencyToMap(normalizedMap,barcodeFormat);
   return withWorldCoordinate;
 };
 
@@ -933,7 +968,6 @@ export const addWorldCoordinateToMap = (normalizedMap) => {
       tileIdToWorldCoordinateMap: tileIdToWorldCoordinateMap,
       neighbourWithValidWorldCoordinate: neighbourWithValidWorldCoordinate,
     } = getTileIdToWorldCoordMapFunc(currentFloorBarcodeDict);
-
     for (var barcode in currentFloorBarcodeDict) {
       var barcodeInfo = currentFloorBarcodeDict[barcode];
       const worldCoordinate = tileIdToWorldCoordinateMap[barcode];
@@ -952,3 +986,153 @@ export const addWorldCoordinateToMap = (normalizedMap) => {
   normalizedMap.entities = entities;
   return normalizedMap;
 };
+
+export const addWorldCoordinateAdjacencyToMap = (normalizedMap,barcodeFormat) => {
+  var entities = normalizedMap.entities;
+  const oldBarcodeDict = entities.barcode;
+  const floorInfo = entities.floor;
+  var newbarcodeDict = {};
+  for (var floorId in floorInfo) {
+    var currentFloorBarcodeDict = {};
+    const barcodeKeys = floorInfo[floorId].map_values;
+    barcodeKeys.forEach((barcodeKey) => {
+      currentFloorBarcodeDict[barcodeKey] = oldBarcodeDict[barcodeKey];
+    });
+    const {
+      tileIdToWorldCoordinateMap: tileIdToWorldCoordinateMap,
+      neighbourWithValidWorldCoordinate: neighbourWithValidWorldCoordinate,
+    } = getTileIdToWorldCoordMapFunc(currentFloorBarcodeDict);
+    var worldcord_mapping = [];
+    for (var key in tileIdToWorldCoordinateMap) {
+        worldcord_mapping.push([key, tileIdToWorldCoordinateMap[key]]);
+    }
+    // sort world cordinate for adjacency
+    worldcord_mapping.sort(
+       function(a, b) {          
+          if (a[1].y === b[1].y) {
+             return b[1].x - a[1].x;
+          }
+          return a[1].y > b[1].y ? 1 : -1;
+       });
+
+    let objSorted = []
+    worldcord_mapping.forEach(function(item){
+        item[1].coord = item[0]
+        objSorted.push(item[1])
+    })
+    var worldcorld_tile_mapping = {}
+    for (var key in tileIdToWorldCoordinateMap) {
+        var value = tileIdToWorldCoordinateMap[key]["x"]+','+tileIdToWorldCoordinateMap[key]["y"]
+        worldcorld_tile_mapping[value] = key
+    }
+    var mappping_coord_with_adjacent_neighbour_dict = {}
+    for(var data in objSorted){
+      var adjacent_neighbour_dict = getLinearWorldCordXY(objSorted[data]["x"],objSorted[data]["y"],objSorted[data]["coord"],objSorted,worldcorld_tile_mapping)
+      mappping_coord_with_adjacent_neighbour_dict[objSorted[data]["coord"]]=adjacent_neighbour_dict
+    }
+    var offset_value = getOffsetValue(currentFloorBarcodeDict)
+    for (var barcode in currentFloorBarcodeDict) {
+      var barcodeInfo = currentFloorBarcodeDict[barcode];
+      const worldCoordinate = tileIdToWorldCoordinateMap[barcode];
+      const wcReferenceNeighbour = neighbourWithValidWorldCoordinate[barcode];
+      barcodeInfo["adjacency"] = mappping_coord_with_adjacent_neighbour_dict[barcode]["adjacency"];
+      barcodeInfo["neighbours"] = mappedNeighbour(mappping_coord_with_adjacent_neighbour_dict[barcode]["neighbours"],currentFloorBarcodeDict[barcode]["neighbours"]);
+      if(barcodeFormat=="default_format"){
+        barcodeInfo["barcode"] = ConvertTTPFormatBarcodeIntoDefaultFormat(barcode,barcodeInfo)
+        
+      }else{
+        var GM_barcode = calculateGMBarcode(JSON.parse(barcodeInfo["world_coordinate"]),offset_value)
+        barcodeInfo["barcode"] = GM_barcode
+      }
+      currentFloorBarcodeDict[barcode] = barcodeInfo;
+    }
+    newbarcodeDict = { ...newbarcodeDict, ...currentFloorBarcodeDict };
+  }
+  entities.barcode = newbarcodeDict;
+  normalizedMap.entities = entities;
+  return normalizedMap;
+};
+
+export const editEntryPoints = (entry_barcodes, elevator_id ) => ({
+  type: "EDIT-ELEVATOR-ENTRY-POINTS",
+  value: {
+    elevator_id,
+    entry_barcodes
+  }
+});
+
+export const editExitPoints = ( exit_barcodes, elevator_id ) => ({
+  type: "EDIT-ELEVATOR-EXIT-POINTS",
+  value: {
+    elevator_id,
+    exit_barcodes
+  }
+});
+
+export const positionPoint = ( position, elevator_id ) => ({
+  type: "EDIT-POSITION-POINTS",
+  value: {
+    elevator_id,
+    position
+  }
+});
+
+export const ConvertEntitiesInBarcodeFormat = (dispatch,getState) => {
+  var { normalizedMap } = getState();
+  var entities = normalizedMap.entities;
+  var barcodeMapping = entities.mappingBarcodeCoord
+  var ppsDict = entities.pps
+  var chargerDict = entities.charger
+  var elevatorDict = entities.elevator
+  var odsDict = entities.odsExcluded
+  var BarcodeDict = entities.barcode;
+  if(Object.keys(ppsDict).length !== 0){
+    Object.keys(ppsDict).forEach(function(pps_id) {
+    ppsDict[pps_id]["location"] = BarcodeDict[ppsDict[pps_id]["coordinate"]]["barcode"]
+    ppsDict[pps_id]["pick_position"] = BarcodeDict[ppsDict[pps_id]["coordinate"]]["barcode"]
+    })
+  }
+  if(Object.keys(chargerDict).length !== 0){
+    Object.keys(chargerDict).forEach(function(charger_id) {
+      var reinitPoint = chargerDict[charger_id]["reinit_point_location"]
+      var chargerLocation = chargerDict[charger_id]["charger_location"]
+      if(barcodeMapping.hasOwnProperty(reinitPoint)){
+        var charger_location = BarcodeDict[barcodeMapping[chargerLocation]]["barcode"]
+        var reinit_barcode = BarcodeDict[barcodeMapping[reinitPoint]]["barcode"]
+        dispatch(editChargerBarcode(charger_location,reinit_barcode))
+      }
+    })
+  }
+  if(Object.keys(elevatorDict).length !== 0){
+    Object.keys(elevatorDict).forEach(function(elevator_id) {
+      var position_barcode = BarcodeDict[barcodeMapping[elevatorDict[elevator_id]["position"]]]["barcode"]
+      var entry_barcode = elevatorDict[elevator_id]["entry_barcodes"]
+      var exit_barcode = elevatorDict[elevator_id]["exit_barcodes"]
+      for (var entry in entry_barcode){
+        var entry_barcode_val = BarcodeDict[barcodeMapping[entry_barcode[entry]["barcode"]]]["barcode"]
+        entry_barcode[entry]["barcode"] = entry_barcode_val
+      }
+      for (var exit in exit_barcode){
+          var exit_barcode_val = BarcodeDict[barcodeMapping[exit_barcode[exit]["barcode"]]]["barcode"]
+          exit_barcode[exit]["barcode"] = exit_barcode_val
+      }
+      if(entry_barcode.length!==0){
+        dispatch(editEntryPoints(entry_barcode,elevator_id))
+      }
+      if(exit_barcode.length!==0){
+        dispatch(editExitPoints(exit_barcode,elevator_id))
+    }
+    dispatch(positionPoint(position_barcode,elevator_id))
+    })
+  }
+  if(Object.keys(odsDict).length !== 0){
+    Object.keys(odsDict).forEach(function(ods_id) {
+      var new_barcode = BarcodeDict[odsDict[ods_id]["coordinate"]]["barcode"]
+      var tuple_list = odsDict[ods_id]["ods_tuple"].split("--")
+      var new_tuple = new_barcode+'--'+tuple_list[1]
+      odsDict[ods_id]["ods_tuple"] = new_tuple
+    })
+  }
+
+  return
+}

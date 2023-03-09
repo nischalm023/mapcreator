@@ -14,7 +14,7 @@ export var handleErrors = (response) => {
   return response;
 };
 
-function stringify_number(input_number) {
+export function stringify_number(input_number) {
   if (input_number < 10) {
     return "00".concat(input_number.toString());
   } else if (input_number < 100) {
@@ -22,6 +22,70 @@ function stringify_number(input_number) {
   } else {
     return input_number.toString();
   }
+}
+
+export function stringify_number_ttp(input_number) {
+  if (input_number < 10) {
+    return "000".concat(input_number.toString());
+  } else if (input_number < 100) {
+    return "00".concat(input_number.toString());
+  }else if (input_number < 1000) {
+    return "0".concat(input_number.toString());
+  } else {
+    return input_number.toString();
+  }
+}
+
+// consverty TTP format into default format
+export const ConvertTTPFormatBarcodeIntoDefaultFormat = (key,value) =>{
+    var coord_list = key.split(",").map((val) => parseInt(val))
+    var row = coord_list[0]
+    var column = coord_list[1]
+    var barcode = encode_barcode(row,column)
+  return barcode
+};
+
+
+// calculation for ttp barcode format
+export const calculateGMBarcode = (world_cordinate,offset_value) =>{
+    if(world_cordinate[1]==10812){
+      console.log("here")
+    }
+    var GM_cordinate_x = Math.abs(offset_value[0]) + Math.abs(world_cordinate[0])
+    var GM_cordinate_y = Math.abs(offset_value[1]) + Math.abs(world_cordinate[1])
+    var GM_barcode_x = GM_cordinate_x%10000
+    var GM_barcode_y = GM_cordinate_y%10000
+    var GM_code_x = Math.floor(GM_cordinate_x/10000)
+    var GM_code_y = Math.floor(GM_cordinate_y/10000)
+    var GM_code_value =  GM_code_x * 10 + GM_code_y
+    // if GM_code_value is 0 then append 0 in begining to match two digit format
+    if(GM_code_value == '0'){
+      GM_code_value = "0".concat(GM_code_value)
+    }
+    // if GM_code_value is one digit and GM_CODE_x is 0 and GM-code_y is greater than one
+    // append 0 in the begining
+    if((GM_code_x * 10 == 0) && (GM_code_y>0)){
+      GM_code_value = "0".concat(GM_code_value)
+    }
+    var GM_barcode = GM_code_value+' '+stringify_number_ttp(GM_barcode_x)+' '+stringify_number_ttp(GM_barcode_y)
+    return GM_barcode
+}
+
+// get offset value
+// offset value is the right most edge cordinate
+export const getOffsetValue = (barcodeDict) =>{
+    var coordinate = Object.keys(barcodeDict)
+    var coordinate_list = []
+    for (var i = 0; i < coordinate.length; i++) {
+      var convert = coordinate[i].split(",").map((val) => parseInt(val))
+      coordinate_list.push(convert)
+    }
+    const lowest_y = coordinate_list.reduce((a, b) => a[1] < b[1] ? a : b);
+    const lowest_x = coordinate_list.reduce((a, b) => a[0] < b[0] ? a : b);
+    var world_coord_y = barcodeDict[(lowest_y).toString()]["world_coordinate"]
+    var world_coord_x = barcodeDict[(lowest_x).toString()]["world_coordinate"]
+    var offset_value = [JSON.parse(world_coord_x)[0],JSON.parse(world_coord_y)[1]]
+    return offset_value
 }
 
 export function encode_barcode(row, column) {
@@ -296,7 +360,7 @@ export var createFloorFromCoordinateData = ({
         coordinate: `${column},${row}`,
         blocked: false,
         size_info: [size, size, size, size],
-        msu_dimensions: msu_dimensions,
+        msu_dimensions: msu_dimensions
       };
       if (row == row_start) {
         unit.neighbours[0] = [0, 0, 0];

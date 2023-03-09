@@ -24,6 +24,13 @@ export default (state = {}, action) => {
         [elevator_id]: { ...state[elevator_id], coordinate_list }
       };
     }
+    case "EDIT-POSITION-POINTS": {
+      const { elevator_id, position } = action.value;
+      return {
+        ...state,
+        [elevator_id]: { ...state[elevator_id],position}
+      };
+    }
     case "EDIT-BARCODE": {
       const {coordinate, new_barcode} = action.value;
       let newState = _.cloneDeep(state);
