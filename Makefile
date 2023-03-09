@@ -10,14 +10,6 @@ REVISION_WITH_D := D${REVISION}
 TESTING := ${BASENAME}:${REVISION_WITH_D}
 LATEST		:= ${BASENAME}:latest
 SERVER_SSH	:= root@mapcreator.labs.greyorange.com
-GCP_REPO	:= us-docker.pkg.dev
-GCP_BASENAME	:= ${GCP_REPO}/greymatter-development/apps/${NAME}
-GCP_IMG		:= ${GCP_BASENAME}:${TAG}
-GCP_BRANCH		:= ${GCP_BASENAME}:${BRANCH}
-GCP_EXPERIMENTAL	:= ${GCP_BASENAME}:experimental
-GCP_LATEST	:= ${GCP_BASENAME}:latest
-GCP_STAGING:= ${GCP_BASENAME}:staging
-GCP_TESTING := ${GCP_BASENAME}:${REVISION_WITH_D}
 
 .PHONY: check-uncommitted all
 
@@ -27,31 +19,22 @@ check-uncommitted:
     endif
 
 build-no-check:
-	docker build --build-arg version=${VERSION} -t ${IMG} -t ${GCP_IMG} -t ${GCP_BRANCH} .
+	docker build -t ${IMG} --build-arg version=${VERSION} .
 
 build: check-uncommitted build-no-check
 
 push:
-# docker push ${IMG}
-	docker push ${GCP_IMG}
-	docker push ${GCP_BRANCH}
+	docker push ${IMG}
 
 push-as-latest: check-uncommitted
-# docker pull ${IMG}
-	docker pull ${GCP_IMG}
-#	docker tag ${IMG} ${LATEST}
-	docker tag ${GCP_IMG} ${GCP_LATEST} ${GCP_BRANCH}
-# docker push ${LATEST}
-	docker push ${GCP_LATEST}
-	docker push ${GCP_BRANCH}
+	docker pull ${IMG}
+	docker tag ${IMG} ${LATEST}
+	docker push ${LATEST}
 
 push-as-staging:
-#	docker pull ${IMG}
-#	docker tag ${IMG} ${STAGING}
-#	docker push ${STAGING}
-	docker pull ${GCP_IMG}
-	docker tag ${GCP_IMG} ${GCP_STAGING}
-	docker push ${GCP_STAGING}
+	docker pull ${IMG}
+	docker tag ${IMG} ${STAGING}
+	docker push ${STAGING}
 
 all: build push push-as-latest
 
@@ -61,13 +44,11 @@ testing:
 		--build-arg public_url="http://mapcreator.labs.greyorange.com:5000/${REVISION_WITH_D}/" \
 		--build-arg basename="/${REVISION_WITH_D}" \
 		--build-arg keep_redux_logger=true .
-	docker tag ${TESTING} ${GCP_TESTING}
-	docker push ${GCP_TESTING}
+	docker push ${TESTING}
 
 staging:
 	docker build -t ${STAGING} --build-arg version=${VERSION} .
-	docker tag ${STAGING} ${GCP_STAGING}
-	docker push ${GCP_STAGING}
+	docker push ${STAGING}
 
 deploy-staging:
 	# adding prune to clear up old images
