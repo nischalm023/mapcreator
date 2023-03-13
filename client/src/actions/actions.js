@@ -204,6 +204,20 @@ export const barcodeCordMapping = (getState) => {
   return normalizedMap
 };
 
+export const getBarcodeDistance = (dispatch,getState,mapId) => {  
+  const state = getState();
+  var mapId = state.normalizedMap.entities.mapObj[parseInt(mapId)]
+  var barcodeDistance = mapId.BaseMap.barcodeDistance
+  dispatch(setbarcodeDistance(barcodeDistance))
+
+};
+
+
+export const setbarcodeDistance = (barcodeDistance) => ({
+  type: "CHANGE-BARCODE-DISTANCE",
+  value: barcodeDistance
+});
+
 
 export const fetchMap = (mapId) => (dispatch, getState) => {
   dispatch(clearMap);
@@ -215,6 +229,7 @@ export const fetchMap = (mapId) => (dispatch, getState) => {
     .then(() => dispatch(setViewportClamp))
     .then(() => dispatch(fitToViewport))
     .then(() => setSectorsMxUPreferences(getState))
+    .then(() => getBarcodeDistance(dispatch,getState,mapId))
     .catch((error) => console.warn(error)); // eslint-disable-line no-console
 };
 

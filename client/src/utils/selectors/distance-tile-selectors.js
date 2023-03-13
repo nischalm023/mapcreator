@@ -1,5 +1,6 @@
 import { createSelector } from "reselect";
 import { getTileIdToWorldCoordMap } from "./world-coordinate-utils-selectors";
+import {getBarcodesDistance} from "./barcode-selectors"
 import * as constants from "../../constants";
 
 export const getDistinctXAndYDistances = createSelector(
@@ -25,15 +26,16 @@ export const getDistinctXAndYDistances = createSelector(
 
 export const distanceTileSpritesSelector = createSelector(
   getDistinctXAndYDistances,
-  xAndYDistances => {
+  getBarcodesDistance,
+  (xAndYDistances,barcode_distance) => {
     const xDistances = xAndYDistances.x;
     const yDistances = xAndYDistances.y;
     var ret = [];
     // ************** For X Distance tile **************  //
     for (var i = 0; i < xDistances.length; i++) {
       const currentXCoordinateInPixel = xDistances[i];
-      var sizeInLeft = 1500;
-      var sizeInRight = 1500;
+      var sizeInLeft = barcode_distance;
+      var sizeInRight = barcode_distance;
       if (i != 0) {
         sizeInRight = xDistances[i - 1] - xDistances[i];
       }
@@ -54,8 +56,8 @@ export const distanceTileSpritesSelector = createSelector(
     // ************** For Y Distance tile **************  //
     for (var j = 0; j < yDistances.length; j++) {
       const currentYCoordinateInPixel = yDistances[j];
-      var sizeInDown = 1500;
-      var sizeInTop = 1500;
+      var sizeInDown = barcode_distance;
+      var sizeInTop = barcode_distance;
       if (j != 0) {
         sizeInTop = yDistances[j] - yDistances[j - 1];
       }

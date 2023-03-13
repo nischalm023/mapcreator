@@ -76,13 +76,14 @@ const addTransitBarcode = formData => (dispatch, getState) => {
 
 const addNewBarcode = formData => (dispatch, getState) => {
   const state = getState();
+
   const { tileId, direction } = formData;
   const nbTileId = getNeighbourTiles(tileId)[direction];
   // new barcode will be connected to all neighbour barcodes that it has
   const nbNeighboursTileIds = getNeighbourTiles(nbTileId);
   const oldBarcodes = [];
   const nbNeighbourStructure = [];
-  const nbSizeInfo = Array(4).fill(DEFAULT_BOT_WITH_RACK_THRESHOLD);
+  const nbSizeInfo = Array(4).fill(state.barcodeDistance);
   nbNeighboursTileIds.forEach((nbNbTileId, idx) => {
     const nbNbBarcode = getBarcode(state, { tileId: nbNbTileId });
     if (nbNbBarcode) {
