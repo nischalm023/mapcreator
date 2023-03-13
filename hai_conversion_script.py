@@ -781,23 +781,23 @@ class StitchTtpRtpMap:
 					adjacentedges['east'] = [ex, ey, targetpoint]
 					neighbours[1] = [1,1,1]
 					adjacencyList[1] = [ex, ey]
-					sizeInfo[1] = abs(x-ex)
+					sizeInfo[1] = round(abs(x-ex)/2)
 				else:
 					adjacentedges['west'] = [ex, ey, targetpoint]
 					neighbours[3] = [1,1,1]
 					adjacencyList[3] = [ex, ey]
-					sizeInfo[3] = abs(x-ex)
+					sizeInfo[3] = round(abs(x-ex)/2)
 			else:
 				if ey > y:
 					adjacentedges['north'] = [ex, ey, targetpoint]
 					neighbours[0] = [1,1,1]
 					adjacencyList[0] = [ex, ey]
-					sizeInfo[0] = abs(y-ey)
+					sizeInfo[0] = abs(y-ey)//2
 				else:
 					adjacentedges['south'] = [ex, ey, targetpoint]
 					neighbours[2] = [1,1,1]
 					adjacencyList[2] = [ex, ey]
-					sizeInfo[2] = abs(y-ey)
+					sizeInfo[2] = abs(y-ey)//2
 
 		barcode = self.generate_barcode([x,y])
 		gridInfo[code] =  {"store_status": 0, "zone": "ttp_zone", "sector": "undefined", "barcode": barcode, "botid":None, 'size_info': sizeInfo,
@@ -901,12 +901,12 @@ class StitchTtpRtpMap:
 		rtp_cord = '[{},{}]'.format(rtp_cordinate[0],rtp_cordinate[1])
 		ttp_cord = '[{},{}]'.format(ttp_cordinate[0],ttp_cordinate[1])
 		for map_value in GtpMap:
-			if map_value["coordinate"] == ttp_cord:
+			if map_value["coordinate"].replace(" ","") == ttp_cord:
 				if direction == 1 or direction == 3:
 					map_value["size_info"][direction] = delta[0]//2
 				else:
 					map_value["size_info"][direction] = delta[1]//2
-			if map_value["coordinate"] == rtp_cord:
+			if map_value["coordinate"].replace(" ","") == rtp_cord:
 				if (direction + 2) % 4 == 1 or (direction + 2) % 4 == 3:
 					map_value["size_info"][(direction + 2) % 4] = round(delta[0]/2)
 					if "adjacency" in  map_value.keys():
