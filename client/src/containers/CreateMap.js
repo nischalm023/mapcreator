@@ -2,19 +2,23 @@ import React, { Component } from "react";
 import { withFormik, Field } from "formik";
 import { withRouter } from "react-router-dom";
 import { FormikedInput, FormikedSelectInput } from "components/InlineTextInput";
+
 import { createMapFromCoordinateData, handleErrors } from "utils/util";
 import SweetAlertError from "components/SweetAlertError";
 import { string, object, ref } from "yup";
-import { yupNonNegIntSchema, msuDimensionAndNames, barcodeDistance12xAndNames, barcodeDistance15xAndNames, yupMSUMappingSchema } from "utils/forms";
+import { yupNonNegBarcodeDistanceIntSchema,yupNonNegIntSchema, msuDimensionAndNames, barcodeDistance12xAndNames, barcodeDistance15xAndNames, yupMSUMappingSchema } from "utils/forms";
 import { createMap } from "utils/api";
 import guideImg from "sprites/guide.png";
 
 // form html
 const InnerForm = ({ handleSubmit, isSubmitting, values }) => {
   const checkDimensions = (msu_dimensions) => {
+      if(msu_dimensions == "Custom"){
+        return "undefined"
+      }
     return msu_dimensions == 97.9 ? barcodeDistance12xAndNames : barcodeDistance15xAndNames;
   };
-
+  
   return (
     <form onSubmit={handleSubmit}>
       <Field name="name" component={FormikedInput} label="Name" type="text" />
@@ -28,7 +32,7 @@ const InnerForm = ({ handleSubmit, isSubmitting, values }) => {
         )}
         label="MSU dimension"
       />
-      {values.msu_dimensions && <Field
+      {values.msu_dimensions && values.msu_dimensions !== "Custom" && <Field
         name="barcode_distances"
         component={props => (
           <FormikedSelectInput
@@ -37,6 +41,13 @@ const InnerForm = ({ handleSubmit, isSubmitting, values }) => {
           />
         )}
         label="Barcode Distances"
+      />}
+      {values.msu_dimensions === "Custom" && 
+        <Field
+          name="barcode_distances"
+          component={FormikedInput}
+          type="number"
+          label="Barcode Distances"
       />}
       <Field
         name="row_start"
@@ -84,7 +95,7 @@ const Form = withFormik({
     return object().shape({
       name: string().required(),
       msu_dimensions: yupMSUMappingSchema,
-      barcode_distances: yupMSUMappingSchema,
+      barcode_distances: yupNonNegBarcodeDistanceIntSchema,
       row_start: yupNonNegIntSchema,
       row_end: yupNonNegIntSchema.min(ref("row_start")),
       col_start: yupNonNegIntSchema,

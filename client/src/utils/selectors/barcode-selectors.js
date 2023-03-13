@@ -3,6 +3,7 @@ import { encode_barcode, coordinateKeyToTupleOfIntegers } from "../util";
 export const getCurrentFloorBarcodeIds = state =>
   state.normalizedMap.entities.floor[state.currentFloor].map_values;
 export const getBarcodes = state => state.normalizedMap.entities.barcode || {};
+export const getBarcodesDistance = state => state.barcodeDistance
 export const getBarcode = (state, { tileId }) =>
   state.normalizedMap.entities.barcode[tileId];
 export const getCurrentFloorBarcodes = createSelector(

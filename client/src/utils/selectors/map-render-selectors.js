@@ -120,7 +120,7 @@ export const getBarcodeDigitSpritesData = createSelector(
       for (let i = 0; i < 3; i++) {
         ret[i] = {
           name: digitSpriteNames[i],
-          x: boundingBox.left + (i * barcodeWidth) / 7,
+          x: boundingBox.left +(i * barcodeWidth) / 7,
           y: boundingBox.top - constants.BARCODE_DIGIT_HEIGHT * yScale,
           ...scaleData
         };
@@ -128,7 +128,7 @@ export const getBarcodeDigitSpritesData = createSelector(
       // dot sprite
       ret["3"] = {
         name: digitSpriteNames[3],
-        x: boundingBox.left-40 + barcodeWidth / 2,
+        x: boundingBox.left + (barcodeWidth) / 2.2,
         y:
           boundingBox.top -
           (constants.BARCODE_DIGIT_OFFSET + constants.BARCODE_DIGIT_HEIGHT / 3) *

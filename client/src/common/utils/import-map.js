@@ -7,6 +7,7 @@ import {
   findFloorIndex,
   findCoordinateForBarcode,
 } from "common/utils/util";
+import * as constants from "../../constants";
 import _ from "lodash";
 const prettyAjvError = (errors) => JSON.stringify(errors[0], undefined, 2);
 
@@ -62,7 +63,7 @@ export default ({
   var map = {};
   // map.json is required
   if (!mapJson) throw new Error("map.json is required");
-
+  map["barcodeDistance"] = constants.DEFAULT_BOT_WITH_RACK_THRESHOLD
   // check if mapJson is valid and add it to map. should first detect if single or multi floor
   if (detectSingleFloor(mapJson)) {
     validate("single_floor_map_json", mapJson);

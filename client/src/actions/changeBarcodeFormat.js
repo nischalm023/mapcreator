@@ -3,13 +3,21 @@ import { setErrorMessage } from "./message";
 export const validateBarcodesDistance = (barcodesDict) => {
   for (var barcode in barcodesDict){
     var barcodeInfo = barcodesDict[barcode]
-    var world_cordinate = JSON.parse(barcodeInfo["world_coordinate"])
-    if((Math.abs(world_cordinate[0])>100000) || (Math.abs(world_cordinate[1])>100000)){
+    if(barcodeInfo.hasOwnProperty("world_coordinate")){
+      var world_cordinate = JSON.parse(barcodeInfo["world_coordinate"])
+      if((Math.abs(world_cordinate[0])>100000) || (Math.abs(world_cordinate[1])>100000)){
+        return {
+          error: true,
+          reason: "Distance of barcode should not be greator than 1 km from origin"
+        };
+      }
+    }else{
       return {
-        error: true,
-        reason: "Distance of barcode should not be greator than 1 km from origin"
-      };
+          error: true,
+          reason: "Please save your map before change of barcode format"
+        };
     }
+    
   }
   return { error: false };
 };

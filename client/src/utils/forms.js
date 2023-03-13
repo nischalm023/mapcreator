@@ -51,14 +51,18 @@ export const yupPosIntSchema = number()
   .integer("Should be integer")
   .min(1, "Should be positive integer");
 
-export const yupMSUMappingSchema = number()
-  .required("Please select any one option")
-  .min(1, "Please select any one option");
+export const yupMSUMappingSchema = string()
+  .required("Please select any one option");
 
 export const yupNonNegIntSchema = number()
   .required("Required")
   .integer("Should be integer")
   .min(0, "Should be non-negative integer");
+
+export const yupNonNegBarcodeDistanceIntSchema = number()
+  .required("Required")
+  .integer("Should be integer")
+  .min(200, "Should be non-negative integer and greater than 200");
 
 export const yupBarcodeStringSchema = string()
   .required("Required")

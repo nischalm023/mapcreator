@@ -73,18 +73,17 @@ export const calculateGMBarcode = (world_cordinate,offset_value) =>{
 
 // get offset value
 // offset value is the right most edge cordinate
+
 export const getOffsetValue = (barcodeDict) =>{
-    var coordinate = Object.keys(barcodeDict)
     var coordinate_list = []
-    for (var i = 0; i < coordinate.length; i++) {
-      var convert = coordinate[i].split(",").map((val) => parseInt(val))
+    for (var barcode in barcodeDict) {
+      var barcodeInfo = barcodeDict[barcode];
+      var convert = JSON.parse(barcodeInfo["world_coordinate"])
       coordinate_list.push(convert)
     }
     const lowest_y = coordinate_list.reduce((a, b) => a[1] < b[1] ? a : b);
-    const lowest_x = coordinate_list.reduce((a, b) => a[0] < b[0] ? a : b);
-    var world_coord_y = barcodeDict[(lowest_y).toString()]["world_coordinate"]
-    var world_coord_x = barcodeDict[(lowest_x).toString()]["world_coordinate"]
-    var offset_value = [JSON.parse(world_coord_x)[0],JSON.parse(world_coord_y)[1]]
+    const lowest_x = coordinate_list.reduce((a, b) => a[0] > b[0] ? a : b);
+    var offset_value = [lowest_x[0],lowest_y[1]]
     return offset_value
 }
 
@@ -412,6 +411,7 @@ export var createMapFromCoordinateData = (
     queueDatas: [],
     downloadConveyor:[],
     conveyors:[],
+    barcodeDistance:parseInt(barcode_distances / 2),
     floors: [
       createFloorFromCoordinateData({
         row_start,
