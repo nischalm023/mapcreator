@@ -1050,8 +1050,8 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap,barcodeFormat) =>
       var barcodeInfo = currentFloorBarcodeDict[barcode];
       const worldCoordinate = tileIdToWorldCoordinateMap[barcode];
       const wcReferenceNeighbour = neighbourWithValidWorldCoordinate[barcode];
-      // barcodeInfo["adjacency"] = mappping_coord_with_adjacent_neighbour_dict[barcode]["adjacency"];
-      // barcodeInfo["neighbours"] = mappedNeighbour(mappping_coord_with_adjacent_neighbour_dict[barcode]["neighbours"],currentFloorBarcodeDict[barcode]["neighbours"]);
+      barcodeInfo["adjacency"] = mappping_coord_with_adjacent_neighbour_dict[barcode]["adjacency"];
+      barcodeInfo["neighbours"] = mappedNeighbour(mappping_coord_with_adjacent_neighbour_dict[barcode]["neighbours"],currentFloorBarcodeDict[barcode]["neighbours"]);
       if(barcodeFormat=="default_format"){
         barcodeInfo["barcode"] = ConvertTTPFormatBarcodeIntoDefaultFormat(barcode,barcodeInfo)
         
