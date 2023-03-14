@@ -1050,8 +1050,8 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap,barcodeFormat) =>
       var barcodeInfo = currentFloorBarcodeDict[barcode];
       const worldCoordinate = tileIdToWorldCoordinateMap[barcode];
       const wcReferenceNeighbour = neighbourWithValidWorldCoordinate[barcode];
-      barcodeInfo["adjacency"] = mappping_coord_with_adjacent_neighbour_dict[barcode]["adjacency"];
-      barcodeInfo["neighbours"] = mappedNeighbour(mappping_coord_with_adjacent_neighbour_dict[barcode]["neighbours"],currentFloorBarcodeDict[barcode]["neighbours"]);
+      // barcodeInfo["adjacency"] = mappping_coord_with_adjacent_neighbour_dict[barcode]["adjacency"];
+      // barcodeInfo["neighbours"] = mappedNeighbour(mappping_coord_with_adjacent_neighbour_dict[barcode]["neighbours"],currentFloorBarcodeDict[barcode]["neighbours"]);
       if(barcodeFormat=="default_format"){
         barcodeInfo["barcode"] = ConvertTTPFormatBarcodeIntoDefaultFormat(barcode,barcodeInfo)
         
@@ -1093,7 +1093,8 @@ export const positionPoint = ( position, elevator_id ) => ({
 });
 
 export const ConvertEntitiesInBarcodeFormat = (dispatch,getState) => {
-  var { normalizedMap } = getState();
+
+  const { normalizedMap } = getState();
   var entities = normalizedMap.entities;
   var barcodeMapping = entities.mappingBarcodeCoord
   var ppsDict = entities.pps
@@ -1120,16 +1121,24 @@ export const ConvertEntitiesInBarcodeFormat = (dispatch,getState) => {
   }
   if(Object.keys(elevatorDict).length !== 0){
     Object.keys(elevatorDict).forEach(function(elevator_id) {
-      var position_barcode = BarcodeDict[barcodeMapping[elevatorDict[elevator_id]["position"]]]["barcode"]
+      if(barcodeMapping.hasOwnProperty(elevatorDict[elevator_id]["position"])){
+        var position_barcode = BarcodeDict[barcodeMapping[elevatorDict[elevator_id]["position"]]]["barcode"]
+        dispatch(positionPoint(position_barcode,elevator_id))
+      }
       var entry_barcode = elevatorDict[elevator_id]["entry_barcodes"]
       var exit_barcode = elevatorDict[elevator_id]["exit_barcodes"]
       for (var entry in entry_barcode){
-        var entry_barcode_val = BarcodeDict[barcodeMapping[entry_barcode[entry]["barcode"]]]["barcode"]
-        entry_barcode[entry]["barcode"] = entry_barcode_val
+        if(barcodeMapping.hasOwnProperty(entry_barcode[entry]["barcode"])){
+          var entry_barcode_val = BarcodeDict[barcodeMapping[entry_barcode[entry]["barcode"]]]["barcode"]
+          entry_barcode[entry]["barcode"] = entry_barcode_val
+        }
+        
       }
       for (var exit in exit_barcode){
+        if(barcodeMapping.hasOwnProperty(exit_barcode[exit]["barcode"])){
           var exit_barcode_val = BarcodeDict[barcodeMapping[exit_barcode[exit]["barcode"]]]["barcode"]
           exit_barcode[exit]["barcode"] = exit_barcode_val
+        }
       }
       if(entry_barcode.length!==0){
         dispatch(editEntryPoints(entry_barcode,elevator_id))
@@ -1137,7 +1146,6 @@ export const ConvertEntitiesInBarcodeFormat = (dispatch,getState) => {
       if(exit_barcode.length!==0){
         dispatch(editExitPoints(exit_barcode,elevator_id))
     }
-    dispatch(positionPoint(position_barcode,elevator_id))
     })
   }
   if(Object.keys(odsDict).length !== 0){
