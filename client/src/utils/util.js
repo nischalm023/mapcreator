@@ -67,7 +67,7 @@ export const calculateGMBarcode = (world_cordinate,offset_value) =>{
     if((GM_code_x * 10 == 0) && (GM_code_y>0)){
       GM_code_value = "0".concat(GM_code_value)
     }
-    var GM_barcode = GM_code_value+' '+stringify_number_ttp(GM_barcode_x)+' '+stringify_number_ttp(GM_barcode_y)
+    var GM_barcode = GM_code_value+stringify_number_ttp(GM_barcode_x)+stringify_number_ttp(GM_barcode_y)
     return GM_barcode
 }
 
