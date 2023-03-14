@@ -781,18 +781,18 @@ class StitchTtpRtpMap:
 					adjacentedges['east'] = [ex, ey, targetpoint]
 					neighbours[1] = [1,1,1]
 					adjacencyList[1] = [ex, ey]
-					sizeInfo[1] = round(abs(x-ex)/2)
+					sizeInfo[1] = math.ceil(abs(x-ex)/2)
 				else:
 					adjacentedges['west'] = [ex, ey, targetpoint]
 					neighbours[3] = [1,1,1]
 					adjacencyList[3] = [ex, ey]
-					sizeInfo[3] = round(abs(x-ex)/2)
+					sizeInfo[3] = abs(x-ex)//2
 			else:
 				if ey > y:
 					adjacentedges['north'] = [ex, ey, targetpoint]
 					neighbours[0] = [1,1,1]
 					adjacencyList[0] = [ex, ey]
-					sizeInfo[0] = abs(y-ey)//2
+					sizeInfo[0] = math.ceil(abs(y-ey)/2)
 				else:
 					adjacentedges['south'] = [ex, ey, targetpoint]
 					neighbours[2] = [1,1,1]
