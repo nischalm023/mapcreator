@@ -51,8 +51,8 @@ export const calculateGMBarcode = (world_cordinate,offset_value) =>{
     if(world_cordinate[1]==10812){
       console.log("here")
     }
-    var GM_cordinate_x = Math.abs(offset_value[0]) + Math.abs(world_cordinate[0])
-    var GM_cordinate_y = Math.abs(offset_value[1]) + Math.abs(world_cordinate[1])
+    var GM_cordinate_x = Math.abs(world_cordinate[0] - offset_value[0])
+    var GM_cordinate_y = Math.abs(world_cordinate[1] - offset_value[1])
     var GM_barcode_x = GM_cordinate_x%10000
     var GM_barcode_y = GM_cordinate_y%10000
     var GM_code_x = Math.floor(GM_cordinate_x/10000)
