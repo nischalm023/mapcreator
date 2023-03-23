@@ -13,6 +13,7 @@ import math
 
 # mapped rotation
 def get_rotation(rotation):
+	rotation = str(int(float(rotation)))
 	if rotation == '0':
 		return 0
 	if rotation == '90':
@@ -984,10 +985,10 @@ def ttp_rtp_map_stitch():
 	visited_points=set()
 	for p in Points:
 	   StitchTtpRtpMap().getNeighbours(p['code'], p['position'], p['adjacentEdge'])
-	gtp_ref_point = [int(x) for x in req_data["gtp_ref_point"].split()]
-	delta = [int(x) for x in req_data["delta"].split()]
+	gtp_ref_point = [int(x) for x in req_data["gtp_ref_point"].split(',')]
+	delta = [int(x) for x in req_data["delta"].split(',')]
 	x_dir, y_dir = [int(x) for x in req_data["stitch_cord"].split()]
-	ttp_world_cordinate = [int(x) for x in req_data["ttp_ref_point"].split()]
+	ttp_world_cordinate = [int(x) for x in req_data["ttp_ref_point"].split(',')]
 	error,status = ValidateStitchingData().validation(GtpMap,TtpMap,gtp_ref_point,ttp_world_cordinate)
 	if error:
 		return {"content":error,"status":status}

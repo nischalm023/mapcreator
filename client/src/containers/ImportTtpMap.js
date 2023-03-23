@@ -194,15 +194,15 @@ class ImportMap extends Component {
                 className="form-control"
                 value={this.state.rtp_ref_point}
                 onChange={(e) => this.setState({ rtp_ref_point: e.target.value })}
-                placeholder="Enter RTP reference coordinate (eg -> x y)"
-                pattern="-?\d+\s-?\d+"
+                placeholder="Enter RTP reference coordinate (eg -> x,y)"
+                pattern="-?\d+\,?\d+"
                 required
               />
             </div>
           </div>
           <div className="form-group row">
             <label className="col-form-label col-sm-3">
-              TTP Reference Point
+              TTP Coordinate Reference Point
             </label>
             <div className="col-sm-9">
               <input
@@ -211,8 +211,8 @@ class ImportMap extends Component {
                 className="form-control"
                 value={this.state.ttp_ref_point}
                 onChange={(e) => this.setState({ ttp_ref_point: e.target.value })}
-                placeholder=" Enter TTP reference coordinate (eg -> x y)"
-                pattern="-?\d+\s-?\d+"
+                placeholder=" Enter TTP reference coordinate (eg -> x,y)"
+                pattern="-?\d+\,?\d+"
                 required
               />
             </div>
@@ -230,7 +230,7 @@ class ImportMap extends Component {
                 value={this.state.delta}
                 onChange={(e) => this.setState({ delta: e.target.value })}
                 placeholder="The distance specified will be the offset between the two input maps"
-                pattern="-?\d+\s-?\d+"
+                pattern="-?\d+\,?\d+"
                 required
               />
               <i
