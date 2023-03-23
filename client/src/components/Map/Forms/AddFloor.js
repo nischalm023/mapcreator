@@ -6,7 +6,7 @@ import { addFloor } from "actions/floor";
 import SweetAlertError from "components/SweetAlertError";
 import { withFormik, Field } from "formik";
 import { object, ref } from "yup";
-import { yupPosIntSchema, yupNonNegIntSchema, msuDimensionAndNames, yupMSUMappingSchema, barcodeDistance15xAndNames, barcodeDistance12xAndNames } from "utils/forms";
+import { yupNonNegBarcodeDistanceIntSchema,yupPosIntSchema, yupNonNegIntSchema, msuDimensionAndNames, yupMSUMappingSchema, barcodeDistance15xAndNames, barcodeDistance12xAndNames } from "utils/forms";
 
 // form html
 // not using BaseForm as more advanced validation needed
@@ -32,7 +32,7 @@ const InnerForm = ({ handleSubmit, isSubmitting, values }) => {
         )}
         label="MSU dimension"
       />
-      {values.msu_dimensions && <Field
+      {values.msu_dimensions && values.msu_dimensions !== "Custom" && <Field
         name="barcode_distances"
         component={props => (
           <FormikedSelectInput
@@ -41,6 +41,13 @@ const InnerForm = ({ handleSubmit, isSubmitting, values }) => {
           />
         )}
         label="Barcode Spacing"
+      />}
+      {values.msu_dimensions === "Custom" && 
+        <Field
+          name="barcode_distances"
+          component={FormikedInput}
+          type="number"
+          label="Barcode Spacing"
       />}
       <Field
         name="row_start"
@@ -87,7 +94,7 @@ const Form = withFormik({
   validationSchema: () => {
     return object().shape({
       msu_dimensions: yupMSUMappingSchema,
-      barcode_distances: yupMSUMappingSchema,
+      barcode_distances: yupNonNegBarcodeDistanceIntSchema,
       floor_id: yupPosIntSchema,
       row_start: yupNonNegIntSchema,
       row_end: yupNonNegIntSchema.min(ref("row_start")),
