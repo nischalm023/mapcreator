@@ -47,7 +47,7 @@ const InnerForm = ({ handleSubmit, isSubmitting, values }) => {
           name="barcode_distances"
           component={FormikedInput}
           type="number"
-          label="Barcode Distances"
+          label="Barcode Spacing"
       />}
       <Field
         name="row_start"

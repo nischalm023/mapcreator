@@ -153,14 +153,12 @@ class Map extends Component {
             />
             <form onSubmit={this.onSubmit}>
               <div className="form-row">
-                <label for="fileSelect" >Import autocad file &nbsp;</label>
-                <div>
+                <div className="col float-right">
+                  <label for="fileSelect" >Import autocad file &nbsp;</label>
                   <input
                    type={"file"} 
                    onChange={this.handleChange}
                    accept={".xls"} />
-                </div>
-                <div>
                   <button type="submit" style={{'border-radius':'6%','border-color':'lightgrey'}}>
                     Submit
                   </button>
@@ -228,10 +226,10 @@ class Map extends Component {
               <div className="col float-right">
                 <ChangeFloorDropdown />
               </div>
-              <div>
-              <div className="col float-right">
-                <ChangeBarcodeFormat />
-              </div>
+              <div className="row py-2 p-2">
+                <div className="col float-right">
+                  <ChangeBarcodeFormat />
+                </div>
               </div>
             </div>
           </div>
