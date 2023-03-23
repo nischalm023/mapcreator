@@ -40,7 +40,7 @@ const InnerForm = ({ handleSubmit, isSubmitting, values }) => {
             valuesAndLabels={checkDimensions(values.msu_dimensions)}
           />
         )}
-        label="Barcode Distances"
+        label="Barcode Spacing"
       />}
       <Field
         name="row_start"
