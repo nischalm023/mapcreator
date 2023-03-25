@@ -207,9 +207,10 @@ export const barcodeCordMapping = (getState) => {
 export const getBarcodeDistance = (dispatch,getState,mapId) => {  
   const state = getState();
   var mapId = state.normalizedMap.entities.mapObj[parseInt(mapId)]
+  if (mapId.BaseMap.barcodeDistance.hasOwnProperty("barcodeDistance")){
   var barcodeDistance = mapId.BaseMap.barcodeDistance
   dispatch(setbarcodeDistance(barcodeDistance))
-
+}
 };
 
 
