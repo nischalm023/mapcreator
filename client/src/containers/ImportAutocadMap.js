@@ -120,6 +120,11 @@ class ImportMap extends Component {
               </button>
             </div>
           </div>
+	  <div className="form-group row">
+            <div className="col-sm-10">
+              <p>Click <a href="http://gsb-dev.greymatter.greyorange.com:3006/" target="_blank">here </a>to convert Autocad(.dwg) file to xls</p>
+            </div>
+          </div>
         </form>
       </div>
     );
