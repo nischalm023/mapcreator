@@ -12,7 +12,7 @@ import {
   getNewCoordinate
 } from "utils/selectors";
 import _ from "lodash";
-
+import {calculate_corner_world_cordinate} from "./actions";
 // TODO: correct place for this function
 export const isValidNewBarcode = (barcode, state) => {
   const existingBarcodesAndCoordinates = getExistingBarcodesAndCoordinates(
@@ -57,7 +57,7 @@ const getTransitCoordinate = state => {
 };
 
 // TODO: Can merge both getWorldCoordUsingNeighbour from world-coordinate-utils-selectors
-export const getNeighbourBarcodeWorldCoord = (
+export const getTTPNeighbourBarcodeWorldCoord = (
   refBarcodeWorldCoord,
   distance,
   direction
@@ -157,6 +157,95 @@ export const getUpdatedBarcodes = (
   return updatedBarcodes;
 };
 
+const axis = (value) => {
+    var opposite = null;
+    switch(value){
+      case "x":
+        opposite = 0;
+        break;
+      case "y":
+        opposite = 1;
+        break;
+    }
+    return opposite;
+}
+
+const overlap_north_east = (ref_corner_coordinate,transit_corner_coordinate,transit_corner_coordinate1) => {
+    if(ref_corner_coordinate[axis("x")] <  transit_corner_coordinate[axis("x")] && ref_corner_coordinate[axis("y")] > transit_corner_coordinate[axis("y")]){
+        if(ref_corner_coordinate[axis("x")]>transit_corner_coordinate1[axis("x")]){
+           return true;
+        }
+    }
+    return false;
+}
+
+const overlap_north_west = (ref_corner_coordinate,transit_corner_coordinate,transit_corner_coordinate1) => {
+    if(ref_corner_coordinate[axis("x")] >  transit_corner_coordinate[axis("x")] && ref_corner_coordinate[axis("y")] > transit_corner_coordinate[axis("y")]){
+        if(ref_corner_coordinate[axis("x")]<transit_corner_coordinate1[axis("x")]){
+           return true;
+        }
+    }
+    return false;
+}
+
+const corner_direction_mapping = (value) => {
+  var opposite = null;
+  switch(value){
+      case "ne":
+          opposite = 0;
+          break;
+      case "se":
+          opposite = 1;
+          break;
+      case "sw":
+          opposite = 2;
+          break;
+      case "nw":
+          opposite = 3;
+      break;
+  }
+  return opposite;
+}
+
+const direction_mapping = (value) => {
+  var opposite = null;
+  switch(value){
+    case "top":
+        opposite = 0;
+        break;
+    case "right":
+        opposite = 1;
+        break;
+    case "bottom":
+        opposite = 2;
+        break;
+    case "left":
+        opposite = 3;
+    break;
+  }
+  return opposite;
+}
+
+const AdjustTopTransitPosition = (gridView,transit_world_coordinate,transit_size_info) => {
+   for (const [key, value] of Object.entries(gridView)) {
+      if(overlap_north_east(value['corner_world_cooordinate'][corner_direction_mapping("sw")],transit_world_coordinate[corner_direction_mapping("ne")],transit_world_coordinate[corner_direction_mapping("nw")])){
+          console.log("north_east-------->",key)
+          // value['size_info'][direction_mapping("left")] = value['size_info'][direction_mapping("left")] - transit_size_info[direction_mapping("right")]
+          value['size_info'][direction_mapping("left")] = transit_size_info[direction_mapping("right")]
+          var corner_coordinate = calculate_corner_world_cordinate(value,value["world_coordinate"])
+          value['corner_world_cooordinate'] = corner_coordinate
+        }
+        if(overlap_north_west(value['corner_world_cooordinate'][corner_direction_mapping("se")],transit_world_coordinate[corner_direction_mapping("nw")],transit_world_coordinate[corner_direction_mapping("ne")])){
+          console.log("north_west-------->",key)
+          // value['size_info'][direction_mapping("right")] = value['size_info'][direction_mapping("right")] - transit_size_info[direction_mapping("left")]
+          value['size_info'][direction_mapping("right")] =  transit_size_info[direction_mapping("left")]
+          var corner_coordinate = calculate_corner_world_cordinate(value,value["world_coordinate"])
+          value['corner_world_cooordinate'] = corner_coordinate
+        }
+    }
+}
+
+
 const getTransitBarcodeInfo = (state, formData) => {
   const { tileId, newBarcode, direction, distance } = formData;
   const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
@@ -167,32 +256,51 @@ const getTransitBarcodeInfo = (state, formData) => {
     barcodes,
     direction
   ); // Of ref barcode
-  const transitBarcodeWorldCoord = getNeighbourBarcodeWorldCoord(
+  const transitBarcodeWorldCoord = getTTPNeighbourBarcodeWorldCoord(
     refBarcodeWorldCoord,
     distance,
     direction
   );
   const transitBarcodeCoordinate = getTransitCoordinate(state);
+  const transitBarcodeWorldCoordinate = `[${transitBarcodeWorldCoord["x"]},${transitBarcodeWorldCoord["y"]}]`
   // SizeInfo
   const sizeInfo = _.cloneDeep(refBarcodeInfo.size_info);
-  sizeInfo[direction] =
-    (2 * refBarcodeInfo.size_info[direction] - distance) / 2;
-  sizeInfo[(direction + 2) % 4] = distance / 2;
+  const nTileId = getNeighbourBarcodeIncludingDisconnectedInDirection(
+        tileId,
+        barcodes,
+        direction
+      );
+  if (nTileId == null) {
+    sizeInfo[(direction + 2) % 4] = distance / 2; 
+  }else{
+    sizeInfo[direction] =
+      (2 * refBarcodeInfo.size_info[direction] - distance) / 2;
+    sizeInfo[(direction + 2) % 4] = distance / 2;
+  }
+  var cornerWorldCooordinate = calculate_corner_world_cordinate(sizeInfo,[transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]])
   // Adjacency and Neighbour structure
+  if(direction == 0){
+    AdjustTopTransitPosition(barcodes,cornerWorldCooordinate,sizeInfo)
+   }
   const adjacency = [null, null, null, null];
   const nStructure = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
   for (var dir = 0; dir < 4; dir++) {
-    const nWorldCoord = getNeighbourBarcodeWorldCoord(
+    const nWorldCoord = getTTPNeighbourBarcodeWorldCoord(
       transitBarcodeWorldCoord,
       2 * sizeInfo[dir],
       dir
     );
-    const nTileId = getTileIdHavingWorldCoordinate(state, nWorldCoord);
-    if (nTileId != undefined) {
-      adjacency[dir] = coordinateKeyToTupleOfIntegers(nTileId);
+    const nTileIdWC = getTileIdHavingWorldCoordinate(state, nWorldCoord);
+    if (nTileIdWC != undefined) {
+      adjacency[dir] = coordinateKeyToTupleOfIntegers(nTileIdWC);
       if (dir != getOppositDirection(direction)) {
         nStructure[dir] = refBarcodeInfo.neighbours[dir];
-      } else {
+      }
+      else if(dir == getOppositDirection(direction) && oldNeighbour===null){
+        nStructure[dir] = [1, 1, 1]
+        refBarcodeInfo.neighbours[direction]=[1, 1, 1]
+      }
+      else {
         nStructure[dir] = oldNeighbour.neighbours[dir];
       }
     }
@@ -206,7 +314,10 @@ const getTransitBarcodeInfo = (state, formData) => {
     coordinate: transitBarcodeCoordinate,
     blocked: false,
     size_info: sizeInfo,
-    adjacency: adjacency
+    adjacency: adjacency,
+    world_coordinate:transitBarcodeWorldCoordinate,
+    world_coordinate_reference_neighbour:tileId,
+    corner_world_cooordinate: cornerWorldCooordinate
   };
   return unit;
 };
@@ -230,11 +341,11 @@ const getTransitBarcodeInfo = (state, formData) => {
 //    B5   B8   B6
 
 // B1,B7,B2,B8 will be modified and TB will be added
-export const getUpdatedAndTransitBarcodes = (state, formData) => {
+export const getUpdatedAndTTPTransitBarcodes = (state, formData) => {
   const barcodes = getBarcodes(state);
   const newState = _.cloneDeep(barcodes);
   var { direction } = formData;
-  validateTransitBarcodeForm(formData, state);
+  // validateTransitBarcodeForm(formData, state);
   const transitBarcodeInfo = getTransitBarcodeInfo(state, formData);
   const updatedBarcodes = getUpdatedBarcodes(
     transitBarcodeInfo,

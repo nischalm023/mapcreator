@@ -14,8 +14,15 @@ import {
 import { changeFloor } from "./currentFloor";
 import {
   getUpdatedAndTransitBarcodes,
-  validateTransitBarcodeForm
+  validateTransitBarcodeForm,
+  getNeighbourBarcodeWorldCoord
 } from "./add-transit-barcode";
+
+import {
+  getUpdatedAndTTPTransitBarcodes,
+  getTTPNeighbourBarcodeWorldCoord
+} from "./add-ttp-transit-barcode";
+
 import { addEntitiesToFloor, clearTiles } from "./actions";
 import { snapToCoordinate } from "./viewport";
 import { setErrorMessage } from "./message";
@@ -28,7 +35,7 @@ import {
 // TODO: should create a folder "actions/barcode" and move this file
 // and "add-transit-barcode.js" in it since this is getting big
 
-const createNewBarcode = ({ coordinate, neighbours, barcode, size_info }) => ({
+const createNewBarcode = ({ coordinate, neighbours, barcode, size_info, world_coordinate, world_coordinate_reference_neighbour}) => ({
   barcode,
   coordinate,
   neighbours,
@@ -37,7 +44,9 @@ const createNewBarcode = ({ coordinate, neighbours, barcode, size_info }) => ({
   sector: "undefined",
   store_status: 0,
   size_info,
-  botid: "null"
+  botid: "null",
+  world_coordinate,
+  world_coordinate_reference_neighbour
 });
 
 const addTransitBarcode = formData => (dispatch, getState) => {
@@ -72,6 +81,38 @@ const addTransitBarcode = formData => (dispatch, getState) => {
   return Promise.resolve();
 };
 
+const addTTPTransitBarcode = formData => (dispatch, getState) => {
+  const state = getState();
+  // const isValidFormData = validateTransitBarcodeForm(formData, state);
+  // if (isValidFormData != true) {
+  //   const { error } = isValidFormData;
+  //   return dispatch(setErrorMessage(error));
+  // }
+  var [updatedBarcodes, transitBarcode] = getUpdatedAndTTPTransitBarcodes(
+    state,
+    formData
+  );
+  // TODO: should do add barcode and add barcode to floor in a single action.
+  // i.e. handle "ADD-MULTIPLE-BARCODE" in floor reducer itself.
+  // add to barcodes
+  dispatch({
+    type: "ADD-MULTIPLE-BARCODE",
+    value: [...updatedBarcodes, transitBarcode]
+  });
+  // add to floor
+  dispatch(
+    addEntitiesToFloor({
+      currentFloor: state.currentFloor,
+      floorKey: "map_values",
+      entities: [transitBarcode],
+      idField: "coordinate"
+    })
+  );
+  // clear selection
+  dispatch(clearTiles);
+  return Promise.resolve();
+};
+
 // TODO: (MUST) choose barcode and coordinate which doesn't exit in current map
 
 const addNewBarcode = formData => (dispatch, getState) => {
@@ -79,6 +120,13 @@ const addNewBarcode = formData => (dispatch, getState) => {
 
   const { tileId, direction } = formData;
   const nbTileId = getNeighbourTiles(tileId)[direction];
+  const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
+  const newBarcodeWorldCoord = getNeighbourBarcodeWorldCoord(
+    refBarcodeWorldCoord,
+    DEFAULT_BOT_WITH_RACK_THRESHOLD*2,
+    direction
+  );
+  const NewBarcodeWorldCoordinate = `[${newBarcodeWorldCoord["x"]},${newBarcodeWorldCoord["y"]}]`
   // new barcode will be connected to all neighbour barcodes that it has
   const nbNeighboursTileIds = getNeighbourTiles(nbTileId);
   const oldBarcodes = [];
@@ -100,9 +148,11 @@ const addNewBarcode = formData => (dispatch, getState) => {
     coordinate: nbTileId,
     neighbours: nbNeighbourStructure,
     barcode: implicitCoordinateKeyToBarcode(nbTileId),
-    size_info: nbSizeInfo
+    size_info: nbSizeInfo,
+    world_coordinate:NewBarcodeWorldCoordinate,
+    world_coordinate_reference_neighbour:tileId
   });
-
+  console.log("newBarcode---------->>>>",newBarcode)
   // add to barcodes
   dispatch({
     type: "ADD-MULTIPLE-BARCODE",
@@ -131,6 +181,14 @@ const addNewMultipleBarcode = formData => (dispatch, getState) => {
     const nbBarcode = getBarcode(state, { tileId: val });
     // new barcode will be connected to all neighbour barcodes that it has
     const nbNeighboursTileIds = getNeighbourTiles(nbTileId);
+    const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId: val });
+    // console.log("refBarcodeWorldCoord--->>>",refBarcodeWorldCoord)
+    const newBarcodeWorldCoord = getNeighbourBarcodeWorldCoord(
+    refBarcodeWorldCoord,
+    DEFAULT_BOT_WITH_RACK_THRESHOLD*2,
+    direction
+    );
+    const NewBarcodeWorldCoordinate = `[${newBarcodeWorldCoord["x"]},${newBarcodeWorldCoord["y"]}]`
     const oldBarcodes = [];
     const nbNeighbourStructure = [];
     const nbSizeInfo = nbBarcode.size_info;
@@ -149,7 +207,9 @@ const addNewMultipleBarcode = formData => (dispatch, getState) => {
       coordinate: nbTileId,
       neighbours: nbNeighbourStructure,
       barcode: implicitCoordinateKeyToBarcode(nbTileId),
-      size_info: nbSizeInfo
+      size_info: nbSizeInfo,
+      world_coordinate:NewBarcodeWorldCoordinate,
+      world_coordinate_reference_neighbour:val
     });
 
     // add to barcodes
@@ -302,5 +362,6 @@ export {
   modifyMultipleNeighbours,
   shiftBarcode,
   addTransitBarcode,
-  locateBarcode
+  locateBarcode,
+  addTTPTransitBarcode
 };

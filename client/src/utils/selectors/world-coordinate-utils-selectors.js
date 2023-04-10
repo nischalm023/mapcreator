@@ -101,9 +101,13 @@ export const getTileIdToWorldCoordMapFunc = barcodes => {
             distanceInfo,
             neighbourWithWorldCoordinate
           );
+          // console.log("................worldCoordinate",worldCoordinate)
+          var worldCoordinates = JSON.parse(barcodeInfoDict["world_coordinate"])
+          console.log("................",worldCoordinates)
+          // console.log("<<<<<<<<<<<<<<<<<<,",)
           totalBarcodesWithDefinedWorldCoord =
             totalBarcodesWithDefinedWorldCoord + 1;
-          tileIdToWorldCoordinateMapInitial[barcode] = worldCoordinate;
+          tileIdToWorldCoordinateMapInitial[barcode] = {"x":worldCoordinates[0],"y":worldCoordinates[1]};
           neighbourWithValidWorldCoordinate[barcode] = neighbourWithWorldCoordinate.nbarcode;
         }
       }
