@@ -25,7 +25,7 @@ export const tileNameWithoutEntityDataSelector = createSelector(
     if (barcode.store_status && !zoneViewMode && !sectorViewMode)
       tileSprite = constants.STORABLE;
     if (barcode.special && !zoneViewMode) tileSprite = constants.SPECIAL;
-    if (barcode.blocked && !zoneViewMode) tileSprite = constants.BLOCKED;
+    if (barcode.blocked && !zoneViewMode && !sectorViewMode) tileSprite = constants.BLOCKED;
     if (barcode.path_status > 0 && !zoneViewMode && !sectorViewMode)
       tileSprite = constants.PATH;
     if (barcode.node_status > 0 && !zoneViewMode && !sectorViewMode)

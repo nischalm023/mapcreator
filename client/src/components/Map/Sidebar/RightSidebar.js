@@ -28,6 +28,7 @@ import AddSector from "components/Map/Forms/AddSector";
 import EditSpecialBarcode from "components/Map/Forms/EditSpecialBarcodes";
 import ShiftBarcode from "components/Map/Forms/ShiftBarcode";
 import AddTransitBarcode from "components/Map/Forms/AddTransitBarcode";
+import AddTTPTransitBarcode from "components/Map/Forms/AddTTPTransitBarcode";
 import LocateBarcode from "components/Map/Forms/LocateBarcode";
 import SectorMSUMapping from "components/Map/Forms/SectorMSUMapping";
 import RemoveConveyorSystem from "components/Map/Forms/RemoveConveyorSystem";
@@ -39,7 +40,8 @@ import {
   ZoneViewCheckbox,
   SectorViewCheckbox,
   DirectionViewCheckbox,
-  ConveyorCheckbox
+  ConveyorCheckbox,
+  TTPCheckbox
 } from "./Checkboxes";
 
 class RightSidebar extends Component {
@@ -49,7 +51,7 @@ class RightSidebar extends Component {
   };
 
   render() {
-    const { queueMode, multiQueueMode, zoneViewMode, sectorViewMode, directionViewMode, conveyorMode, dispatch } = this.props;
+    const { queueMode, multiQueueMode, zoneViewMode, sectorViewMode, directionViewMode, conveyorMode, TTPMode, dispatch } = this.props;
     const { open } = this.state;
 
     return (
@@ -93,7 +95,6 @@ class RightSidebar extends Component {
               Exclude,
               EditSpecialBarcode,
               ShiftBarcode,
-              AddTransitBarcode,
             ].map((Elm, idx) => (
               <div
                 key={idx}
@@ -103,6 +104,9 @@ class RightSidebar extends Component {
                 <Elm onError={e => this.setState({ e })} />
               </div>
             ))}
+          </div>
+          <div className="row" style={{ margin: "0% 5% 0%", marginTop: "0%" }}>
+              {this.props.TTPMode === true ?<AddTTPTransitBarcode />: <AddTransitBarcode />}
           </div>
           <div className="conveyor-buttons">
             <div className="row">
@@ -127,6 +131,16 @@ class RightSidebar extends Component {
                 val={conveyorMode}
                 onChange={() =>
                   dispatch({ type: "TOGGLE-CONVEYOR-VIEW-MODE" })
+                }
+              />
+            </div>
+          </div>
+          <div className="row">
+            <div className="col">
+              <TTPCheckbox
+                val={TTPMode}
+                onChange={() =>
+                  dispatch({ type: "TOGGLE-TTP-VIEW-MODE" })
                 }
               />
             </div>

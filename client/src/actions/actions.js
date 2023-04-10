@@ -966,6 +966,14 @@ const updateMapObj = (mapObj, withWorldCoordinate) => {
   return mapObj;
 }
 
+export const calculate_corner_world_cordinate = (size_info,world_cordinate) => {
+    var north_east_wc = [world_cordinate[0]+size_info[1],world_cordinate[1]-size_info[0]]
+    var south_east_wc = [world_cordinate[0]+size_info[1],world_cordinate[1]+size_info[2]]
+    var north_west_wc = [world_cordinate[0]-size_info[3],world_cordinate[1]-size_info[0]]
+    var south_west_wc = [world_cordinate[0]-size_info[3],world_cordinate[1]+size_info[2]]
+    return [north_east_wc,south_east_wc,south_west_wc,north_west_wc]
+}
+
 // adds the key "world_coordinate" to the normalized map.
 // This is a derived value, so by default is not stored. However
 // while exporting, it is required to be present explicitly
@@ -988,12 +996,13 @@ export const addWorldCoordinateToMap = (normalizedMap) => {
       var barcodeInfo = currentFloorBarcodeDict[barcode];
       const worldCoordinate = tileIdToWorldCoordinateMap[barcode];
       const wcReferenceNeighbour = neighbourWithValidWorldCoordinate[barcode];
-      barcodeInfo["world_coordinate"] = `[${worldCoordinate.x},${
-        worldCoordinate.y
-      }]`;
-      barcodeInfo[
-        "world_coordinate_reference_neighbour"
-      ] = wcReferenceNeighbour;
+      // barcodeInfo["world_coordinate"] = `[${worldCoordinate.x},${
+      //   worldCoordinate.y
+      // }]`;
+      // barcodeInfo[
+      //   "world_coordinate_reference_neighbour"
+      // ] = wcReferenceNeighbour;
+      barcodeInfo["corner_world_cooordinate"] = calculate_corner_world_cordinate(barcodeInfo["size_info"],[worldCoordinate.x,worldCoordinate.y])
       currentFloorBarcodeDict[barcode] = barcodeInfo;
     }
     newbarcodeDict = { ...newbarcodeDict, ...currentFloorBarcodeDict };

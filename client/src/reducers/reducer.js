@@ -167,6 +167,14 @@ const conveyorModeReducer = (state = false, action) => {
   return state;
 };
 
+const TTPModeReducer = (state = false, action) => {
+  switch (action.type) {
+    case "TOGGLE-TTP-VIEW-MODE":
+      return !state;
+  }
+  return state;
+};
+
 const multiQueueModeReducer = (state = false, action) => {
   switch (action.type) {
     case "TOGGLE-MULTI-QUEUE-MODE":
@@ -204,6 +212,7 @@ export const baseSelectionReducer = combineReducers({
   distanceTiles: selectedDistanceTilesReducer,
   queueMode: queueModeReducer,
   conveyorMode: conveyorModeReducer,
+  TTPMode: TTPModeReducer,
   multiQueueMode: multiQueueModeReducer,
   zoneViewMode: zoneViewModeReducer,
   sectorViewMode: sectorViewModeReducer,
@@ -228,6 +237,7 @@ export const selectionReducer = (
     shiftKey: false,
     queueMode: false,
     conveyorMode: false,
+    TTPMode:false,
     multiQueueMode: false,
     zoneViewMode: false,
     sectorViewMode: false,

@@ -93,6 +93,7 @@ class Map extends Component {
       successMessage,
       queueMode,
       conveyorMode,
+      TTPMode,
       zoneViewMode,
       sectorViewMode,
       directionViewMode
@@ -147,6 +148,7 @@ class Map extends Component {
               dispatch={dispatch}
               queueMode={queueMode}
               conveyorMode={conveyorMode}
+              TTPMode={TTPMode}
               zoneViewMode={zoneViewMode}
               sectorViewMode={sectorViewMode}
               directionViewMode={directionViewMode}
@@ -274,6 +276,7 @@ export default connect(state => ({
   nMap: state.normalizedMap,
   queueMode: state.selection.queueMode,
   conveyorMode: state.selection.conveyorMode,
+  TTPMode:state.selection.TTPMode,
   successMessage: state.successMessage,
   errorMessage: state.errorMessage,
   zoneViewMode: state.selection.zoneViewMode,
