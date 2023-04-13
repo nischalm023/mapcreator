@@ -83,34 +83,37 @@ export const getTileIdToWorldCoordMapFunc = barcodes => {
   var totalBarcodesWithDefinedWorldCoord = 1;
   while (totalBarcodesWithDefinedWorldCoord < totalBarcodes) {
     for (var barcode in barcodes) {
-      if (barcodes.hasOwnProperty(barcode)) {
-        if (tileIdToWorldCoordinateMapInitial.hasOwnProperty(barcode) && !barcodes[barcode].hasOwnProperty("world_coordinate")) {
-          continue;
-        }
-        var barcodeInfoDict = barcodes[barcode];
-        var distanceInfo = barcodeInfoDict.size_info;
-        var neighbourWithWorldCoordinate = getNeighbourWithValidWorldCoord(
-          barcode,
-          barcodes,
-          tileIdToWorldCoordinateMapInitial
-        );
-        if (neighbourWithWorldCoordinate != undefined) {
-         
-          
-          worldCoordinate = getWorldCoordUsingNeighbour(
-            distanceInfo,
-            neighbourWithWorldCoordinate
-          );
-          if(barcodeInfoDict.hasOwnProperty("world_coordinate")){
-            var worldCoordinateValue = JSON.parse(barcodeInfoDict["world_coordinate"])
-            worldCoordinate = {"x":worldCoordinateValue[0],"y":worldCoordinateValue[1]}
-          }
-          totalBarcodesWithDefinedWorldCoord =
+      var barcodeInfoDict = barcodes[barcode];
+      if(barcodeInfoDict.hasOwnProperty("world_coordinate")){
+        var worldCoordinateValue = JSON.parse(barcodeInfoDict["world_coordinate"])
+        worldCoordinate = {"x":worldCoordinateValue[0],"y":worldCoordinateValue[1]}
+        totalBarcodesWithDefinedWorldCoord =
             totalBarcodesWithDefinedWorldCoord + 1;
           tileIdToWorldCoordinateMapInitial[barcode] = worldCoordinate
-          neighbourWithValidWorldCoordinate[barcode] = neighbourWithWorldCoordinate.nbarcode;
+          neighbourWithValidWorldCoordinate[barcode] = barcodeInfoDict["world_coordinate_reference_neighbour"];
+      }else{
+        if (barcodes.hasOwnProperty(barcode)) {
+          if (tileIdToWorldCoordinateMapInitial.hasOwnProperty(barcode) && !barcodes[barcode].hasOwnProperty("world_coordinate")) {
+            continue;
+          }
+          var distanceInfo = barcodeInfoDict.size_info;
+          var neighbourWithWorldCoordinate = getNeighbourWithValidWorldCoord(
+            barcode,
+            barcodes,
+            tileIdToWorldCoordinateMapInitial
+          );
+          if (neighbourWithWorldCoordinate != undefined) {
+            worldCoordinate = getWorldCoordUsingNeighbour(
+              distanceInfo,
+              neighbourWithWorldCoordinate
+            );
+            totalBarcodesWithDefinedWorldCoord =
+              totalBarcodesWithDefinedWorldCoord + 1;
+            tileIdToWorldCoordinateMapInitial[barcode] = worldCoordinate
+            neighbourWithValidWorldCoordinate[barcode] = neighbourWithWorldCoordinate.nbarcode;
+            }
+          }
         }
-      }
     }
   }
   return {tileIdToWorldCoordinateMap : tileIdToWorldCoordinateMapInitial,
