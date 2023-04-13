@@ -94,19 +94,19 @@ const getUpdatedBarcodeInfo = (
   refDirection
 ) => {
   const oppositeDirection = getOppositDirection(direction);
+  const oppositeRefDirection = getOppositDirection(refDirection);
   var currentNeighbourStructure = barcodeInfo.neighbours;
   barcodeInfo.size_info[oppositeDirection] = size;
   // Adjacency update,
+  var barcodeInfoWorldCoord = JSON.parse(barcodeInfo["world_coordinate"])
+  barcodeInfo["corner_world_cooordinate"] = calculate_corner_world_cordinate(barcodeInfo["size_info"],barcodeInfoWorldCoord)
   const adjacency = [null, null, null, null];
   for (var neighbourDir in neighbours) {
     if (neighbourDir == oppositeDirection) {
       adjacency[neighbourDir] = coordinateKeyToTupleOfIntegers(
         transitCoordinate
       );
-      // Update neighbour structure of perpendicular neighbours only
-      if (refDirection != direction && refDirection != oppositeDirection) {
         currentNeighbourStructure[neighbourDir] = [1, 1, 1];
-      }
     } else {
       const nBarcodeInfo = neighbours[neighbourDir];
       if (nBarcodeInfo != null) {
@@ -136,7 +136,9 @@ export const getUpdatedBarcodes = (
       const neighbourIndirTileId = tupleOfIntegersToCoordinateKey(
         neighbourIndir
       );
+      var get_diretion = getOppositDirection(dir)
       const barcodeInfo = newState[neighbourIndirTileId];
+
       const neighbours = getNeighbouringBarcodesWithNbFilter(
         neighbourIndirTileId,
         newState,
@@ -170,7 +172,8 @@ const axis = (value) => {
     return opposite;
 }
 
-const overlap_north_east = (ref_corner_coordinate,transit_corner_coordinate,transit_corner_coordinate1) => {
+const overlap_vertical_north_east = (ref_corner_coordinate,transit_corner_coordinate,transit_corner_coordinate1) => {
+
     if(ref_corner_coordinate[axis("x")] <  transit_corner_coordinate[axis("x")] && ref_corner_coordinate[axis("y")] > transit_corner_coordinate[axis("y")]){
         if(ref_corner_coordinate[axis("x")]>transit_corner_coordinate1[axis("x")]){
            return true;
@@ -179,13 +182,67 @@ const overlap_north_east = (ref_corner_coordinate,transit_corner_coordinate,tran
     return false;
 }
 
-const overlap_north_west = (ref_corner_coordinate,transit_corner_coordinate,transit_corner_coordinate1) => {
+const overlap_vertical_north_west = (ref_corner_coordinate,transit_corner_coordinate,transit_corner_coordinate1) => {
     if(ref_corner_coordinate[axis("x")] >  transit_corner_coordinate[axis("x")] && ref_corner_coordinate[axis("y")] > transit_corner_coordinate[axis("y")]){
         if(ref_corner_coordinate[axis("x")]<transit_corner_coordinate1[axis("x")]){
            return true;
         }
     }
     return false;
+}
+
+const overlap_vertical_south_east = (ref_corner_coordinate,transit_corner_coordinate,transit_corner_coordinate1) => {
+    if(ref_corner_coordinate[axis("x")] <  transit_corner_coordinate[axis("x")] && ref_corner_coordinate[axis("y")] < transit_corner_coordinate[axis("y")]){
+        if(ref_corner_coordinate[axis("x")]>transit_corner_coordinate1[axis("x")]){
+           return true;
+        }
+    }
+    return false;
+}
+
+const overlap_vertical_south_west = (ref_corner_coordinate,transit_corner_coordinate,transit_corner_coordinate1) => {
+    if(ref_corner_coordinate[axis("x")] >  transit_corner_coordinate[axis("x")] && ref_corner_coordinate[axis("y")] < transit_corner_coordinate[axis("y")]){
+        if(ref_corner_coordinate[axis("x")]<transit_corner_coordinate1[axis("x")]){
+           return true;
+        }
+    }
+    return false;
+}
+
+const overlap_horizontal_north_east = (ref_corner_coordinate,transit_corner_coordinate,transit_corner_coordinate1) => {
+  if(ref_corner_coordinate[axis("x")] <  transit_corner_coordinate[axis("x")] && ref_corner_coordinate[axis("y")] > transit_corner_coordinate[axis("y")]){
+      if(ref_corner_coordinate[axis("y")]<transit_corner_coordinate1[axis("y")]){
+         return true;
+      }
+  }
+  return false;
+}
+
+const overlap_horizontal_north_west = (ref_corner_coordinate,transit_corner_coordinate,transit_corner_coordinate1) => {
+  if(ref_corner_coordinate[axis("x")] >  transit_corner_coordinate[axis("x")] && ref_corner_coordinate[axis("y")] > transit_corner_coordinate[axis("y")]){
+      if(ref_corner_coordinate[axis("y")]<transit_corner_coordinate1[axis("y")]){
+         return true;
+      }
+  }
+  return false;
+}
+
+const overlap_horizontal_south_west = (ref_corner_coordinate,transit_corner_coordinate,transit_corner_coordinate1) => {
+  if(ref_corner_coordinate[axis("x")] >  transit_corner_coordinate[axis("x")] && ref_corner_coordinate[axis("y")] < transit_corner_coordinate[axis("y")]){
+      if(ref_corner_coordinate[axis("y")]>transit_corner_coordinate1[axis("y")]){
+         return true;
+      }
+  }
+  return false;
+}
+
+const overlap_horizontal_south_east = (ref_corner_coordinate,transit_corner_coordinate,transit_corner_coordinate1) => {
+  if(ref_corner_coordinate[axis("x")] <  transit_corner_coordinate[axis("x")] && ref_corner_coordinate[axis("y")] < transit_corner_coordinate[axis("y")]){
+      if(ref_corner_coordinate[axis("y")] > transit_corner_coordinate1[axis("y")]){
+         return true;
+      }
+  }
+  return false;
 }
 
 const corner_direction_mapping = (value) => {
@@ -226,25 +283,86 @@ const direction_mapping = (value) => {
   return opposite;
 }
 
-const AdjustTopTransitPosition = (gridView,transit_world_coordinate,transit_size_info) => {
+const AdjustBottomTransitPosition = (gridView,transit_corner_world_coordinate,transit_size_info,direction,transit_world_cordinate) => {
    for (const [key, value] of Object.entries(gridView)) {
-      if(overlap_north_east(value['corner_world_cooordinate'][corner_direction_mapping("sw")],transit_world_coordinate[corner_direction_mapping("ne")],transit_world_coordinate[corner_direction_mapping("nw")])){
-          console.log("north_east-------->",key)
-          // value['size_info'][direction_mapping("left")] = value['size_info'][direction_mapping("left")] - transit_size_info[direction_mapping("right")]
+      if(overlap_vertical_south_east(value['corner_world_cooordinate'][corner_direction_mapping("nw")],transit_corner_world_coordinate[corner_direction_mapping("se")],transit_corner_world_coordinate[corner_direction_mapping("sw")])){
           value['size_info'][direction_mapping("left")] = transit_size_info[direction_mapping("right")]
-          var corner_coordinate = calculate_corner_world_cordinate(value,value["world_coordinate"])
+          var corner_coordinate = calculate_corner_world_cordinate(value["size_info"],JSON.parse(value["world_coordinate"]))
           value['corner_world_cooordinate'] = corner_coordinate
+          transit_corner_world_coordinate[corner_direction_mapping("se")]=corner_coordinate[corner_direction_mapping("sw")]
+          transit_size_info[direction] =  corner_coordinate[corner_direction_mapping("sw")][1]- transit_world_cordinate[1]
+
         }
-        if(overlap_north_west(value['corner_world_cooordinate'][corner_direction_mapping("se")],transit_world_coordinate[corner_direction_mapping("nw")],transit_world_coordinate[corner_direction_mapping("ne")])){
-          console.log("north_west-------->",key)
-          // value['size_info'][direction_mapping("right")] = value['size_info'][direction_mapping("right")] - transit_size_info[direction_mapping("left")]
+        if(overlap_vertical_south_west(value['corner_world_cooordinate'][corner_direction_mapping("ne")],transit_corner_world_coordinate[corner_direction_mapping("sw")],transit_corner_world_coordinate[corner_direction_mapping("se")])){
           value['size_info'][direction_mapping("right")] =  transit_size_info[direction_mapping("left")]
-          var corner_coordinate = calculate_corner_world_cordinate(value,value["world_coordinate"])
+          var corner_coordinate = calculate_corner_world_cordinate(value["size_info"],JSON.parse(value["world_coordinate"]))
           value['corner_world_cooordinate'] = corner_coordinate
+          transit_corner_world_coordinate[corner_direction_mapping("sw")]=corner_coordinate[corner_direction_mapping("se")]
+          transit_size_info[direction] = corner_coordinate[corner_direction_mapping("se")][1] -  transit_world_cordinate[1]
         }
     }
 }
 
+const AdjustTopTransitPosition = (gridView,transit_corner_world_coordinate,transit_size_info,direction,transit_world_cordinate) => {
+   for (const [key, value] of Object.entries(gridView)) {
+      if(overlap_vertical_north_east(value['corner_world_cooordinate'][corner_direction_mapping("sw")],transit_corner_world_coordinate[corner_direction_mapping("ne")],transit_corner_world_coordinate[corner_direction_mapping("nw")])){
+          value['size_info'][direction_mapping("left")] = transit_size_info[direction_mapping("right")]
+          var corner_coordinate = calculate_corner_world_cordinate(value["size_info"],JSON.parse(value["world_coordinate"]))
+          value['corner_world_cooordinate'] = corner_coordinate
+          transit_corner_world_coordinate[corner_direction_mapping("ne")]=corner_coordinate[corner_direction_mapping("nw")]
+          transit_size_info[direction] =  transit_world_cordinate[1]- corner_coordinate[corner_direction_mapping("nw")][1]
+        }
+        if(overlap_vertical_north_west(value['corner_world_cooordinate'][corner_direction_mapping("se")],transit_corner_world_coordinate[corner_direction_mapping("nw")],transit_corner_world_coordinate[corner_direction_mapping("ne")])){
+          value['size_info'][direction_mapping("right")] =  transit_size_info[direction_mapping("left")]
+          var corner_coordinate = calculate_corner_world_cordinate(value["size_info"],JSON.parse(value["world_coordinate"]))
+          value['corner_world_cooordinate'] = corner_coordinate
+          transit_corner_world_coordinate[corner_direction_mapping("nw")]=corner_coordinate[corner_direction_mapping("ne")]
+          transit_size_info[direction] =  transit_world_cordinate[1]- corner_coordinate[corner_direction_mapping("ne")][1]
+        }
+    }
+}
+
+const AdjustRightTransitPosition = (gridView,transit_corner_world_coordinate,transit_size_info,direction,transit_world_cordinate) => {
+   for (const [key, value] of Object.entries(gridView)) {
+    if(overlap_horizontal_north_east(value['corner_world_cooordinate'][corner_direction_mapping("sw")],
+    transit_corner_world_coordinate[corner_direction_mapping("ne")],transit_corner_world_coordinate[corner_direction_mapping("se")])){
+      value['size_info'][direction_mapping("bottom")] = transit_size_info[direction_mapping("top")]
+      var corner_coordinate = calculate_corner_world_cordinate(value["size_info"],JSON.parse(value["world_coordinate"]))
+      value['corner_world_cooordinate'] = corner_coordinate
+      transit_corner_world_coordinate[corner_direction_mapping("ne")]=corner_coordinate[corner_direction_mapping("se")]
+      transit_size_info[direction] =  corner_coordinate[corner_direction_mapping("se")][0] - transit_world_cordinate[0]
+    }
+    if(overlap_horizontal_south_east(value['corner_world_cooordinate'][corner_direction_mapping("nw")],
+    transit_corner_world_coordinate[corner_direction_mapping("se")],transit_corner_world_coordinate[corner_direction_mapping("ne")])){
+      value['size_info'][direction_mapping("top")] =  transit_size_info[direction_mapping("bottom")]
+      var corner_coordinate = calculate_corner_world_cordinate(value["size_info"],JSON.parse(value["world_coordinate"]))
+      value['corner_world_cooordinate'] = corner_coordinate
+      transit_corner_world_coordinate[corner_direction_mapping("se")]=corner_coordinate[corner_direction_mapping("ne")]
+      transit_size_info[direction] =  corner_coordinate[corner_direction_mapping("ne")][0] - transit_world_cordinate[0]
+    }
+  }
+}
+
+ const AdjustLeftTransitPosition = (gridView,transit_corner_world_coordinate,transit_size_info,direction,transit_world_cordinate) => {
+    for (const [key, value] of Object.entries(gridView)) {
+      if(overlap_horizontal_north_west(value['corner_world_cooordinate'][corner_direction_mapping("se")],
+      transit_corner_world_coordinate[corner_direction_mapping("nw")],transit_corner_world_coordinate[corner_direction_mapping("sw")])){
+        value['size_info'][direction_mapping("bottom")] =  transit_size_info[direction_mapping("top")]
+        var corner_coordinate = calculate_corner_world_cordinate(value["size_info"],JSON.parse(value["world_coordinate"]))
+        value['corner_world_cooordinate'] = corner_coordinate
+        transit_corner_world_coordinate[corner_direction_mapping("nw")]=corner_coordinate[corner_direction_mapping("sw")]
+        transit_size_info[direction] =  transit_world_cordinate[0] - corner_coordinate[corner_direction_mapping("sw")][0]
+      }
+      if(overlap_horizontal_south_west(value['corner_world_cooordinate'][corner_direction_mapping("ne")],
+       transit_corner_world_coordinate[corner_direction_mapping("sw")],transit_corner_world_coordinate[corner_direction_mapping("nw")])){
+           value['size_info'][direction_mapping("top")] = transit_size_info[direction_mapping("bottom")]
+           var corner_coordinate = calculate_corner_world_cordinate(value["size_info"],JSON.parse(value["world_coordinate"]))
+           value['corner_world_cooordinate'] = corner_coordinate
+           transit_corner_world_coordinate[corner_direction_mapping("sw")]=corner_coordinate[corner_direction_mapping("nw")]
+           transit_size_info[direction] =  transit_world_cordinate[0] - corner_coordinate[corner_direction_mapping("nw")][0]
+      }   
+    }
+ }
 
 const getTransitBarcodeInfo = (state, formData) => {
   const { tileId, newBarcode, direction, distance } = formData;
@@ -262,6 +380,7 @@ const getTransitBarcodeInfo = (state, formData) => {
     direction
   );
   const transitBarcodeCoordinate = getTransitCoordinate(state);
+
   const transitBarcodeWorldCoordinate = `[${transitBarcodeWorldCoord["x"]},${transitBarcodeWorldCoord["y"]}]`
   // SizeInfo
   const sizeInfo = _.cloneDeep(refBarcodeInfo.size_info);
@@ -279,8 +398,20 @@ const getTransitBarcodeInfo = (state, formData) => {
   }
   var cornerWorldCooordinate = calculate_corner_world_cordinate(sizeInfo,[transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]])
   // Adjacency and Neighbour structure
+
   if(direction == 0){
-    AdjustTopTransitPosition(barcodes,cornerWorldCooordinate,sizeInfo)
+    var barcodes_info = AdjustTopTransitPosition(barcodes,cornerWorldCooordinate,sizeInfo,direction,[transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]])
+   }
+  if(direction == 1){
+    // var barcodes_info = barcodes
+    var barcodes_info = AdjustRightTransitPosition(barcodes,cornerWorldCooordinate,sizeInfo,direction,[transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]])
+   }
+  if(direction == 2){
+    var barcodes_info = AdjustBottomTransitPosition(barcodes,cornerWorldCooordinate,sizeInfo,direction,[transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]])
+   }
+  if(direction == 3){
+    // var barcodes_info = barcodes
+    var barcodes_info = AdjustLeftTransitPosition(barcodes,cornerWorldCooordinate,sizeInfo,direction,[transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]])
    }
   const adjacency = [null, null, null, null];
   const nStructure = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
@@ -345,8 +476,7 @@ export const getUpdatedAndTTPTransitBarcodes = (state, formData) => {
   const barcodes = getBarcodes(state);
   const newState = _.cloneDeep(barcodes);
   var { direction } = formData;
-  // validateTransitBarcodeForm(formData, state);
-  const transitBarcodeInfo = getTransitBarcodeInfo(state, formData);
+  var transitBarcodeInfo = getTransitBarcodeInfo(state, formData);
   const updatedBarcodes = getUpdatedBarcodes(
     transitBarcodeInfo,
     newState,

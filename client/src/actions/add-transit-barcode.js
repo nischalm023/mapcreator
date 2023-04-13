@@ -4,6 +4,7 @@ import {
   tupleOfIntegersToCoordinateKey,
   getNeighbourBarcodeIncludingDisconnectedInDirection
 } from "utils/util";
+import {calculate_corner_world_cordinate} from "./actions";
 import {
   getBarcodes,
   getTileIdHavingWorldCoordinate,
@@ -179,6 +180,7 @@ const getTransitBarcodeInfo = (state, formData) => {
     (2 * refBarcodeInfo.size_info[direction] - distance) / 2;
   sizeInfo[(direction + 2) % 4] = distance / 2;
   // Adjacency and Neighbour structure
+
   const adjacency = [null, null, null, null];
   const nStructure = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
   for (var dir = 0; dir < 4; dir++) {
@@ -188,6 +190,8 @@ const getTransitBarcodeInfo = (state, formData) => {
       dir
     );
     const nTileId = getTileIdHavingWorldCoordinate(state, nWorldCoord);
+    var transitBarcodeWorldCoordinate = `[${transitBarcodeWorldCoord["x"]},${transitBarcodeWorldCoord["y"]}]`
+    var cornerWorldCooordinate = calculate_corner_world_cordinate(sizeInfo,[transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]])
     if (nTileId != undefined) {
       adjacency[dir] = coordinateKeyToTupleOfIntegers(nTileId);
       if (dir != getOppositDirection(direction)) {
@@ -206,7 +210,10 @@ const getTransitBarcodeInfo = (state, formData) => {
     coordinate: transitBarcodeCoordinate,
     blocked: false,
     size_info: sizeInfo,
-    adjacency: adjacency
+    adjacency: adjacency,
+    world_coordinate:transitBarcodeWorldCoordinate,
+    world_coordinate_reference_neighbour:tileId,
+    corner_world_cooordinate: cornerWorldCooordinate
   };
   return unit;
 };

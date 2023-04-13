@@ -20,10 +20,10 @@ import {
 
 import {
   getUpdatedAndTTPTransitBarcodes,
-  getTTPNeighbourBarcodeWorldCoord
+  getTTPNeighbourBarcodeWorldCoord,
 } from "./add-ttp-transit-barcode";
 
-import { addEntitiesToFloor, clearTiles } from "./actions";
+import { addEntitiesToFloor, clearTiles, calculate_corner_world_cordinate} from "./actions";
 import { snapToCoordinate } from "./viewport";
 import { setErrorMessage } from "./message";
 import {
@@ -35,7 +35,7 @@ import {
 // TODO: should create a folder "actions/barcode" and move this file
 // and "add-transit-barcode.js" in it since this is getting big
 
-const createNewBarcode = ({ coordinate, neighbours, barcode, size_info, world_coordinate, world_coordinate_reference_neighbour}) => ({
+const createNewBarcode = ({ coordinate, neighbours, barcode, size_info, world_coordinate, world_coordinate_reference_neighbour,corner_world_cooordinate}) => ({
   barcode,
   coordinate,
   neighbours,
@@ -46,7 +46,8 @@ const createNewBarcode = ({ coordinate, neighbours, barcode, size_info, world_co
   size_info,
   botid: "null",
   world_coordinate,
-  world_coordinate_reference_neighbour
+  world_coordinate_reference_neighbour,
+  corner_world_cooordinate
 });
 
 const addTransitBarcode = formData => (dispatch, getState) => {
@@ -144,15 +145,16 @@ const addNewBarcode = formData => (dispatch, getState) => {
       nbNeighbourStructure.push([0, 0, 0]);
     }
   });
+  var barcodeCornerCoordinate = calculate_corner_world_cordinate(nbSizeInfo,[newBarcodeWorldCoord["x"],newBarcodeWorldCoord["y"]])
   const newBarcode = createNewBarcode({
     coordinate: nbTileId,
     neighbours: nbNeighbourStructure,
     barcode: implicitCoordinateKeyToBarcode(nbTileId),
     size_info: nbSizeInfo,
     world_coordinate:NewBarcodeWorldCoordinate,
-    world_coordinate_reference_neighbour:tileId
+    world_coordinate_reference_neighbour:tileId,
+    corner_world_cooordinate:barcodeCornerCoordinate
   });
-  console.log("newBarcode---------->>>>",newBarcode)
   // add to barcodes
   dispatch({
     type: "ADD-MULTIPLE-BARCODE",
@@ -203,13 +205,15 @@ const addNewMultipleBarcode = formData => (dispatch, getState) => {
         nbNeighbourStructure.push([0, 0, 0]);
       }
     });
+    var barcodeCornerCoordinate = calculate_corner_world_cordinate(nbSizeInfo,[newBarcodeWorldCoord["x"],newBarcodeWorldCoord["y"]])
     const newBarcode = createNewBarcode({
       coordinate: nbTileId,
       neighbours: nbNeighbourStructure,
       barcode: implicitCoordinateKeyToBarcode(nbTileId),
       size_info: nbSizeInfo,
       world_coordinate:NewBarcodeWorldCoordinate,
-      world_coordinate_reference_neighbour:val
+      world_coordinate_reference_neighbour:val,
+      corner_world_cooordinate:barcodeCornerCoordinate
     });
 
     // add to barcodes
@@ -306,6 +310,7 @@ const modifyMultipleNeighbours = (values) => (dispatch, getState) => {
 };
 
 const shiftBarcode = ({ tileId, direction, distance }) => dispatch => {
+  
   try {
     return dispatch({
       type: "SHIFT-BARCODE",
