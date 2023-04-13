@@ -195,6 +195,7 @@ export const setSectorsMxUPreferences = (getState) => {
 export const barcodeCordMapping = (getState) => {  
   const state = getState();
   const normalizedMap = state.normalizedMap;
+  var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   var mappingBarcodeCoord = {}
   Object.keys(normalizedMap.entities.barcode).forEach(function(key) {
     mappingBarcodeCoord[normalizedMap.entities.barcode[key]["barcode"]]=key
