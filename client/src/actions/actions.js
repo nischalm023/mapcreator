@@ -195,7 +195,6 @@ export const setSectorsMxUPreferences = (getState) => {
 export const barcodeCordMapping = (getState) => {  
   const state = getState();
   const normalizedMap = state.normalizedMap;
-  var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   var mappingBarcodeCoord = {}
   Object.keys(normalizedMap.entities.barcode).forEach(function(key) {
     mappingBarcodeCoord[normalizedMap.entities.barcode[key]["barcode"]]=key
@@ -555,7 +554,6 @@ export const addHighwayQueue = () => (dispatch, getState) => {
 
 export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
   var { normalizedMap, barcodeFormat } = getState();
-  var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   var withAdjacencyWorldCoordinate = addWorldCoordinateAndAdjacency(normalizedMap,barcodeFormat)
   var convertBarcodeEntities = ConvertEntitiesInBarcodeFormat(dispatch,getState)
   var { normalizedMap, barcodeFormat } = getState();
@@ -576,9 +574,9 @@ export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
 
 export const downloadMap = (singleFloor = false) => (dispatch, getState) => {
   var { normalizedMap } = getState();
-  var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
+  // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   setSectorsBarcodeMapping(dispatch, getState);
-  const exportedJson = exportMap(withWorldCoordinate, singleFloor);
+  const exportedJson = exportMap(normalizedMap, singleFloor);
   var zip = new JSZip();
   Object.keys(exportedJson).forEach((fileName) => {
     if (fileName != "sector") {
@@ -600,8 +598,8 @@ export const copyJSONToClipboard = (fieldName, singleFloor = false) => (
 ) => {
   setSectorsBarcodeMapping(dispatch, getState);
   var { normalizedMap } = getState();
-  var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
-  const exportedJson = exportMap(withWorldCoordinate, singleFloor);
+  // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
+  const exportedJson = exportMap(normalizedMap, singleFloor);
   if (exportedJson[fieldName]) {
     copy(JSON.stringify(exportedJson[fieldName]));
   } else dispatch(setErrorMessage("Invalid JSON file name"));
@@ -630,8 +628,8 @@ export const editChargerBarcode = (charger_location, new_barcode ) => ({
 
 export const createMapCopy = ({ name }) => (dispatch, getState) => {
   const { normalizedMap } = getState();
-  var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
-  return createMap(denormalizeMap(withWorldCoordinate).map, name)
+  // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
+  return createMap(denormalizeMap(normalizedMap).map, name)
     .then(handleErrors)
     .then((res) => res.json())
     .then((id) =>
@@ -652,9 +650,9 @@ export const requestValidation = (id, email, map_updated_time) => (
   getState
 ) => {
   var { normalizedMap } = getState();
-  var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
+  // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   setSectorsBarcodeMapping(dispatch, getState);
-  const exportedJson = exportMap(withWorldCoordinate, false);
+  const exportedJson = exportMap(normalizedMap, false);
   var payload = formatMapWithDataSuffix(id, exportedJson, map_updated_time);
   payload["email"] = email;
   // map validation request on Map Validator
@@ -673,11 +671,11 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
   const state = getState();
   let id = getMapId(state);
   let { normalizedMap } = state;
-  let withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
+  // let withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   setSectorsBarcodeMapping(dispatch, getState);
-  const mapObj = denormalizeMap(withWorldCoordinate);
-  let updatedMapObj = updateMapObj(mapObj, withWorldCoordinate);
-  const exportedJson = exportMap(withWorldCoordinate, false);
+  const mapObj = denormalizeMap(normalizedMap);
+  let updatedMapObj = updateMapObj(mapObj, normalizedMap);
+  const exportedJson = exportMap(normalizedMap, false);
   let chargerDict = getParticularEntity(state, { entityName: "charger" });
   let chargers = Object.entries(chargerDict).map(([, val]) => val);
   let ppsDict = getParticularEntity(state, { entityName: "pps" });
@@ -744,8 +742,8 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
 export const runSanity = () => (dispatch, getState) => {
   //return runSanityReducer("NONE");
   const { normalizedMap } = getState();
-  var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
-  var CompleteDataSanity = runCompleteDataSanity(withWorldCoordinate);
+  // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
+  var CompleteDataSanity = runCompleteDataSanity(normalizedMap);
 
   // console.log("CompleteDataSanity  data", CompleteDataSanity);
   return dispatch(
@@ -996,12 +994,12 @@ export const addWorldCoordinateToMap = (normalizedMap) => {
       var barcodeInfo = currentFloorBarcodeDict[barcode];
       const worldCoordinate = tileIdToWorldCoordinateMap[barcode];
       const wcReferenceNeighbour = neighbourWithValidWorldCoordinate[barcode];
-      // barcodeInfo["world_coordinate"] = `[${worldCoordinate.x},${
-      //   worldCoordinate.y
-      // }]`;
-      // barcodeInfo[
-      //   "world_coordinate_reference_neighbour"
-      // ] = wcReferenceNeighbour;
+      barcodeInfo["world_coordinate"] = `[${worldCoordinate.x},${
+        worldCoordinate.y
+      }]`;
+      barcodeInfo[
+        "world_coordinate_reference_neighbour"
+      ] = wcReferenceNeighbour;
       barcodeInfo["corner_world_cooordinate"] = calculate_corner_world_cordinate(barcodeInfo["size_info"],[worldCoordinate.x,worldCoordinate.y])
       currentFloorBarcodeDict[barcode] = barcodeInfo;
     }
@@ -1023,11 +1021,11 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap,barcodeFormat) =>
     barcodeKeys.forEach((barcodeKey) => {
       currentFloorBarcodeDict[barcodeKey] = oldBarcodeDict[barcodeKey];
     });
-    const {
-      tileIdToWorldCoordinateMap: tileIdToWorldCoordinateMap,
-      neighbourWithValidWorldCoordinate: neighbourWithValidWorldCoordinate,
-    } = getTileIdToWorldCoordMapFunc(currentFloorBarcodeDict);
     var worldcord_mapping = [];
+    var tileIdToWorldCoordinateMap = {} 
+    for (const [key, value] of Object.entries(currentFloorBarcodeDict)) {
+      tileIdToWorldCoordinateMap[key] = {"x":JSON.parse(value["world_coordinate"])[0],"y":JSON.parse(value["world_coordinate"])[1]}
+    }
     for (var key in tileIdToWorldCoordinateMap) {
         worldcord_mapping.push([key, tileIdToWorldCoordinateMap[key]]);
     }
@@ -1058,13 +1056,10 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap,barcodeFormat) =>
     var offset_value = getOffsetValue(currentFloorBarcodeDict)
     for (var barcode in currentFloorBarcodeDict) {
       var barcodeInfo = currentFloorBarcodeDict[barcode];
-      const worldCoordinate = tileIdToWorldCoordinateMap[barcode];
-      const wcReferenceNeighbour = neighbourWithValidWorldCoordinate[barcode];
       barcodeInfo["adjacency"] = mappping_coord_with_adjacent_neighbour_dict[barcode]["adjacency"];
       barcodeInfo["neighbours"] = mappedNeighbour(mappping_coord_with_adjacent_neighbour_dict[barcode]["neighbours"],currentFloorBarcodeDict[barcode]["neighbours"]);
       if(barcodeFormat=="default_format"){
         barcodeInfo["barcode"] = ConvertTTPFormatBarcodeIntoDefaultFormat(barcode,barcodeInfo)
-        
       }else{
         var GM_barcode = calculateGMBarcode(JSON.parse(barcodeInfo["world_coordinate"]),offset_value)
         barcodeInfo["barcode"] = GM_barcode

@@ -39,8 +39,8 @@ export function stringify_number_ttp(input_number) {
 // consverty TTP format into default format
 export const ConvertTTPFormatBarcodeIntoDefaultFormat = (key,value) =>{
     var coord_list = key.split(",").map((val) => parseInt(val))
-    var row = coord_list[0]
-    var column = coord_list[1]
+    var row = coord_list[1]
+    var column = coord_list[0]
     var barcode = encode_barcode(row,column)
   return barcode
 };

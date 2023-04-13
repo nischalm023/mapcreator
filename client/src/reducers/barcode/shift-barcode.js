@@ -1,4 +1,7 @@
 import { getNeighbouringBarcodesIncludingDisconnected } from "utils/util";
+import {getTTPNeighbourBarcodeWorldCoord} from "actions/add-ttp-transit-barcode";
+import {calculate_corner_world_cordinate} from "actions/actions";
+import {tileToWorldCoordinate} from "utils/selectors/world-coordinate-utils-selectors";
 import _ from "lodash";
 
 const shiftNeighboursAndUpdateSizeinfo = (b1, b2, direction, shiftDistance) => {
@@ -23,6 +26,7 @@ const breakConnectionInDirection = (barcode, direction) => {
 
 const shiftBarcode = (state, action) => {
   const { tileId, direction, distance } = action.value;
+
   var shiftedBarcode = Object.assign({}, state[tileId]);
   if (!shiftedBarcode) return state;
   var nbBarcodes = _.cloneDeep(
@@ -59,6 +63,19 @@ const shiftBarcode = (state, action) => {
     breakConnectionInDirection(nbBarcodes[perpDir2], perpDir1);
     breakConnectionInDirection(shiftedBarcode, perpDir2);
   }
+  var nbWorldCordinate = JSON.parse(nbBarcodes[oppositeDirection]["world_coordinate"])
+  var nbCalculateCornerWorldCoordinate = calculate_corner_world_cordinate(nbBarcodes[oppositeDirection]["size_info"],nbWorldCordinate)
+  nbBarcodes[oppositeDirection]["corner_world_cooordinate"] = nbCalculateCornerWorldCoordinate
+  const refBarcodeWorldCoord = {"x":JSON.parse(shiftedBarcode["world_coordinate"])[0],
+                                "y":JSON.parse(shiftedBarcode["world_coordinate"])[1]};
+
+  const transitBarcodeWorldCoord = getTTPNeighbourBarcodeWorldCoord(
+    refBarcodeWorldCoord,
+    distance,
+    direction
+  );
+  shiftedBarcode["world_coordinate"] = `[${transitBarcodeWorldCoord["x"]},${transitBarcodeWorldCoord["y"]}]`
+  shiftedBarcode["corner_world_cooordinate"] = calculate_corner_world_cordinate(shiftedBarcode["size_info"],[transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]])
   nbBarcodes.filter(b => b).forEach(b => (newState[b.coordinate] = b));
   newState[tileId] = shiftedBarcode;
   return { ...state, ...newState };

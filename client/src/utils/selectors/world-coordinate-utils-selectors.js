@@ -84,7 +84,7 @@ export const getTileIdToWorldCoordMapFunc = barcodes => {
   while (totalBarcodesWithDefinedWorldCoord < totalBarcodes) {
     for (var barcode in barcodes) {
       if (barcodes.hasOwnProperty(barcode)) {
-        if (tileIdToWorldCoordinateMapInitial.hasOwnProperty(barcode)) {
+        if (tileIdToWorldCoordinateMapInitial.hasOwnProperty(barcode) && !barcodes[barcode].hasOwnProperty("world_coordinate")) {
           continue;
         }
         var barcodeInfoDict = barcodes[barcode];
@@ -101,13 +101,13 @@ export const getTileIdToWorldCoordMapFunc = barcodes => {
             distanceInfo,
             neighbourWithWorldCoordinate
           );
-          // console.log("................worldCoordinate",worldCoordinate)
-          var worldCoordinates = JSON.parse(barcodeInfoDict["world_coordinate"])
-          console.log("................",worldCoordinates)
-          // console.log("<<<<<<<<<<<<<<<<<<,",)
+          if(barcodeInfoDict.hasOwnProperty("world_coordinate")){
+            var worldCoordinateValue = JSON.parse(barcodeInfoDict["world_coordinate"])
+            worldCoordinate = {"x":worldCoordinateValue[0],"y":worldCoordinateValue[1]}
+          }
           totalBarcodesWithDefinedWorldCoord =
             totalBarcodesWithDefinedWorldCoord + 1;
-          tileIdToWorldCoordinateMapInitial[barcode] = {"x":worldCoordinates[0],"y":worldCoordinates[1]};
+          tileIdToWorldCoordinateMapInitial[barcode] = worldCoordinate
           neighbourWithValidWorldCoordinate[barcode] = neighbourWithWorldCoordinate.nbarcode;
         }
       }

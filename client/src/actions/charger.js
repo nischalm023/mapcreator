@@ -8,9 +8,13 @@ import {
 import {
   coordinateKeyToBarcodeSelector,
   getIdsForNewEntities,
-  getNewSpecialCoordinates
+  getNewSpecialCoordinates,
+  tileToWorldCoordinate
 } from "utils/selectors";
-import { addEntitiesToFloor, clearTiles } from "./actions";
+import {
+  getNeighbourBarcodeWorldCoord
+} from "./add-transit-barcode";
+import { addEntitiesToFloor, clearTiles, calculate_corner_world_cordinate } from "./actions";
 import { CHARGER_DISTANCE } from "../constants";
 import _ from "lodash";
 
@@ -37,6 +41,7 @@ export const createNewCharger = (
 // should also split this into smaller functions
 // actual charger barcode, entry point special, barcode in direction of charger direction, and all other neighbours of charger barcode as well
 export const createAllChargerBarcodes = (
+  state,
   { charger_direction },
   tileId,
   specialTileId,
@@ -64,7 +69,7 @@ export const createAllChargerBarcodes = (
     blocked: false,
     size_info: [750, 750, 750, 750],
     adjacency: [null, null, null, null],
-    special: true
+    special: true,
   };
   var chargerBarcode = _.cloneDeep(barcodesDict[tileId]);
   specialBarcode.neighbours[charger_direction] = [1, 1, 0];
@@ -103,7 +108,15 @@ export const createAllChargerBarcodes = (
   chargerBarcode.adjacency[charger_direction] = coordinateKeyToTupleOfIntegers(
     specialTileId
   );
-
+  const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
+  const transitBarcodeWorldCoord = getNeighbourBarcodeWorldCoord(
+    refBarcodeWorldCoord,
+    CHARGER_DISTANCE*2,
+    charger_direction
+  );
+  specialBarcode["world_coordinate"] = `[${transitBarcodeWorldCoord["x"]},${transitBarcodeWorldCoord["y"]}]`
+  specialBarcode["world_coordinate_reference_neighbour"]= tileId
+  specialBarcode["corner_world_cooordinate"] = calculate_corner_world_cordinate(specialBarcode["size_info"],[transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]])
   var originalChargerBarcodeSizeInfoInChargerDirection =
     chargerBarcode.size_info[charger_direction];
   chargerBarcode.size_info[charger_direction] = CHARGER_DISTANCE;
@@ -136,7 +149,6 @@ export const createAllChargerBarcodes = (
       return nbClone;
     })
     .filter(e => e != null);
-
   return [
     ...chargerNeighboursExceptEntry,
     chargerBarcode,
@@ -160,7 +172,7 @@ export const addChargers = formData => (dispatch, getState) => {
   Object.keys(mapTiles).forEach((tileId, idx) => {
     var specialTileId = specialTileIds[idx];
     newBarcodes = newBarcodes.concat(
-      createAllChargerBarcodes(formData, tileId, specialTileId, barcodesDict)
+      createAllChargerBarcodes(state,formData, tileId, specialTileId, barcodesDict)
     );
     newChargers.push(createNewCharger(formData, tileId, specialTileId, state));
   });
