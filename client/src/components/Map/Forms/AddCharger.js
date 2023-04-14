@@ -1,64 +1,136 @@
-// technically components should not be connected to app state but it's ok for our case.
-import React from "react";
-import BaseJsonForm from "./Util/BaseJsonForm";
+import React, { Component } from "react";
 import { connect } from "react-redux";
+import { FormikedInput, FormikedSelectInput } from "components/InlineTextInput";
+import ButtonForm from "./Util/ButtonForm";
+import SweetAlertError from "components/SweetAlertError";
+import { withFormik, Field } from "formik";
+import { object, ref } from "yup";
+import { chargerAgentName, chargerDirectionName, chargerTypeName} from "utils/forms";
+import ChargerBaseJsonForm from "./Util/ChargerBaseJsonForm";
 import { addChargers } from "actions/charger";
-import { directionSchema } from "utils/forms";
+import * as constants from "../../../constants";
 
-const chargerTypes = ["bottom_dock","side_dock"];
-const chargerNames = ["Bottom Dock", "Side Dock"];
 
-const chargerTypeSchema = {
-  type: "string",
-  title: "Charger Type",
-  default: "bottom_dock",
-  enum: chargerTypes,
-  enumNames: chargerNames
+// form html
+// not using BaseForm as more advanced validation needed
+
+const handleFormValue = (formValues) => {
+    formValues.charger_direction = parseInt(formValues.charger_direction)
+    if(formValues.agent_type == "ttp"){
+        formValues.charger_type = constants.TtpChargerTypeName
+      }
+    if(formValues.agent_type == "quicktron"){
+      formValues.charger_type = constants.QuicktronChargerTypeName
+    }
+    return formValues
+  };
+
+const InnerForm = ({ handleSubmit, isSubmitting, values }) => {
+  const checkChargerType = (agent_type) => {
+    return agent_type == "ttp" ? constants.TtpChargerTypeName : constants.QuicktronChargerTypeName;
+  };
+
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <h3> Add Charger </h3>
+      <Field
+        name="agent_type"
+        component={props => (
+          <FormikedSelectInput
+            {...props}
+            valuesAndLabels={chargerAgentName}
+          />
+        )}
+        label="Agent Type"
+      />
+      {values.agent_type == "rtp" && <Field
+        name="charger_type"
+        component={props => (
+          <FormikedSelectInput
+            {...props}
+            valuesAndLabels={chargerTypeName}
+          />
+        )}
+        label="Charger Type"
+      />}
+      {values.agent_type != "rtp" && 
+        <Field
+          name="charger_type"
+          component={props => <FormikedInput {...props} readOnly={true} />}
+          label="Charger Type"
+          value={checkChargerType(values.agent_type)}
+      />}
+      <Field
+        name="charger_direction"
+        component={props => (
+          <FormikedSelectInput
+            {...props}
+            valuesAndLabels={chargerDirectionName}
+          />
+        )}
+        label="Charger Direction"
+      />
+      <button type="submit" disabled={isSubmitting} className="btn btn-primary">
+        Submit
+      </button>
+    </form>
+  );
 };
 
-const schema = {
-  title: "Add Charger",
-  type: "object",
-  required: ["charger_direction", "charger_type"],
-  properties: {
-    charger_direction: {
-      ...directionSchema,
-      title: "Charger Direction"
-    },
-    charger_type: chargerTypeSchema
+// form validation etc.
+const Form = withFormik({
+  mapPropsToValues: () => ({
+    agent_type: "rtp",
+    charger_direction: 0,
+    charger_type: "side_dock"
+    
+  }),
+  handleSubmit: (formValues, { props }) => {
+    const { onSuccess, dispatch } = props;
+    formValues = handleFormValue(formValues)
+    dispatch(addChargers(formValues));
+    onSuccess();
   }
-};
+})(InnerForm);
 
-const tooltipData = {
-  id: "add-charger",
-  title: "Add a charger",
-  bulletPoints: [
-    "Can only add one charger at a time.",
-    "Can't add charger at periphery in a direction so that entry point would be outside map, please don't try.",
-    "Also creates a special barcode with barcode 500.500 and above to accomodate map expansion",
-    "Distance b/w special barcode and its neighbours is hardcoded but can be changed later in json"
-  ]
-};
+class AddCharger extends Component {
+  state = {
+    error: undefined,
+    show: false
+  };
+  toggle = () => this.setState({ show: !this.state.show });
+  render() {
+    const { error, show } = this.state;
+    const { dispatch,disabled } = this.props;
+    return (
+      <div>
+        <SweetAlertError
+          title="Server Error"
+          error={error}
+          onConfirm={() => this.setState({ error: undefined })}
+        />
+        <ButtonForm
+          show={show}
+          disabled={disabled}
+          toggle={this.toggle}
+          buttonText="Assign Charger"
+        >
+          <Form
+            onSuccess={() => this.toggle()}
+            dispatch={dispatch}
 
-const AddCharger = ({ onSubmit, disabled }) => (
-  <BaseJsonForm
-    disabled={disabled}
-    schema={schema}
-    onSubmit={onSubmit}
-    buttonText={"Assign Charger"}
-    tooltipData={tooltipData}
-  />
-);
+          />
+        </ButtonForm>
+      </div>
+    );
+  }
+}
 
 export default connect(
   state => ({
     // TODO: disabling adding multiple chargers; adding neighbouring chargers together messes up
     // adjacency, should be fixed...
     disabled: Object.keys(state.selection.mapTiles).length !== 1 || state.selection.conveyorMode === true
-  }),
-  dispatch => ({
-    onSubmit: ({ formData }) => {
-      dispatch(addChargers(formData));
-    }
   })
 )(AddCharger);

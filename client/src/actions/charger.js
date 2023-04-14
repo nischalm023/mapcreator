@@ -55,7 +55,7 @@ export const createAllChargerBarcodes = (
     throw new Error(
       `No neighbour for ${tileId} in direction ${charger_direction}`
     );
-  var entryTileId = getNeighbourTiles(tileId)[charger_direction];
+  var entryTileId = getNeighbouringBarcodes(tileId,barcodesDict)[charger_direction].coordinate
   // special barcode
   // TODO: can ask user to add this, using transit barcode button
   var specialBarcode = {

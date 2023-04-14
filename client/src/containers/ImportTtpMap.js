@@ -112,7 +112,6 @@ class ImportMap extends Component {
 
   render() {
     const { error,map_id } = this.state;
-    console.log("states",this.state)
     return (
       <div className="container">
         {/* sweetalert here*/}

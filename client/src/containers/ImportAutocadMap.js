@@ -18,10 +18,8 @@ class ImportMap extends Component {
   };
 
   onRead = (stateKey) => (json) => {
-    console.log(" in on read", json,stateKey)
     // should do validation here or not? probably not, just do it once submit is pressed
     this.setState({ [stateKey]: json });
-    console.log(" in on read", this.state)
 
   };
 
@@ -71,7 +69,6 @@ class ImportMap extends Component {
             });
       }
     } catch (error) {
-      console.log(error.message);
       this.setState({ error: error.message });
       return;
     }
@@ -79,7 +76,6 @@ class ImportMap extends Component {
   };
 
   render() {
-    // console.log(" State ",this.state);
     const { error } = this.state;
     return (
       <div className="container">

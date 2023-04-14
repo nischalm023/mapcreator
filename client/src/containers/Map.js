@@ -55,7 +55,6 @@ class Map extends Component {
 
   handleChange = (evt) => {
       this.setState({importMap : {["autocad"]: evt.target.files[0]}});
-      console.log("check state in handle chnage",this.state)
   };
 
   onSubmit = (e) => {
