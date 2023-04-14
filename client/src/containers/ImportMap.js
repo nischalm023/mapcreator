@@ -57,7 +57,6 @@ class ImportMap extends Component {
   };
   
   render() {
-    // console.log(" State ",this.state);
     const { error } = this.state;
     return (
       <div className="container">

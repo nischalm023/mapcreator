@@ -184,7 +184,6 @@ const addNewMultipleBarcode = formData => (dispatch, getState) => {
     // new barcode will be connected to all neighbour barcodes that it has
     const nbNeighboursTileIds = getNeighbourTiles(nbTileId);
     const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId: val });
-    // console.log("refBarcodeWorldCoord--->>>",refBarcodeWorldCoord)
     const newBarcodeWorldCoord = getNeighbourBarcodeWorldCoord(
     refBarcodeWorldCoord,
     DEFAULT_BOT_WITH_RACK_THRESHOLD*2,

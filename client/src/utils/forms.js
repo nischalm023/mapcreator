@@ -94,6 +94,11 @@ export const yupCoordinateListSchema = array()
   .min(1, "Atleast one coordinate required");
 
 //default schema to select MSU while creating MAP
+export const chargerAgentName = _.zip(constants.AGENTTYPE, constants.AGENTTYPENAME);
+
+export const chargerDirectionName = _.zip(constants.CHARGERDIRECTION, constants.CHARGERDIRECTIONNAME);
+
+export const chargerTypeName = _.zip(constants.CHARGERTYPE, constants.CHARGERTYPENAME);
 
 export const msuDimensionAndNames = _.zip(constants.MSUDIMENSIONS, constants.MSUDIMENSIONSNAMES);
 

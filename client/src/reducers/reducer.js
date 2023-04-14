@@ -61,8 +61,6 @@ export const runSanityReducer = (state = {}, action) => {
     //  return validateChargersLayout;
     case "RUN-DATA-SANITY":
       //var finalDataSanityResult = runCompleteDataSanity(state);
-      //console.log("running data sanity");
-      //console.log(finalDataSanityResult);
       return state;
       
 

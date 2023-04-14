@@ -30,10 +30,8 @@ class ImportMap extends Component {
   };
 
   onRead = (stateKey) => (json) => {
-    console.log(" in on read", json,stateKey)
     // should do validation here or not? probably not, just do it once submit is pressed
     this.setState({ [stateKey]: json });
-    console.log(" in on read", this.state)
 
   };
 
