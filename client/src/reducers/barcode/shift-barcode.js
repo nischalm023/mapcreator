@@ -19,6 +19,20 @@ const shiftNeighboursAndUpdateSizeinfo = (b1, b2, direction, shiftDistance) => {
   b2.size_info[oppositeDirection] = d2;
 };
 
+const calculateWorldCordinateShiftBarcode = (barcode,distance,direction) => {
+  const refBarcodeWorldCoord = {"x":JSON.parse(barcode["world_coordinate"])[0],
+                                "y":JSON.parse(barcode["world_coordinate"])[1]};
+
+  const barcodeWorldCoord = getTTPNeighbourBarcodeWorldCoord(
+    refBarcodeWorldCoord,
+    distance,
+    direction
+  );
+  barcode["world_coordinate"] = `[${barcodeWorldCoord["x"]},${barcodeWorldCoord["y"]}]`
+  barcode["corner_world_cooordinate"] = calculate_corner_world_cordinate(barcode["size_info"],[barcodeWorldCoord["x"],barcodeWorldCoord["y"]])
+};
+
+
 const breakConnectionInDirection = (barcode, direction) => {
   barcode.neighbours[direction] = [0, 0, 0];
   if (barcode.adjacency) barcode.adjacency[direction] = null;
@@ -41,6 +55,8 @@ const shiftBarcode = (state, action) => {
       direction,
       distance
     );
+    var nbBarcodesWorldCordinate = JSON.parse(nbBarcodes[direction]["world_coordinate"])
+    nbBarcodes[direction]["corner_world_cooordinate"]=calculate_corner_world_cordinate(nbBarcodes[direction]["size_info"],[nbBarcodesWorldCordinate[0],nbBarcodesWorldCordinate[1]])
   }
   if (nbBarcodes[oppositeDirection]) {
     shiftNeighboursAndUpdateSizeinfo(
@@ -49,6 +65,8 @@ const shiftBarcode = (state, action) => {
       oppositeDirection,
       -distance
     );
+    var nbBarcodesWorldCordinate = JSON.parse(nbBarcodes[oppositeDirection]["world_coordinate"])
+    nbBarcodes[oppositeDirection]["corner_world_cooordinate"]=calculate_corner_world_cordinate(nbBarcodes[oppositeDirection]["size_info"],[nbBarcodesWorldCordinate[0],nbBarcodesWorldCordinate[1]])
   }
   // break connectivity with perpendicular direction
   // doing this always since very hard to determine if barcodes are aligned
@@ -63,19 +81,8 @@ const shiftBarcode = (state, action) => {
     breakConnectionInDirection(nbBarcodes[perpDir2], perpDir1);
     breakConnectionInDirection(shiftedBarcode, perpDir2);
   }
-  var nbWorldCordinate = JSON.parse(nbBarcodes[oppositeDirection]["world_coordinate"])
-  var nbCalculateCornerWorldCoordinate = calculate_corner_world_cordinate(nbBarcodes[oppositeDirection]["size_info"],nbWorldCordinate)
-  nbBarcodes[oppositeDirection]["corner_world_cooordinate"] = nbCalculateCornerWorldCoordinate
-  const refBarcodeWorldCoord = {"x":JSON.parse(shiftedBarcode["world_coordinate"])[0],
-                                "y":JSON.parse(shiftedBarcode["world_coordinate"])[1]};
+  calculateWorldCordinateShiftBarcode(shiftedBarcode,distance,direction)
 
-  const transitBarcodeWorldCoord = getTTPNeighbourBarcodeWorldCoord(
-    refBarcodeWorldCoord,
-    distance,
-    direction
-  );
-  shiftedBarcode["world_coordinate"] = `[${transitBarcodeWorldCoord["x"]},${transitBarcodeWorldCoord["y"]}]`
-  shiftedBarcode["corner_world_cooordinate"] = calculate_corner_world_cordinate(shiftedBarcode["size_info"],[transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]])
   nbBarcodes.filter(b => b).forEach(b => (newState[b.coordinate] = b));
   newState[tileId] = shiftedBarcode;
   return { ...state, ...newState };

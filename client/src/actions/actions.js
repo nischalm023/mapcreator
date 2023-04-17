@@ -955,11 +955,17 @@ const updateMapObj = (mapObj, withWorldCoordinate) => {
 
   const mapValues = mapObj.map.floors[0].map_values;
   for (var coor in mapValues) {
-    mapObj.map.floors[0].map_values[coor].path_status = 0;
-    mapObj.map.floors[0].map_values[coor].node_status = 0;
-    mapObj.map.floors[0].map_values[coor].excluded = 0;
-    if(mapObj.map.floors[0].map_values[coor].highlight_status==1){
-      mapObj.map.floors[0].map_values[coor].highlight_status = 0
+    if(mapValues[coor].hasOwnProperty("path_status")){
+      delete mapObj.map.floors[0].map_values[coor].path_status
+    }
+    if(mapValues[coor].hasOwnProperty("node_status")){
+      delete mapObj.map.floors[0].map_values[coor].node_status
+    }
+    if(mapValues[coor].hasOwnProperty("highlight_status")){
+      delete mapObj.map.floors[0].map_values[coor].highlight_status
+    }
+    if(mapValues[coor].hasOwnProperty("corner_world_cooordinate")){
+      delete mapObj.map.floors[0].map_values[coor].corner_world_cooordinate
     }
   }
   return mapObj;
