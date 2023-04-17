@@ -26,6 +26,7 @@ import AddElevator from "components/Map/Forms/AddElevator";
 import AddZone from "components/Map/Forms/AddZone";
 import AddSector from "components/Map/Forms/AddSector";
 import EditSpecialBarcode from "components/Map/Forms/EditSpecialBarcodes";
+import AlignBarcode from "components/Map/Forms/AlignBarcode";
 import ShiftBarcode from "components/Map/Forms/ShiftBarcode";
 import AddTransitBarcode from "components/Map/Forms/AddTransitBarcode";
 import AddTTPTransitBarcode from "components/Map/Forms/AddTTPTransitBarcode";
@@ -95,6 +96,7 @@ class RightSidebar extends Component {
               Exclude,
               EditSpecialBarcode,
               ShiftBarcode,
+              AlignBarcode
             ].map((Elm, idx) => (
               <div
                 key={idx}

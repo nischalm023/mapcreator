@@ -16,18 +16,18 @@ import * as constants from "../../../constants";
 
 const handleFormValue = (formValues) => {
     formValues.charger_direction = parseInt(formValues.charger_direction)
-    if(formValues.agent_type == "ttp"){
-        formValues.charger_type = constants.TtpChargerTypeName
+    if(formValues.agent_type == constants.AGENTTYPE[2]){
+        formValues.charger_type = constants.TtpChargerType
       }
-    if(formValues.agent_type == "quicktron"){
-      formValues.charger_type = constants.QuicktronChargerTypeName
+    if(formValues.agent_type == constants.AGENTTYPE[3]){
+      formValues.charger_type = constants.QuicktronChargerType
     }
     return formValues
   };
 
 const InnerForm = ({ handleSubmit, isSubmitting, values }) => {
   const checkChargerType = (agent_type) => {
-    return agent_type == "ttp" ? constants.TtpChargerTypeName : constants.QuicktronChargerTypeName;
+    return agent_type == constants.AGENTTYPE[2] ? constants.TtpChargerTypeName : constants.QuicktronChargerTypeName;
   };
 
   
@@ -44,7 +44,7 @@ const InnerForm = ({ handleSubmit, isSubmitting, values }) => {
         )}
         label="Agent Type"
       />
-      {values.agent_type == "rtp" && <Field
+      {values.agent_type == constants.AGENTTYPE[1] && <Field
         name="charger_type"
         component={props => (
           <FormikedSelectInput
@@ -54,7 +54,7 @@ const InnerForm = ({ handleSubmit, isSubmitting, values }) => {
         )}
         label="Charger Type"
       />}
-      {values.agent_type != "rtp" && 
+      {values.agent_type != constants.AGENTTYPE[1] && 
         <Field
           name="charger_type"
           component={props => <FormikedInput {...props} readOnly={true} />}
@@ -80,12 +80,22 @@ const InnerForm = ({ handleSubmit, isSubmitting, values }) => {
 
 // form validation etc.
 const Form = withFormik({
-  mapPropsToValues: () => ({
-    agent_type: "rtp",
-    charger_direction: 0,
-    charger_type: "side_dock"
-    
-  }),
+  mapPropsToValues: (props: props) => {
+    const { onSuccess, ttpMode } = props;
+    if(ttpMode === true){
+      return({
+        agent_type: constants.AGENTTYPE[2],
+        charger_direction: constants.CHARGERDIRECTION[1],
+        charger_type: constants.TtpChargerTypeName
+      })
+    }else{
+      return({
+        agent_type: constants.AGENTTYPE[1],
+        charger_direction: constants.CHARGERDIRECTION[1],
+        charger_type: constants.CHARGERTYPE[1]
+      })
+    }
+  },
   handleSubmit: (formValues, { props }) => {
     const { onSuccess, dispatch } = props;
     formValues = handleFormValue(formValues)
@@ -102,7 +112,7 @@ class AddCharger extends Component {
   toggle = () => this.setState({ show: !this.state.show });
   render() {
     const { error, show } = this.state;
-    const { dispatch,disabled } = this.props;
+    const { dispatch,disabled,ttpMode } = this.props;
     return (
       <div>
         <SweetAlertError
@@ -119,6 +129,7 @@ class AddCharger extends Component {
           <Form
             onSuccess={() => this.toggle()}
             dispatch={dispatch}
+            ttpMode={ttpMode}
 
           />
         </ButtonForm>
@@ -131,6 +142,7 @@ export default connect(
   state => ({
     // TODO: disabling adding multiple chargers; adding neighbouring chargers together messes up
     // adjacency, should be fixed...
-    disabled: Object.keys(state.selection.mapTiles).length !== 1 || state.selection.conveyorMode === true
+    disabled: Object.keys(state.selection.mapTiles).length !== 1 || state.selection.conveyorMode === true,
+    ttpMode:state.selection.TTPMode
   })
 )(AddCharger);

@@ -30,7 +30,9 @@
           "circular_plate_charger",
           "side_dock",
           "bottom_dock",
-          "normal"
+          "normal",
+          "quicktron_charger",
+          "hai_charger"
         ]
       }
     }

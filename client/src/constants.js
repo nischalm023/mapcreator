@@ -96,14 +96,16 @@ export const BARCODEDISTANCE12X = [OPTION_DEFAULTS.value, 1220];
 export const BARCODEDISTANCE12XNAMES = [OPTION_DEFAULTS.key, "1220 mm"];
 export const BARCODEDISTANCE15X = [OPTION_DEFAULTS.value, 1500, 1560];
 export const BARCODEDISTANCE15XNAMES = [OPTION_DEFAULTS.key, "1500 mm", "1560 mm"];
-export const CHARGERTYPE = [OPTION_DEFAULTS.value, "side_dock", "bottom_dock"];
-export const CHARGERTYPENAME = [OPTION_DEFAULTS.key, "Side Dock", "Bottom Dock"];
+export const CHARGERTYPE = [OPTION_DEFAULTS.value, "side_dock", "bottom_dock","rectangular_plate_charger","circular_plate_charger","normal"];
+export const CHARGERTYPENAME = [OPTION_DEFAULTS.key, "Side Dock", "Bottom Dock","Rectangular Plate Charger","Circular Plate Charger","Normal"];
 export const CHARGERDIRECTION = [OPTION_DEFAULTS.value, 0, 1, 2, 3];
 export const CHARGERDIRECTIONNAME = [OPTION_DEFAULTS.key, "Top", "Right", "Bottom", "Left"];
-export const AGENTTYPE = [OPTION_DEFAULTS.key, "rtp", "ttp", "quicktron"]
-export const AGENTTYPENAME = [OPTION_DEFAULTS.value, "Ranger RTP", "Ranger RTTP(HAI)", "Quicktron RTP"]
-export const TtpChargerTypeName = "ttp_charger"
-export const QuicktronChargerTypeName = "quicktron_charger"
+export const AGENTTYPE = [OPTION_DEFAULTS.value, "RTP", "TTP", "QUICKTRON"]
+export const AGENTTYPENAME = [OPTION_DEFAULTS.key, "Ranger RTP", "Ranger RTTP(HAI)", "Quicktron RTP"]
+export const TtpChargerType = "hai_charger"
+export const QuicktronChargerType = "quicktron_charger"
+export const TtpChargerTypeName = "Hai Charger"
+export const QuicktronChargerTypeName = "Quicktron Charger"
 
 // Viewport
 export var VIEWPORT_MAX_SIZE_PADDING_RATIO = 2;

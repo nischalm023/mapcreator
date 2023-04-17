@@ -309,7 +309,6 @@ const modifyMultipleNeighbours = (values) => (dispatch, getState) => {
 };
 
 const shiftBarcode = ({ tileId, direction, distance }) => dispatch => {
-  
   try {
     return dispatch({
       type: "SHIFT-BARCODE",
@@ -323,6 +322,71 @@ const shiftBarcode = ({ tileId, direction, distance }) => dispatch => {
     return dispatch(setErrorMessage(e.message));
   }
 };
+
+export const alignBarcode = ({ alignedBarcode, tileId, axis }) => (dispatch, getState) => {
+  // vertically:
+  //   left: (aligned node_x < misaligned node_x)
+  //   right:(aligned node_x > misaligned node_x)
+
+  // horizontally:
+  //   top:(aligned node_y < misaligned node_y)
+  //   bottom:(aligned node_y > misaligned node_y)
+  const state = getState();
+  const {
+    normalizedMap: {
+      entities: { barcode },
+    },
+  } = state;
+  var direction = 0
+  var distance = 0
+  const alignBarcodeWorldCoordinate = JSON.parse(barcode[alignedBarcode]["world_coordinate"]);
+  const misalignBarcodeWorldCoordinate = JSON.parse(barcode[tileId]["world_coordinate"]);
+  if(axis=="vertical"){
+    // const { error, reason } = validateVerticalAlignment(alignBarcodeWorldCoordinate,misalignBarcodeWorldCoordinate);
+    // if (error) {
+    // return dispatch(setErrorMessage(reason));
+    // }
+    if(alignBarcodeWorldCoordinate[0] < misalignBarcodeWorldCoordinate[0]){
+       direction = 3
+       distance = misalignBarcodeWorldCoordinate[0] - alignBarcodeWorldCoordinate[0]
+
+    }
+    else if(alignBarcodeWorldCoordinate[0] > misalignBarcodeWorldCoordinate[0]){
+      direction = 1
+      distance = alignBarcodeWorldCoordinate[0] - misalignBarcodeWorldCoordinate[0]
+    }
+  }
+  if(axis=="horizontal"){
+    if(alignBarcodeWorldCoordinate[1] < misalignBarcodeWorldCoordinate[1]){
+       direction = 0
+       distance = misalignBarcodeWorldCoordinate[1] - alignBarcodeWorldCoordinate[1]
+       if(misalignBarcodeWorldCoordinate[1] != distance + alignBarcodeWorldCoordinate[1]){
+        return dispatch(setErrorMessage("Cannot align these barcode horizontally"))
+       }
+    }
+    else if(alignBarcodeWorldCoordinate[1] > misalignBarcodeWorldCoordinate[1]){
+      direction = 2
+      distance = alignBarcodeWorldCoordinate[1] - misalignBarcodeWorldCoordinate[1]
+      if(alignBarcodeWorldCoordinate[1] != distance + misalignBarcodeWorldCoordinate[1]){
+        return dispatch(setErrorMessage("Cannot align these barcode horizontally"))
+       }
+    }
+    
+  }
+  try {
+    return dispatch({
+      type: "SHIFT-BARCODE",
+      value: {
+        tileId,
+        direction,
+        distance
+      }
+    });
+  } catch (e) {
+    return dispatch(setErrorMessage(e.message));
+  }
+};
+
 
 const locateBarcode = barcodeString => async (dispatch, getState) => {
   var state = getState();

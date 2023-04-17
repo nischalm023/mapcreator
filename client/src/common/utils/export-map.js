@@ -36,6 +36,14 @@ export default (withWorldCoordinate, singleFloor = false) => {
       coordinate: `[${coordinate}]`,
     })),
   }));
+
+  ret.map = map.floors.map(({ floor_id, map_values }) => ({
+    floor_id,
+    map_values:map_values.map((barcode) => {
+        delete barcode.corner_world_cooordinate
+        return barcode
+    }),
+  }));
   // make single floor if required
   if (singleFloor && ret.map.length == 1) {
     ret.map = ret.map[0].map_values;
