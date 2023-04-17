@@ -6,7 +6,6 @@ import SweetAlertError from "components/SweetAlertError";
 import { withFormik, Field } from "formik";
 import { object, ref } from "yup";
 import { chargerAgentName, chargerDirectionName, chargerTypeName} from "utils/forms";
-import ChargerBaseJsonForm from "./Util/ChargerBaseJsonForm";
 import { addChargers } from "actions/charger";
 import * as constants from "../../../constants";
 
