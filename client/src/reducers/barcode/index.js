@@ -16,6 +16,7 @@ import { stringify_number,
         calculateGMBarcode
       } from "utils/util";
 import shiftBarcode from "./shift-barcode";
+import alignBarcode from "./align-barcode"
 import { getNeighbouringBarcodesIncludingDisconnected } from "../../utils/util";
 
 export default (state = {}, action) => {
@@ -231,6 +232,8 @@ export default (state = {}, action) => {
 
     case "SHIFT-BARCODE":
       return shiftBarcode(state, action);
+    case "ALIGN-BARCODE":
+      return alignBarcode(state, action);
   }
   return state;
 };
