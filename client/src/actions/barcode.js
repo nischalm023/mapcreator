@@ -360,22 +360,16 @@ export const alignBarcode = ({ alignedBarcode, tileId, axis }) => (dispatch, get
     if(alignBarcodeWorldCoordinate[1] < misalignBarcodeWorldCoordinate[1]){
        direction = 0
        distance = misalignBarcodeWorldCoordinate[1] - alignBarcodeWorldCoordinate[1]
-       if(misalignBarcodeWorldCoordinate[1] != distance + alignBarcodeWorldCoordinate[1]){
-        return dispatch(setErrorMessage("Cannot align these barcode horizontally"))
-       }
     }
     else if(alignBarcodeWorldCoordinate[1] > misalignBarcodeWorldCoordinate[1]){
       direction = 2
       distance = alignBarcodeWorldCoordinate[1] - misalignBarcodeWorldCoordinate[1]
-      if(alignBarcodeWorldCoordinate[1] != distance + misalignBarcodeWorldCoordinate[1]){
-        return dispatch(setErrorMessage("Cannot align these barcode horizontally"))
-       }
     }
     
   }
   try {
     return dispatch({
-      type: "SHIFT-BARCODE",
+      type: "ALIGN-BARCODE",
       value: {
         tileId,
         direction,

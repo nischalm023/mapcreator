@@ -125,6 +125,7 @@ export const selectedDistanceTilesReducer = (state = {}, action) => {
     case "CHANGE-FLOOR":
     case "ADD-ELEVATOR":
     case "SHIFT-BARCODE":
+    case "ALIGN-BARCODE":
       return {};
   }
   return state;
@@ -142,6 +143,7 @@ export const selectedMapTilesReducer = (state = {}, action) => {
     case "CHANGE-FLOOR":
     case "ADD-ELEVATOR":
     case "SHIFT-BARCODE":
+    case "ALIGN-BARCODE":
     case "ADD-QUEUE-BARCODES-TO-HIGHWAY":
     case "ADD-QUEUE-BARCODES-TO-PPS":
       return {};

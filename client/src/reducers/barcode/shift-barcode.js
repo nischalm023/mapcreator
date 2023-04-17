@@ -82,7 +82,6 @@ const shiftBarcode = (state, action) => {
     breakConnectionInDirection(shiftedBarcode, perpDir2);
   }
   calculateWorldCordinateShiftBarcode(shiftedBarcode,distance,direction)
-
   nbBarcodes.filter(b => b).forEach(b => (newState[b.coordinate] = b));
   newState[tileId] = shiftedBarcode;
   return { ...state, ...newState };
