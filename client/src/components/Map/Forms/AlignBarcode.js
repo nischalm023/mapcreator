@@ -5,8 +5,6 @@ import SweetAlertError from "components/SweetAlertError";
 import { coordinateKeyToBarcodeSelector } from "utils/selectors";
 import { alignBarcode } from "actions/barcode";
 
-import "./alignBarcode.css";
-
 
 class AlignBarcode extends Component {
     state = {
@@ -21,7 +19,7 @@ class AlignBarcode extends Component {
         event.preventDefault();
         let aligned = initialData.tileId1;
         let misAligned = initialData.tileId2;
-        let direction = event.target.field3.value;
+        let direction = initialData.directionValidate[0] ? "vertical" : "horizontal";
         const formData = {
             alignedBarcode:aligned,
             tileId:misAligned,
@@ -48,15 +46,15 @@ class AlignBarcode extends Component {
                 >
                     {initialData!==undefined &&
                     <form onSubmit={(e)=>this.handleSubmit(e,dispatch,initialData)}>
-                        <label htmlFor="field3">Direction</label><br/>
-                        <select id="field3" name="field3" required className="alignBarcodeInput">
-                            <option value="vertical" disabled={!initialData.directionValidate[0]}>Vertically</option>
-                            <option value="horizontal" disabled={!initialData.directionValidate[1]}>Horizontally</option>
-                        </select>
+                        <legend>Align Barcode</legend>
+                        Reference Barcode : {initialData.barcodeString1}
+                        <br/>
+                        Barcode to Align : {initialData.barcodeString2}
+                        <br/>
+                        Alignment Direction : {initialData.directionValidate[0] ? "Vertical" : "Horizontal"}
                         <br/>
                         <br/>
-
-                        <input type="submit" value="Submit"></input>
+                        <input type="submit" value="Ok"></input>
                     </form>}
                 </ButtonForm>
             </div>
@@ -112,6 +110,12 @@ export default connect(
         }
         const tileId1 = mapTilesArr[0];
         const tileId2 = mapTilesArr[1];
+        const barcodeString1 = coordinateKeyToBarcodeSelector(state, {
+            tileId: tileId1
+        });
+        const barcodeString2 = coordinateKeyToBarcodeSelector(state, {
+            tileId: tileId2
+        });
         var directionValidate = isAlignBarcodeValid(state,tileId1,tileId2)
         if (directionValidate.length == 2 && !directionValidate[0] && !directionValidate[1]) {
             return {
@@ -123,6 +127,8 @@ export default connect(
             initialData: {
                 tileId1,
                 tileId2,
+                barcodeString1,
+                barcodeString2,
                 directionValidate
             },
             mapTilesArr: mapTilesArr
