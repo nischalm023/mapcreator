@@ -407,7 +407,12 @@ const getTransitBarcodeInfo = (state, formData) => {
         direction
       );
   if (nTileId == null) {
-    sizeInfo[(direction + 2) % 4] = distance / 2; 
+    if(distance<sizeInfo[direction]){
+      sizeInfo[direction] = refBarcodeInfo.size_info[direction] - distance
+      sizeInfo[(direction + 2) % 4] = distance/2
+    }else{
+      sizeInfo[(direction + 2) % 4] = distance / 2; 
+    }
   }else{
     sizeInfo[direction] =
       (2 * refBarcodeInfo.size_info[direction] - distance) / 2;
