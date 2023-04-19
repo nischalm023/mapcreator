@@ -54,7 +54,7 @@ class AlignBarcode extends Component {
                         Alignment Direction : {initialData.directionValidate[0] ? "Vertical" : "Horizontal"}
                         <br/>
                         <br/>
-                        <input type="submit" value="Ok"></input>
+                        <input type="submit" className="btn btn-outline-primary mr-1" value="Ok"></input>
                         <button
                             type="button"
                             className="btn btn-outline-secondary"
