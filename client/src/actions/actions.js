@@ -1114,13 +1114,13 @@ export const ConvertEntitiesInBarcodeFormat = (dispatch,getState) => {
   var elevatorDict = entities.elevator
   var odsDict = entities.odsExcluded
   var BarcodeDict = entities.barcode;
-  if(Object.keys(ppsDict).length !== 0){
+  if(ppsDict !=undefined && Object.keys(ppsDict).length !== 0){
     Object.keys(ppsDict).forEach(function(pps_id) {
     ppsDict[pps_id]["location"] = BarcodeDict[ppsDict[pps_id]["coordinate"]]["barcode"]
     ppsDict[pps_id]["pick_position"] = BarcodeDict[ppsDict[pps_id]["coordinate"]]["barcode"]
     })
   }
-  if(Object.keys(chargerDict).length !== 0){
+  if(chargerDict !=undefined && Object.keys(chargerDict).length !== 0){
     Object.keys(chargerDict).forEach(function(charger_id) {
       var reinitPoint = chargerDict[charger_id]["reinit_point_location"]
       var chargerLocation = chargerDict[charger_id]["charger_location"]
@@ -1131,7 +1131,7 @@ export const ConvertEntitiesInBarcodeFormat = (dispatch,getState) => {
       }
     })
   }
-  if(Object.keys(elevatorDict).length !== 0){
+  if(elevatorDict !=undefined && Object.keys(elevatorDict).length !== 0){
     Object.keys(elevatorDict).forEach(function(elevator_id) {
       if(barcodeMapping.hasOwnProperty(elevatorDict[elevator_id]["position"])){
         var position_barcode = BarcodeDict[barcodeMapping[elevatorDict[elevator_id]["position"]]]["barcode"]
@@ -1160,7 +1160,7 @@ export const ConvertEntitiesInBarcodeFormat = (dispatch,getState) => {
     }
     })
   }
-  if(Object.keys(odsDict).length !== 0){
+  if(odsDict !=undefined && Object.keys(odsDict).length !== 0){
     Object.keys(odsDict).forEach(function(ods_id) {
       var new_barcode = BarcodeDict[odsDict[ods_id]["coordinate"]]["barcode"]
       var tuple_list = odsDict[ods_id]["ods_tuple"].split("--")
