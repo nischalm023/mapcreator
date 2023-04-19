@@ -55,6 +55,13 @@ class AlignBarcode extends Component {
                         <br/>
                         <br/>
                         <input type="submit" value="Ok"></input>
+                        <button
+                            type="button"
+                            className="btn btn-outline-secondary"
+                            onClick={this.toggle}
+                        >
+                            Cancel
+                        </button>
                     </form>}
                 </ButtonForm>
             </div>
