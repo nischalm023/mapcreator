@@ -28,14 +28,6 @@ export default (withWorldCoordinate, singleFloor = false) => {
     withWorldCoordinate.entities.sectorBarcodeMapping,
   ];
   ret.sectorMxUPreferences = withWorldCoordinate.entities.sectorMxUPreferences;
-  // convert coordinates to strings first!
-  ret.map = map.floors.map(({ floor_id, map_values }) => ({
-    floor_id,
-    map_values: map_values.map(({ coordinate, ...rest }) => ({
-      ...rest,
-      coordinate: `[${coordinate}]`,
-    })),
-  }));
 
   ret.map = map.floors.map(({ floor_id, map_values }) => ({
     floor_id,
@@ -44,6 +36,16 @@ export default (withWorldCoordinate, singleFloor = false) => {
         return barcode
     }),
   }));
+  
+  // convert coordinates to strings first!
+  ret.map = map.floors.map(({ floor_id, map_values }) => ({
+    floor_id,
+    map_values: map_values.map(({ coordinate, ...rest }) => ({
+      ...rest,
+      coordinate: `[${coordinate}]`,
+    })),
+  }));
+  
   // make single floor if required
   if (singleFloor && ret.map.length == 1) {
     ret.map = ret.map[0].map_values;
