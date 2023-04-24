@@ -67,8 +67,6 @@ export const dummyState = {
   selection: {
     mapTiles: {},
     distanceTiles: {},
-    conveyorTile:{},
-    DownloadconveyorTile:{},
     shiftKey: false,
     metaKey: false,
     queueMode: false,
