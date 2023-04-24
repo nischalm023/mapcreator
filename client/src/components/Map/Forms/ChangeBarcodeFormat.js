@@ -11,7 +11,7 @@ const ChangeBarcodeFormat = ({ value, onClick, options }) => (
         onClick={onClick}
       >
       <option value="default_format">Default Format</option>
-      <option value="ttp_format">TTP Barcode Format (xy xxxx yyyy)</option>
+      <option value="ttp_format">TTP Barcode Format (xx xxxx xxxx)</option>
     </select>
     </div>
   </form>
