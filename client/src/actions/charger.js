@@ -61,7 +61,7 @@ export const createAllChargerBarcodes = (
   var specialBarcode = {
     store_status: 0,
     zone: "defzone",
-    sector: 0,
+    sector: "undefined",
     barcode: implicitCoordinateKeyToBarcode(specialTileId),
     botid: "null",
     neighbours: [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],

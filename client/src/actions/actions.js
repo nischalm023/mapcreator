@@ -219,6 +219,21 @@ export const setbarcodeDistance = (barcodeDistance) => ({
   value: barcodeDistance
 });
 
+export const setConveyorTile = (getState) => {
+  const state = getState();
+  const normalizedMap = state.normalizedMap;
+  var mapId = getMapId(state);
+  var conveyorTile = {};
+  return getMap(mapId)
+    .then(handleErrors)
+    .then((res) => res.json())
+    .then((map) => {
+      if(!map.hasOwnProperty("conveyorTile")){
+        normalizedMap.entities.conveyorTile = conveyorTile;
+        normalizedMap.entities.map.dummy.conveyorTile = conveyorTile;
+      }
+    });
+};
 
 export const fetchMap = (mapId) => (dispatch, getState) => {
   dispatch(clearMap);
@@ -231,6 +246,7 @@ export const fetchMap = (mapId) => (dispatch, getState) => {
     .then(() => dispatch(fitToViewport))
     .then(() => setSectorsMxUPreferences(getState))
     .then(() => getBarcodeDistance(dispatch,getState,mapId))
+    .then(() => setConveyorTile(getState))
     .catch((error) => console.warn(error)); // eslint-disable-line no-console
 };
 

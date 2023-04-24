@@ -4,8 +4,11 @@ import { connect } from "react-redux";
 import {
   getNeighbourTiles,
   implicitCoordinateKeyToBarcode,
-  isValidCoordinateKey
+  isValidCoordinateKey,
+  encode_barcode,
+  coordinateKeyToTupleOfIntegers
 } from "utils/util";
+
 import _ from "lodash";
 import { addNewBarcode } from "actions/barcode";
 import { getBarcodes } from "../../../utils/selectors";
@@ -32,6 +35,28 @@ export const getValidEmptyNeighbours = (selectedMapTiles, barcodes) => {
   return emptyDirTileIdList;
 };
 
+export const getValidEmptyDirTileIdList = (barcodeDict, emptyNeighbour) => {
+  for (let k = 0; k < emptyNeighbour.length; k++) {
+    if(barcodeDict.hasOwnProperty(implicitCoordinateKeyToBarcode(emptyNeighbour[k][1]))){
+      for (var i = 999; i > 0; i--) {
+        for (var j = 1; j < 1000; j++) {
+          const coordinate = `${i},${j}`;
+          if (barcodeDict.hasOwnProperty(implicitCoordinateKeyToBarcode(coordinate))) {
+            continue;
+          }else{
+            barcodeDict[implicitCoordinateKeyToBarcode(coordinate)] = true
+            emptyNeighbour[k][1] = coordinate
+            i = -1
+            break
+          }
+          
+        }
+      }
+    }
+  }
+  return emptyNeighbour;
+};
+
 const shouldBeDisabled = (selectedMapTiles, barcodes, state) => {
   return (
     !onlyOneTileSelected(selectedMapTiles) ||
@@ -40,6 +65,21 @@ const shouldBeDisabled = (selectedMapTiles, barcodes, state) => {
     state.selection.conveyorMode === true
   );
 };
+
+export const getExistingBarcodesAndCoordinates = (barcodeInfoList) => {
+    var barcodes = {};
+    var coordinates = {};
+    for (var key in barcodeInfoList) {
+      if (barcodeInfoList.hasOwnProperty(key)) {
+        barcodes[barcodeInfoList[key].barcode] = true;
+
+        coordinates[
+          coordinateKeyToTupleOfIntegers(barcodeInfoList[key].coordinate)
+        ] = true;
+      }
+    }
+    return { barcodes: barcodes, coordinates: coordinates };
+  }
 
 // TODO: support negative tile id i.e. when trying to go above 0,0 etc.
 // TODO: support customizing edges of new barcode
@@ -73,16 +113,18 @@ class AddBarcode extends Component {
       selectedMapTiles,
       barcodes
     );
-    const keys = _.unzip(emptyDirTileIdList)[0];
+    var barcode_cordinate = getExistingBarcodesAndCoordinates(barcodes)
+    const validEmptyDirTileIdList =  getValidEmptyDirTileIdList(barcode_cordinate.barcodes,emptyDirTileIdList)
+    const keys = validEmptyDirTileIdList.map(innerArray => JSON.stringify(innerArray))
     const schema = {
       ...baseSchema,
       required: ["direction", "tileId"],
       properties: {
         direction: {
-          type: "integer",
+          type: "string",
           title: "Direction",
           enum: keys,
-          enumNames: emptyDirTileIdList.map(
+          enumNames: validEmptyDirTileIdList.map(
             ([dir, tileId]) =>
               `${titleCase(dirStrs[dir])} (${implicitCoordinateKeyToBarcode(
                 tileId
@@ -98,6 +140,7 @@ class AddBarcode extends Component {
     };
     const uiSchema = {
       tileId: { "ui:widget": "hidden" }
+
     };
     return (
       <BaseJsonForm
@@ -120,6 +163,9 @@ export default connect(
   }),
   dispatch => ({
     onSubmit: ({ formData }) => {
+      var formDateValue = JSON.parse(formData.direction)
+      formData["direction"] = formDateValue[0]
+      formData["barcode_value"] = implicitCoordinateKeyToBarcode(formDateValue[1])
       dispatch(addNewBarcode(formData));
     }
   })

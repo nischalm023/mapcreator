@@ -9,7 +9,8 @@ import {
   currentFloorBarcodeToCoordinateKeySelector,
   tileToWorldCoordinate,
   getTileSpriteScale,
-  barcodeStringToFloorsSelector
+  barcodeStringToFloorsSelector,
+  getExistingBarcodesAndCoordinates
 } from "utils/selectors";
 import { changeFloor } from "./currentFloor";
 import {
@@ -49,6 +50,25 @@ const createNewBarcode = ({ coordinate, neighbours, barcode, size_info, world_co
   world_coordinate_reference_neighbour,
   corner_world_cooordinate
 });
+
+const getValidEmptyDirTileIdList = (barcodeDict, ncoord) => {
+  if(barcodeDict.hasOwnProperty(implicitCoordinateKeyToBarcode(ncoord))){
+      for (var i = 999; i > 0; i--) {
+        for (var j = 1; j < 1000; j++) {
+          const coordinate = `${i},${j}`;
+          if (barcodeDict.hasOwnProperty(implicitCoordinateKeyToBarcode(coordinate))) {
+            continue;
+          }else{
+            barcodeDict[implicitCoordinateKeyToBarcode(coordinate)] = true
+            ncoord = coordinate
+            i = -1
+            break
+          }
+        }
+      }
+    }
+  return ncoord;
+};
 
 const addTransitBarcode = formData => (dispatch, getState) => {
   const state = getState();
@@ -119,7 +139,7 @@ const addTTPTransitBarcode = formData => (dispatch, getState) => {
 const addNewBarcode = formData => (dispatch, getState) => {
   const state = getState();
 
-  const { tileId, direction } = formData;
+  const { tileId, direction, barcode_value} = formData;
   const nbTileId = getNeighbourTiles(tileId)[direction];
   const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
   const newBarcodeWorldCoord = getNeighbourBarcodeWorldCoord(
@@ -149,7 +169,7 @@ const addNewBarcode = formData => (dispatch, getState) => {
   const newBarcode = createNewBarcode({
     coordinate: nbTileId,
     neighbours: nbNeighbourStructure,
-    barcode: implicitCoordinateKeyToBarcode(nbTileId),
+    barcode: barcode_value,
     size_info: nbSizeInfo,
     world_coordinate:NewBarcodeWorldCoordinate,
     world_coordinate_reference_neighbour:tileId,
@@ -204,11 +224,13 @@ const addNewMultipleBarcode = formData => (dispatch, getState) => {
         nbNeighbourStructure.push([0, 0, 0]);
       }
     });
+    var barcode_cordinate = getExistingBarcodesAndCoordinates(state)
+    var barocde_value = getValidEmptyDirTileIdList(barcode_cordinate.barcodes,nbTileId)
     var barcodeCornerCoordinate = calculate_corner_world_cordinate(nbSizeInfo,[newBarcodeWorldCoord["x"],newBarcodeWorldCoord["y"]])
     const newBarcode = createNewBarcode({
       coordinate: nbTileId,
       neighbours: nbNeighbourStructure,
-      barcode: implicitCoordinateKeyToBarcode(nbTileId),
+      barcode: implicitCoordinateKeyToBarcode(barocde_value),
       size_info: nbSizeInfo,
       world_coordinate:NewBarcodeWorldCoordinate,
       world_coordinate_reference_neighbour:val,
