@@ -25,10 +25,14 @@ export const validateBarcodesDistance = (barcodesDict) => {
 
 export const changeBarcodeFormat = barcode_value => (dispatch, getState) => {
   const state = getState();
-  const { normalizedMap } = state;
+  const { normalizedMap,barcodeOffset } = state;
   dispatch({
     type: "CHANGE-BARCODE-FORMAT-MODE",
     value: barcode_value
+  });
+  dispatch({
+    type: "BARCODE-OFFSET-VALUE",
+    value: barcodeOffset
   });
   var barcodesDict = normalizedMap.entities.barcode
   const { error, reason } = validateBarcodesDistance(barcodesDict);
@@ -37,7 +41,8 @@ export const changeBarcodeFormat = barcode_value => (dispatch, getState) => {
   }
   dispatch({
     type:"CHANGE-BARCODE-FORMAT-ON-BASIS-OF-MODE",
-    value:{"barcode_value":barcode_value,"barcodesDict":barcodesDict}
+    value:{"barcode_value":barcode_value,"barcodesDict":barcodesDict,"barcodeOffset":barcodeOffset}
   })
+  
   return Promise.resolve();
 };

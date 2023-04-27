@@ -9,6 +9,7 @@ import conveyorReducer from "./conveyor";
 import DownloadConveyorReducer from "./download_conveyor";
 import currentFloorReducer from "./currentFloor";
 import changeBarcodeFormatReducer from "./changeBarcodeFormat";
+import barcodeFormatOffsetReducer from "./barcodeFormatOffset";
 import barcodeDistanceReducer from "./barcodeDistance";
 import mapReducer from "./map";
 import elevatorReducer from "./elevator";
@@ -382,6 +383,7 @@ export default combineReducers({
   normalizedMap: normalizedMapReducer,
   currentFloor: currentFloorReducer,
   barcodeFormat:changeBarcodeFormatReducer,
+  barcodeOffset:barcodeFormatOffsetReducer,
   barcodeDistance:barcodeDistanceReducer,
   selection: reduceReducers(selectionReducer, baseSelectionReducer),
   spritesheetLoaded: spritesheetLoadedReducer,

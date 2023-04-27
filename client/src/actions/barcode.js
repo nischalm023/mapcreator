@@ -1,7 +1,8 @@
 import {
   getNeighbourTiles,
   implicitCoordinateKeyToBarcode,
-  addNeighbourToBarcode
+  addNeighbourToBarcode,
+  getOffsetValue
 } from "../utils/util";
 import {
   getBarcode,
@@ -138,7 +139,11 @@ const addTTPTransitBarcode = formData => (dispatch, getState) => {
 
 const addNewBarcode = formData => (dispatch, getState) => {
   const state = getState();
-
+  const {
+    normalizedMap: {
+      entities: { barcode },
+    },
+  } = state;
   const { tileId, direction, barcode_value} = formData;
   const nbTileId = getNeighbourTiles(tileId)[direction];
   const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
@@ -175,6 +180,37 @@ const addNewBarcode = formData => (dispatch, getState) => {
     world_coordinate_reference_neighbour:tileId,
     corner_world_cooordinate:barcodeCornerCoordinate
   });
+  if(state.barcodeFormat == "ttp_format"){
+    var map_offset_value = getOffsetValue(barcode)
+    var getCurrentOffset = JSON.parse(state.barcodeOffset)
+
+  if(direction==0){
+    var barcodeOffset = state.barcodeOffset
+  }
+  if(direction == 2){
+    if(newBarcodeWorldCoord["y"]<=map_offset_value[1]){
+      var barcodeOffset = state.barcodeOffset
+    }else{
+    var barcodeOffset_y = getCurrentOffset[1] - (state.barcodeDistance*2)
+    var barcodeOffset = `[${getCurrentOffset[0]},${barcodeOffset_y}]`
+  }
+  }
+  if(direction==1){
+    var barcodeOffset = state.barcodeOffset
+  }
+  if(direction == 3){
+    if(newBarcodeWorldCoord["x"]>=map_offset_value[0]){
+      var barcodeOffset = state.barcodeOffset
+    }else{
+    var barcodeOffset_x = getCurrentOffset[0] - (state.barcodeDistance*2)
+    var barcodeOffset = `[${barcodeOffset_x},${getCurrentOffset[1]}]`
+  }
+  }
+  dispatch({
+    type: "BARCODE-OFFSET-VALUE",
+    value: barcodeOffset
+  });
+}
   // add to barcodes
   dispatch({
     type: "ADD-MULTIPLE-BARCODE",
@@ -189,6 +225,7 @@ const addNewBarcode = formData => (dispatch, getState) => {
       idField: "coordinate"
     })
   );
+
   // clear selection
   dispatch(clearTiles);
   return Promise.resolve();
