@@ -570,8 +570,8 @@ export const addHighwayQueue = () => (dispatch, getState) => {
 };
 
 export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
-  var { normalizedMap, barcodeFormat } = getState();
-  var withAdjacencyWorldCoordinate = addWorldCoordinateAndAdjacency(normalizedMap,barcodeFormat)
+  var { normalizedMap, barcodeFormat,barcodeOffset } = getState();
+  var withAdjacencyWorldCoordinate = addWorldCoordinateAndAdjacency(normalizedMap,barcodeFormat,barcodeOffset)
   var convertBarcodeEntities = ConvertEntitiesInBarcodeFormat(dispatch,getState)
   var { normalizedMap, barcodeFormat } = getState();
   setSectorsBarcodeMapping(dispatch, getState);
@@ -958,8 +958,8 @@ export const addWorldCoordinateAndDenormalize = (normalizedMap) => {
   return withWorldCoordinate;
 };
 
-const addWorldCoordinateAndAdjacency = (normalizedMap,barcodeFormat) => {
-  var withWorldCoordinate = addWorldCoordinateAdjacencyToMap(normalizedMap,barcodeFormat);
+const addWorldCoordinateAndAdjacency = (normalizedMap,barcodeFormat,barcodeOffset) => {
+  var withWorldCoordinate = addWorldCoordinateAdjacencyToMap(normalizedMap,barcodeFormat,barcodeOffset);
   return withWorldCoordinate;
 };
 
@@ -1033,7 +1033,7 @@ export const addWorldCoordinateToMap = (normalizedMap) => {
   return normalizedMap;
 };
 
-export const addWorldCoordinateAdjacencyToMap = (normalizedMap,barcodeFormat) => {
+export const addWorldCoordinateAdjacencyToMap = (normalizedMap,barcodeFormat,barcodeOffset) => {
   var entities = normalizedMap.entities;
   const oldBarcodeDict = entities.barcode;
   const floorInfo = entities.floor;
@@ -1084,7 +1084,7 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap,barcodeFormat) =>
       if(barcodeFormat=="default_format"){
         barcodeInfo["barcode"] = ConvertTTPFormatBarcodeIntoDefaultFormat(barcode,barcodeInfo)
       }else{
-        var GM_barcode = calculateGMBarcode(JSON.parse(barcodeInfo["world_coordinate"]),offset_value)
+        var GM_barcode = calculateGMBarcode(JSON.parse(barcodeInfo["world_coordinate"]),offset_value,JSON.parse(barcodeOffset))
         barcodeInfo["barcode"] = GM_barcode
       }
       currentFloorBarcodeDict[barcode] = barcodeInfo;

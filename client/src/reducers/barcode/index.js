@@ -13,7 +13,8 @@ import { stringify_number,
         encode_barcode, 
         ConvertTTPFormatBarcodeIntoDefaultFormat, 
         getOffsetValue,
-        calculateGMBarcode
+        calculateGMBarcode,
+        calculateVsdWorldCordinate
       } from "utils/util";
 import shiftBarcode from "./shift-barcode";
 import alignBarcode from "./align-barcode"
@@ -173,7 +174,7 @@ export default (state = {}, action) => {
     }
 
     case "CHANGE-BARCODE-FORMAT-ON-BASIS-OF-MODE": {
-      const { barcode_value, barcodesDict } = action.value;
+      const { barcode_value, barcodesDict,barcodeOffset} = action.value;
       var newBarcodeDict = {}
       if(barcode_value==="default_format"){
         Object.entries(barcodesDict).forEach(([key, value]) => {
@@ -186,8 +187,10 @@ export default (state = {}, action) => {
         var offset_value = getOffsetValue(barcodesDict)
         for (var barcode in barcodesDict){
             var barcodeInfo = barcodesDict[barcode]
-            var GM_barcode = calculateGMBarcode(JSON.parse(barcodeInfo["world_coordinate"]),offset_value)
+            var GM_barcode = calculateGMBarcode(JSON.parse(barcodeInfo["world_coordinate"]),offset_value,JSON.parse(barcodeOffset))
+            var vsd_world_coordinate = calculateVsdWorldCordinate(JSON.parse(barcodeInfo["world_coordinate"]),offset_value,JSON.parse(barcodeOffset))
             barcodeInfo["barcode"] = GM_barcode
+            barcodeInfo["vda_world_coordinate"] = vsd_world_coordinate
             newBarcodeDict[barcode] = barcodeInfo
         }
         return { ...state, ...newBarcodeDict}
