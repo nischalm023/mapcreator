@@ -46,8 +46,8 @@ export const ConvertTTPFormatBarcodeIntoDefaultFormat = (key,value) =>{
 };
 
 export const calculateVsdWorldCordinate = (world_cordinate,offset_value,gm_offset) =>{
-  var GM_offset_x = gm_offset[0]
-  var GM_offset_y = gm_offset[1]
+  var GM_offset_x = 1135
+  var GM_offset_y = 1400
   var GM_cordinate_x = Math.abs(world_cordinate[0] - offset_value[0]) + GM_offset_x
   var GM_cordinate_y = Math.abs(world_cordinate[1] - offset_value[1]) + GM_offset_y
   return `[${GM_cordinate_x},${GM_cordinate_y}]`
@@ -55,8 +55,8 @@ export const calculateVsdWorldCordinate = (world_cordinate,offset_value,gm_offse
 
 // calculation for ttp barcode format
 export const calculateGMBarcode = (world_cordinate,offset_value,gm_offset) =>{
-    var GM_offset_x = gm_offset[0]
-    var GM_offset_y = gm_offset[1]
+    var GM_offset_x = 101135
+    var GM_offset_y = 1400
     var GM_cordinate_x = parseInt((Math.abs(world_cordinate[0] - offset_value[0]) + GM_offset_x)/10)
     var GM_cordinate_y = parseInt((Math.abs(world_cordinate[1] - offset_value[1]) + GM_offset_y)/10)
     var GM_barcode_x = GM_cordinate_x%1000
