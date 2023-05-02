@@ -2,6 +2,7 @@ import React,{useState} from "react";
 import { connect } from "react-redux";
 import { changeBarcodeFormat } from "actions/changeBarcodeFormat";
 import ChangeBarcodeOffset from "components/Map/Forms/ChangeBarcodeOffset";
+import * as constants from "../../../constants";
 
 const ChangeBarcodeFormat = ({ onClick, current_floor,floor_value }) => {
   var current_floor_value = floor_value[current_floor]
@@ -17,10 +18,10 @@ const ChangeBarcodeFormat = ({ onClick, current_floor,floor_value }) => {
         <select
           className="form-control"
           onClick={onClick}
+          defaultValue={barcode_format}
         >
-
-      <option value="default_format" selected={barcode_format == "default_format"}>Default Format</option>
-      <option value="ttp_format" selected={barcode_format == "ttp_format"}>TTP Barcode Format (xx xxxx xxxx)</option>
+      <option value={constants.DEFAULT_BARCODE_FORMAT} >Default Format</option>
+      <option value={constants.TTP_BARCODE_FORMAT} >TTP Barcode Format (xx xxxx xxxx)</option>
        
       </select>
       </div>

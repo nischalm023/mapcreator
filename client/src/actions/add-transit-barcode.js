@@ -2,7 +2,9 @@ import {
   getNeighbouringBarcodesWithNbFilter,
   coordinateKeyToTupleOfIntegers,
   tupleOfIntegersToCoordinateKey,
-  getNeighbourBarcodeIncludingDisconnectedInDirection
+  getNeighbourBarcodeIncludingDisconnectedInDirection,
+  calculateGMBarcode,
+  getBarcodeOffsetAndFormat
 } from "utils/util";
 import {calculate_corner_world_cordinate} from "./actions";
 import {
@@ -13,6 +15,7 @@ import {
   getNewCoordinate
 } from "utils/selectors";
 import _ from "lodash";
+import {DEFAULT_BARCODE_FORMAT,TTP_BARCODE_FORMAT } from "../constants";
 
 // TODO: correct place for this function
 export const isValidNewBarcode = (barcode, state) => {
@@ -159,7 +162,8 @@ export const getUpdatedBarcodes = (
 };
 
 const getTransitBarcodeInfo = (state, formData) => {
-  const { tileId, newBarcode, direction, distance } = formData;
+  var [barcodeFormat,getCurrentOffset,barcode,map_offset_value,currentFloor] = getBarcodeOffsetAndFormat(state)
+  var { tileId, newBarcode, direction, distance } = formData;
   const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
   const barcodes = getBarcodes(state);
   const refBarcodeInfo = barcodes[tileId];
@@ -200,6 +204,9 @@ const getTransitBarcodeInfo = (state, formData) => {
         nStructure[dir] = oldNeighbour.neighbours[dir];
       }
     }
+  }
+  if(barcodeFormat==TTP_BARCODE_FORMAT){
+    var newBarcode = calculateGMBarcode([transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]],map_offset_value,getCurrentOffset)
   }
   var unit = {
     store_status: 0,

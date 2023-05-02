@@ -4,6 +4,7 @@ import { addPPSQueue, addHighwayQueue } from "./queue-barcodes";
 import { addElevator, editElevatorCoordinates } from "./elevator-barcodes";
 import { editBarcode } from "./edit-barcode";
 import { modifyDistanceBetweenBarcodes } from "./distance-between-barcodes";
+import * as constants from "../../constants";
 import {
   deleteChargerData,
   deletePPSQueue,
@@ -176,7 +177,7 @@ export default (state = {}, action) => {
     case "CHANGE-BARCODE-FORMAT-ON-BASIS-OF-MODE": {
       const { barcode_value, barcodesDict,barcodeOffset} = action.value;
       var newBarcodeDict = {}
-      if(barcode_value==="default_format"){
+      if(barcode_value===constants.DEFAULT_BARCODE_FORMAT){
         Object.entries(barcodesDict).forEach(([key, value]) => {
           var new_barcode = ConvertTTPFormatBarcodeIntoDefaultFormat(key,value)
           value["barcode"] = new_barcode
