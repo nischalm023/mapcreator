@@ -17,6 +17,7 @@ import {
 import { addEntitiesToFloor, clearTiles, calculate_corner_world_cordinate } from "./actions";
 import { CHARGER_DISTANCE } from "../constants";
 import _ from "lodash";
+import { setErrorMessage } from "./message";
 
 // exported for testing
 export const createNewCharger = (
@@ -41,6 +42,7 @@ export const createNewCharger = (
 // should also split this into smaller functions
 // actual charger barcode, entry point special, barcode in direction of charger direction, and all other neighbours of charger barcode as well
 export const createAllChargerBarcodes = (
+  dispatch,
   state,
   { charger_direction },
   tileId,
@@ -135,7 +137,9 @@ export const createAllChargerBarcodes = (
     entryBarcode.size_info[(charger_direction + 2) % 4] +
     originalChargerBarcodeSizeInfoInChargerDirection -
     3 * CHARGER_DISTANCE;
-
+  if((entryBarcode.size_info[(charger_direction + 2) % 4])<0){
+    return dispatch(setErrorMessage("To add Charger, Min distance between two barcode should be 620"));
+  }
   // other neighbour barcodes of charger barcode
   var chargerNeighboursExceptEntry = getNeighbouringBarcodes(
     tileId,
@@ -171,9 +175,11 @@ export const addChargers = formData => (dispatch, getState) => {
   });
   Object.keys(mapTiles).forEach((tileId, idx) => {
     var specialTileId = specialTileIds[idx];
-    newBarcodes = newBarcodes.concat(
-      createAllChargerBarcodes(state,formData, tileId, specialTileId, barcodesDict)
-    );
+    var update_charger_barcode = createAllChargerBarcodes(dispatch,state,formData, tileId, specialTileId, barcodesDict)
+    if(update_charger_barcode.hasOwnProperty("type")){
+      return dispatch(clearTiles)
+    }
+    newBarcodes = newBarcodes.concat(update_charger_barcode);
     newChargers.push(createNewCharger(formData, tileId, specialTileId, state));
   });
   // get ids for chargers

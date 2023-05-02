@@ -30,7 +30,6 @@ export const hasBarcodeForTile = (selectedMapTiles, barcodes) =>{
 export const getValidEmptyNeighbours = (selectedMapTiles, barcodes) => {
   const coordinate = Object.keys(selectedMapTiles)[0];
   const nbTileIds = getNeighbourTiles(coordinate, barcodes);
-  console.log(">>>>>>>>>>>",nbTileIds)
   const emptyDirTileIdList = _.zip([0, 1, 2, 3], nbTileIds).filter(
     ([, nbTileId]) => !barcodes[nbTileId] && isValidCoordinateKey(nbTileId)
   );
