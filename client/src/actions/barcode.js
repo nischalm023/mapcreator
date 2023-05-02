@@ -3,7 +3,9 @@ import {
   implicitCoordinateKeyToBarcode,
   addNeighbourToBarcode,
   getOffsetValue,
-  calculateGMBarcode
+  calculateGMBarcode,
+  getBarcodeOffsetAndFormat,
+  setCoexistenceBarcodeLabel
 } from "../utils/util";
 import {
   getBarcode,
@@ -32,8 +34,11 @@ import { setErrorMessage } from "./message";
 import {
   DEFAULT_BOT_WITH_RACK_THRESHOLD,
   TILE_SPRITE_WIDTH,
-  TILE_SPRITE_HEIGHT
+  TILE_SPRITE_HEIGHT,
+  DEFAULT_BARCODE_FORMAT,
+  TTP_BARCODE_FORMAT
 } from "../constants.js";
+
 import _ from "lodash";
 
 // TODO: should create a folder "actions/barcode" and move this file
@@ -113,6 +118,7 @@ const addTTPTransitBarcode = formData => (dispatch, getState) => {
   //   return dispatch(setErrorMessage(error));
   // }
   var [updatedBarcodes, transitBarcode] = getUpdatedAndTTPTransitBarcodes(
+    dispatch,
     state,
     formData
   );
@@ -141,16 +147,7 @@ const addTTPTransitBarcode = formData => (dispatch, getState) => {
 
 const addNewBarcode = formData => (dispatch, getState) => {
   const state = getState();
-  const {normalizedMap,currentFloor} = state;
-  const floorInfo = normalizedMap.entities.floor;
-  var barcode = {};
-  const barcodeKeys = floorInfo[currentFloor].map_values;
-  barcodeKeys.forEach((barcodeKey) => {
-      barcode[barcodeKey] = normalizedMap.entities.barcode[barcodeKey];
-    });
-  var barcodeFormat = floorInfo[currentFloor].barcodeFormat
-  var getCurrentOffset = JSON.parse(floorInfo[currentFloor].barcodeOffset)
-
+  var [barcodeFormat,getCurrentOffset,barcode,map_offset_value,currentFloor] = getBarcodeOffsetAndFormat(state)
   const { tileId, direction, barcode_value} = formData;
   const nbTileId = getNeighbourTiles(tileId)[direction];
   const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
@@ -179,39 +176,15 @@ const addNewBarcode = formData => (dispatch, getState) => {
   });
   var barcodeCornerCoordinate = calculate_corner_world_cordinate(nbSizeInfo,[newBarcodeWorldCoord["x"],newBarcodeWorldCoord["y"]])
   
-  if(barcodeFormat == "ttp_format"){
-    var map_offset_value = getOffsetValue(barcode)
-    var offset_value = getOffsetValue(barcode)
-    
-  if(direction == 2||direction==0){
-    if(newBarcodeWorldCoord["y"]<=map_offset_value[1]){
-      var barcodeOffset = getCurrentOffset
-    }else{
-    var barcodeOffset_y = getCurrentOffset[1] - (state.barcodeDistance*2)
-    var barcodeOffset = [getCurrentOffset[0],barcodeOffset_y]
-    var offset_value = [offset_value[0],newBarcodeWorldCoord["y"]]
+  if(barcodeFormat == TTP_BARCODE_FORMAT){
+    var ttp_barcode_value = setCoexistenceBarcodeLabel(dispatch,barcode,direction,
+      [newBarcodeWorldCoord["x"],newBarcodeWorldCoord["y"]],map_offset_value,getCurrentOffset,
+      state.barcodeDistance,currentFloor)
   }
-  }
-  if(direction == 3||direction==1){
-    if(newBarcodeWorldCoord["x"]>=map_offset_value[0]){
-      var barcodeOffset = getCurrentOffset
-    }else{
-    var barcodeOffset_x = getCurrentOffset[0] - (state.barcodeDistance*2)
-    var barcodeOffset = [barcodeOffset_x,getCurrentOffset[1]]
-    var offset_value = [newBarcodeWorldCoord["x"],offset_value[1]]
-  }
-  }
-  var ttp_barcode_value = calculateGMBarcode(JSON.parse(NewBarcodeWorldCoordinate),offset_value,barcodeOffset)
-  var barcodeOffset_format = `[${barcodeOffset[0]},${barcodeOffset[1]}]`
-  dispatch({
-    type: "BARCODE-FLOOR-OFFSET-VALUE",
-    value: {"barcodeOffset":barcodeOffset_format,currentFloor}
-  });
-}
   const newBarcode = createNewBarcode({
     coordinate: nbTileId,
     neighbours: nbNeighbourStructure,
-    barcode: (barcodeFormat == "ttp_format")?ttp_barcode_value:barcode_value,
+    barcode: (barcodeFormat == TTP_BARCODE_FORMAT)?ttp_barcode_value:barcode_value,
     size_info: nbSizeInfo,
     world_coordinate:NewBarcodeWorldCoordinate,
     world_coordinate_reference_neighbour:tileId,
@@ -239,6 +212,7 @@ const addNewBarcode = formData => (dispatch, getState) => {
 
 const addNewMultipleBarcode = formData => (dispatch, getState) => {
   const state = getState();
+  var [barcodeFormat,getCurrentOffset,barcode,map_offset_value,currentFloor] = getBarcodeOffsetAndFormat(state)
   const { tileId, direction } = formData;
   var tileIdArr = JSON.parse(tileId);
   tileIdArr.map((val) => {
@@ -270,11 +244,15 @@ const addNewMultipleBarcode = formData => (dispatch, getState) => {
     var barcode_cordinate = getExistingBarcodesAndCoordinates(state)
     var barocde_value = getValidEmptyDirTileIdList(barcode_cordinate.barcodes,nbTileId)
     var barcodeCornerCoordinate = calculate_corner_world_cordinate(nbSizeInfo,[newBarcodeWorldCoord["x"],newBarcodeWorldCoord["y"]])
-    
+    if(barcodeFormat == TTP_BARCODE_FORMAT){
+      var ttp_barcode_value = setCoexistenceBarcodeLabel(dispatch,barcode,direction,
+        [newBarcodeWorldCoord["x"],newBarcodeWorldCoord["y"]],map_offset_value,getCurrentOffset,
+        state.barcodeDistance,currentFloor)
+    }
     const newBarcode = createNewBarcode({
       coordinate: nbTileId,
       neighbours: nbNeighbourStructure,
-      barcode: implicitCoordinateKeyToBarcode(barocde_value),
+      barcode: (barcodeFormat == TTP_BARCODE_FORMAT)?ttp_barcode_value:barocde_value,
       size_info: nbSizeInfo,
       world_coordinate:NewBarcodeWorldCoordinate,
       world_coordinate_reference_neighbour:val,

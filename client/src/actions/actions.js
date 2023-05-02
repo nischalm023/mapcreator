@@ -28,7 +28,7 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver/FileSaver";
 import copy from "copy-to-clipboard";
 import exportMap from "common/utils/export-map";
-import { SPRITESHEET_PATH } from "../constants";
+import { SPRITESHEET_PATH,DEFAULT_BARCODE_FORMAT,TTP_BARCODE_FORMAT } from "../constants";
 import { fitToViewport, setViewportClamp } from "./viewport";
 import { getLinearWorldCordXY ,mappedNeighbour} from "./AddAdjacency";
 import { setErrorMessage, setSuccessMessage } from "./message";
@@ -206,9 +206,9 @@ export const barcodeCordMapping = (getState) => {
 
 export const getBarcodeDistance = (dispatch,getState,mapId) => {  
   const state = getState();
-  var mapId = state.normalizedMap.entities.mapObj[parseInt(mapId)]
-  if (mapId.BaseMap.barcodeDistance.hasOwnProperty("barcodeDistance")){
-  var barcodeDistance = mapId.BaseMap.barcodeDistance
+  var mapIdVal = state.normalizedMap.entities.mapObj[mapId]
+  if (mapIdVal.BaseMap.hasOwnProperty("barcodeDistance")){
+  var barcodeDistance = mapIdVal.BaseMap.barcodeDistance
   dispatch(setbarcodeDistance(barcodeDistance))
 }
 };
@@ -247,12 +247,12 @@ const setTtpBarcodeFormat = (dispatch,getState) => {
     if(/^(\d+\.\d+)$/.test(barcodeVal)){
       dispatch({
         type: "CHANGE-FLOOR-BARCODE-FORMAT-MODE",
-        value: {"barcode_value":"default_format","currentFloor":floorId}
+        value: {"barcode_value":DEFAULT_BARCODE_FORMAT,"currentFloor":floorId}
       });
     }else{
       dispatch({
         type: "CHANGE-FLOOR-BARCODE-FORMAT-MODE",
-        value: {"barcode_value":"ttp_format","currentFloor":floorId}
+        value: {"barcode_value":TTP_BARCODE_FORMAT,"currentFloor":floorId}
       });
     }
   }
@@ -260,6 +260,7 @@ const setTtpBarcodeFormat = (dispatch,getState) => {
 
 export const fetchMap = (mapId) => (dispatch, getState) => {
   dispatch(clearMap);
+  console.log("maaaaaa",parseInt(mapId))
   return getMap(parseInt(mapId))
     .then(handleErrors)
     .then((res) => res.json())
@@ -268,9 +269,9 @@ export const fetchMap = (mapId) => (dispatch, getState) => {
     .then(() => dispatch(setViewportClamp))
     .then(() => dispatch(fitToViewport))
     .then(() => setSectorsMxUPreferences(getState))
-    .then(() => getBarcodeDistance(dispatch,getState,mapId))
     .then(() => setConveyorTile(getState))
-    .then(()=>setTtpBarcodeFormat(dispatch,getState))
+    .then(()=>  setTtpBarcodeFormat(dispatch,getState))
+    .then(() => getBarcodeDistance(dispatch,getState,parseInt(mapId)))
     .catch((error) => console.warn(error)); // eslint-disable-line no-console
 };
 
@@ -1110,7 +1111,7 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap) => {
       var barcodeInfo = currentFloorBarcodeDict[barcode];
       barcodeInfo["adjacency"] = mappping_coord_with_adjacent_neighbour_dict[barcode]["adjacency"];
       barcodeInfo["neighbours"] = mappedNeighbour(mappping_coord_with_adjacent_neighbour_dict[barcode]["neighbours"],currentFloorBarcodeDict[barcode]["neighbours"]);
-      if(barcodeFormat=="default_format"){
+      if(barcodeFormat==DEFAULT_BARCODE_FORMAT){
         barcodeInfo["barcode"] = ConvertTTPFormatBarcodeIntoDefaultFormat(barcode,barcodeInfo)
       }else{
         var GM_barcode = calculateGMBarcode(JSON.parse(barcodeInfo["world_coordinate"]),offset_value,JSON.parse(barcodeOffset))

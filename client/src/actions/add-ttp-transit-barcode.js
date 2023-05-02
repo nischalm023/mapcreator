@@ -2,7 +2,9 @@ import {
   getNeighbouringBarcodesWithNbFilter,
   coordinateKeyToTupleOfIntegers,
   tupleOfIntegersToCoordinateKey,
-  getNeighbourBarcodeIncludingDisconnectedInDirection
+  getNeighbourBarcodeIncludingDisconnectedInDirection,
+  getBarcodeOffsetAndFormat,
+  setCoexistenceBarcodeLabel
 } from "utils/util";
 import {
   getBarcodes,
@@ -12,6 +14,7 @@ import {
   getNewCoordinate
 } from "utils/selectors";
 import _ from "lodash";
+import {DEFAULT_BARCODE_FORMAT,TTP_BARCODE_FORMAT } from "../constants";
 import {calculate_corner_world_cordinate} from "./actions";
 // TODO: correct place for this function
 export const isValidNewBarcode = (barcode, state) => {
@@ -394,7 +397,8 @@ const AdjustRightTransitPosition = (gridView,transit_corner_world_coordinate,tra
     return [shift_transit_corner_coord,shift_size_info]
  }
 
-const getTransitBarcodeInfo = (state, formData) => {
+const getTransitBarcodeInfo = (dispatch, state, formData) => {
+  var [barcodeFormat,getCurrentOffset,barcode,map_offset_value,currentFloor] = getBarcodeOffsetAndFormat(state)
   const { tileId, newBarcode, direction, distance } = formData;
   const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
   const barcodes = getBarcodes(state);
@@ -478,10 +482,15 @@ const getTransitBarcodeInfo = (state, formData) => {
       }
     }
   }
+  if(barcodeFormat == TTP_BARCODE_FORMAT){
+    var ttp_barcode_value = setCoexistenceBarcodeLabel(dispatch,barcode,direction,
+      [transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]],map_offset_value,getCurrentOffset,
+      state.barcodeDistance,currentFloor)
+  }
   var unit = {
     store_status: 0,
     zone: refBarcodeInfo.zone,
-    barcode: newBarcode,
+    barcode: (barcodeFormat == TTP_BARCODE_FORMAT)?ttp_barcode_value:newBarcode,
     botid: "null",
     neighbours: nStructure,
     coordinate: transitBarcodeCoordinate,
@@ -514,11 +523,11 @@ const getTransitBarcodeInfo = (state, formData) => {
 //    B5   B8   B6
 
 // B1,B7,B2,B8 will be modified and TB will be added
-export const getUpdatedAndTTPTransitBarcodes = (state, formData) => {
+export const getUpdatedAndTTPTransitBarcodes = (dispatch,state, formData) => {
   const barcodes = getBarcodes(state);
   const newState = _.cloneDeep(barcodes);
   var { direction } = formData;
-  var transitBarcodeInfo = getTransitBarcodeInfo(state, formData);
+  var transitBarcodeInfo = getTransitBarcodeInfo(dispatch, state, formData);
   const updatedBarcodes = getUpdatedBarcodes(
     transitBarcodeInfo,
     newState,

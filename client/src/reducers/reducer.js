@@ -8,13 +8,12 @@ import ppsReducer from "./pps";
 import conveyorReducer from "./conveyor";
 import DownloadConveyorReducer from "./download_conveyor";
 import currentFloorReducer from "./currentFloor";
-import changeBarcodeFormatReducer from "./changeBarcodeFormat";
-import barcodeFormatOffsetReducer from "./barcodeFormatOffset";
 import barcodeDistanceReducer from "./barcodeDistance";
 import mapReducer from "./map";
 import elevatorReducer from "./elevator";
 import zoneReducer from "./zone";
 import sectorReducer from "./sector";
+import { DEFAULT_BARCODE_FORMAT,DEFAULT_MAP_OFFSET } from "../constants";
 import sectorBarcodeMappingReducer from "./sectorBarcodeMapping";
 import mappingBarcodeCoordReducer from "./mappingBarcodeCoordReducer";
 import sectorMxUPreferencesReducer from "./sectorMxUPreferences";
@@ -83,10 +82,10 @@ export const mapChangeReducer = (state = dummyState.normalizedMap, action) => {
       if(map.sectors == undefined) map.sectors = [];
       if(map.floors.map((obj,i)=>{
         if(!obj.hasOwnProperty("barcodeFormat")){
-          obj["barcodeFormat"] = "default_format"
+          obj["barcodeFormat"] = DEFAULT_BARCODE_FORMAT
         }
         if(!obj.hasOwnProperty("barcodeOffset")){
-          obj["barcodeOffset"] = "[10000,10000]"
+          obj["barcodeOffset"] = DEFAULT_MAP_OFFSET
         }
       }))
       return normalizeMap(action.value);
@@ -390,8 +389,6 @@ const viewportReducer = (
 export default combineReducers({
   normalizedMap: normalizedMapReducer,
   currentFloor: currentFloorReducer,
-  barcodeFormat:changeBarcodeFormatReducer,
-  barcodeOffset:barcodeFormatOffsetReducer,
   barcodeDistance:barcodeDistanceReducer,
   selection: reduceReducers(selectionReducer, baseSelectionReducer),
   spritesheetLoaded: spritesheetLoadedReducer,

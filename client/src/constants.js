@@ -35,6 +35,9 @@ export var BARCODE_DIGIT_OFFSET = 5; // in y
 export var BARCODE_DIGIT_HEIGHT = 20;
 export var BARCODE_DIGIT_WIDTH = 23;
 export var ADJACENCYDISTANCE = 3500;
+export var DEFAULT_BARCODE_FORMAT = "default_format";
+export var TTP_BARCODE_FORMAT = "ttp_format";
+export var DEFAULT_MAP_OFFSET = "[10000,10000]";
 // constants for offsetting barcode string sprites
 export var AFTER_DOT_SPRITE_X_OFFSET = -10;
 // approx ~320k sprites are created for a map of size 200x200. if more than MAX_SPRITES
@@ -78,6 +81,7 @@ export var ACTIVE_CONVEYOR = "active.png";
 export var END_CONVEYOR = "end.png";
 export var EXIT_CONVEYOR = "exit.png";
 export var ENTRY_CONVEYOR = "entry.png";
+
 
 // graph directionality edge sprites
 export const DIRECTIONALITY_SPRITES_MAP = {

@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { implicitBarcodeToCoordinate } from "utils/util";
+import { DEFAULT_BARCODE_FORMAT,DEFAULT_MAP_OFFSET } from "../constants";
 export default (state = {}, action) => {
   // only handle multiple add action for now..
   switch (action.type) {
@@ -36,8 +37,8 @@ export default (state = {}, action) => {
         [floorData.floor_id]: {
           ...floorData,
           map_values: floorData.map_values.map(barcode => barcode.coordinate),
-          barcodeFormat:"default_format",
-          barcodeOffset:"[10000,10000]"
+          barcodeFormat:DEFAULT_BARCODE_FORMAT,
+          barcodeOffset:DEFAULT_MAP_OFFSET
         }
       };
     }
