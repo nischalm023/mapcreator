@@ -212,8 +212,6 @@ export const getBarcodeDistance = (dispatch,getState,mapId) => {
   dispatch(setbarcodeDistance(barcodeDistance))
 }
 };
-
-
 export const setbarcodeDistance = (barcodeDistance) => ({
   type: "CHANGE-BARCODE-DISTANCE",
   value: barcodeDistance
@@ -235,6 +233,31 @@ export const setConveyorTile = (getState) => {
     });
 };
 
+const setTtpBarcodeFormat = (dispatch,getState) => {
+  const state = getState();
+  const {normalizedMap} = state;
+  const floorInfo = normalizedMap.entities.floor;
+  for (var floorId in floorInfo) {
+    var currentFloorBarcodeDict = {};
+    const barcodeKeys = floorInfo[floorId].map_values;
+    barcodeKeys.forEach((barcodeKey) => {
+      currentFloorBarcodeDict[barcodeKey] = normalizedMap.entities.barcode[barcodeKey];
+    });
+    var barcodeVal = currentFloorBarcodeDict[Object.keys(currentFloorBarcodeDict)[0]]["barcode"]
+    if(/^(\d+\.\d+)$/.test(barcodeVal)){
+      dispatch({
+        type: "CHANGE-FLOOR-BARCODE-FORMAT-MODE",
+        value: {"barcode_value":"default_format","currentFloor":floorId}
+      });
+    }else{
+      dispatch({
+        type: "CHANGE-FLOOR-BARCODE-FORMAT-MODE",
+        value: {"barcode_value":"ttp_format","currentFloor":floorId}
+      });
+    }
+  }
+}
+
 export const fetchMap = (mapId) => (dispatch, getState) => {
   dispatch(clearMap);
   return getMap(parseInt(mapId))
@@ -247,6 +270,7 @@ export const fetchMap = (mapId) => (dispatch, getState) => {
     .then(() => setSectorsMxUPreferences(getState))
     .then(() => getBarcodeDistance(dispatch,getState,mapId))
     .then(() => setConveyorTile(getState))
+    .then(()=>setTtpBarcodeFormat(dispatch,getState))
     .catch((error) => console.warn(error)); // eslint-disable-line no-console
 };
 
@@ -570,8 +594,9 @@ export const addHighwayQueue = () => (dispatch, getState) => {
 };
 
 export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
-  var { normalizedMap, barcodeFormat,barcodeOffset } = getState();
-  var withAdjacencyWorldCoordinate = addWorldCoordinateAndAdjacency(normalizedMap,barcodeFormat,barcodeOffset)
+  var { normalizedMap} = getState();
+  var  withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap)
+  var withAdjacencyWorldCoordinate = addWorldCoordinateAndAdjacency(withWorldCoordinate)
   var convertBarcodeEntities = ConvertEntitiesInBarcodeFormat(dispatch,getState)
   var { normalizedMap, barcodeFormat } = getState();
   setSectorsBarcodeMapping(dispatch, getState);
@@ -638,10 +663,12 @@ export const editSpecialBarcode = ({ coordinate, new_barcode }) => ({
   value: { coordinate, new_barcode },
 });
 
-export const editChargerBarcode = (charger_location, new_barcode ) => ({
-  type: "EDIT-CHARGER-BARCODE",
-  value: { charger_location, new_barcode },
-});
+export const editChargerBarcode = (charger_location, new_barcode,charger_id ) => {
+  return({
+    type: "EDIT-CHARGER-BARCODE",
+    value: { charger_location, new_barcode,charger_id },
+  })
+};
 
 export const createMapCopy = ({ name }) => (dispatch, getState) => {
   const { normalizedMap } = getState();
@@ -958,8 +985,8 @@ export const addWorldCoordinateAndDenormalize = (normalizedMap) => {
   return withWorldCoordinate;
 };
 
-const addWorldCoordinateAndAdjacency = (normalizedMap,barcodeFormat,barcodeOffset) => {
-  var withWorldCoordinate = addWorldCoordinateAdjacencyToMap(normalizedMap,barcodeFormat,barcodeOffset);
+const addWorldCoordinateAndAdjacency = (normalizedMap) => {
+  var withWorldCoordinate = addWorldCoordinateAdjacencyToMap(normalizedMap);
   return withWorldCoordinate;
 };
 
@@ -1033,7 +1060,7 @@ export const addWorldCoordinateToMap = (normalizedMap) => {
   return normalizedMap;
 };
 
-export const addWorldCoordinateAdjacencyToMap = (normalizedMap,barcodeFormat,barcodeOffset) => {
+export const addWorldCoordinateAdjacencyToMap = (normalizedMap) => {
   var entities = normalizedMap.entities;
   const oldBarcodeDict = entities.barcode;
   const floorInfo = entities.floor;
@@ -1044,6 +1071,8 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap,barcodeFormat,bar
     barcodeKeys.forEach((barcodeKey) => {
       currentFloorBarcodeDict[barcodeKey] = oldBarcodeDict[barcodeKey];
     });
+    var barcodeFormat = floorInfo[floorId].barcodeFormat
+    var barcodeOffset = floorInfo[floorId].barcodeOffset
     var worldcord_mapping = [];
     var tileIdToWorldCoordinateMap = {} 
     for (const [key, value] of Object.entries(currentFloorBarcodeDict)) {
@@ -1142,8 +1171,8 @@ export const ConvertEntitiesInBarcodeFormat = (dispatch,getState) => {
       var chargerLocation = chargerDict[charger_id]["charger_location"]
       if(barcodeMapping.hasOwnProperty(reinitPoint)){
         var charger_location = BarcodeDict[barcodeMapping[chargerLocation]]["barcode"]
-        var reinit_barcode = BarcodeDict[barcodeMapping[reinitPoint]]["barcode"]
-        dispatch(editChargerBarcode(charger_location,reinit_barcode))
+        var new_barcode = BarcodeDict[barcodeMapping[reinitPoint]]["barcode"]
+        dispatch(editChargerBarcode(charger_location,new_barcode,charger_id))
       }
     })
   }

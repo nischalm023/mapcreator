@@ -25,23 +25,29 @@ export const validateBarcodesDistance = (barcodesDict) => {
 
 export const changeBarcodeFormat = barcode_value => (dispatch, getState) => {
   const state = getState();
-  const { normalizedMap,barcodeOffset } = state;
+  const { normalizedMap,barcodeOffset,currentFloor } = state;
   dispatch({
-    type: "CHANGE-BARCODE-FORMAT-MODE",
-    value: barcode_value
+    type: "CHANGE-FLOOR-BARCODE-FORMAT-MODE",
+    value: {barcode_value,currentFloor}
   });
-  dispatch({
-    type: "BARCODE-OFFSET-VALUE",
-    value: barcodeOffset
-  });
-  var barcodesDict = normalizedMap.entities.barcode
+  var barcodesDict = {};
+  const floorInfo = normalizedMap.entities.floor;
+  const barcodeKeys = floorInfo[currentFloor].map_values;
+  const current_offset = floorInfo[currentFloor].barcodeOffset
+  barcodeKeys.forEach((barcodeKey) => {
+      barcodesDict[barcodeKey] = normalizedMap.entities.barcode[barcodeKey];
+    });
   const { error, reason } = validateBarcodesDistance(barcodesDict);
   if (error) {
     return dispatch(setErrorMessage(reason));
   }
   dispatch({
+    type: "BARCODE-FLOOR-OFFSET-VALUE",
+    value: {"barcodeOffset":current_offset,currentFloor}
+  });
+  dispatch({
     type:"CHANGE-BARCODE-FORMAT-ON-BASIS-OF-MODE",
-    value:{"barcode_value":barcode_value,"barcodesDict":barcodesDict,"barcodeOffset":barcodeOffset}
+    value:{"barcode_value":barcode_value,"barcodesDict":barcodesDict,"barcodeOffset":current_offset}
   })
   
   return Promise.resolve();

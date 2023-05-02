@@ -82,9 +82,9 @@ const deleteChargerData = (state, action) => {
     if (newState[chargerCoordinate].neighbours[direction][0] == 1)
       newState[chargerCoordinate].neighbours[direction] = [1, 1, 1];
   });
-  newState[chargerCoordinate].size_info[chargerDirection] = totalDistance / 2;
+  newState[chargerCoordinate].size_info[chargerDirection] = parseInt(totalDistance / 2);
   newState[coorInDirectionOfCharger].size_info[(chargerDirection + 2) % 4] =
-    totalDistance / 2;
+    parseInt(totalDistance / 2);
   delete newState[chargerCoordinate].adjacency;
   delete newState[coorInDirectionOfCharger].adjacency;
   delete newState[entryPointCoordinate];

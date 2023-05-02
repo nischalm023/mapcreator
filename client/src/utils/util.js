@@ -46,23 +46,23 @@ export const ConvertTTPFormatBarcodeIntoDefaultFormat = (key,value) =>{
 };
 
 export const calculateVsdWorldCordinate = (world_cordinate,offset_value,gm_offset) =>{
-  var GM_offset_x = 1135
-  var GM_offset_y = 1400
-  var GM_cordinate_x = Math.abs(world_cordinate[0] - offset_value[0]) + GM_offset_x
-  var GM_cordinate_y = Math.abs(world_cordinate[1] - offset_value[1]) + GM_offset_y
+  var GM_offset_x = gm_offset[0]
+  var GM_offset_y = gm_offset[1]
+  var GM_cordinate_x = parseInt((Math.abs(world_cordinate[0] - offset_value[0]) + GM_offset_x))
+  var GM_cordinate_y = parseInt((Math.abs(world_cordinate[1] - offset_value[1]) + GM_offset_y))
   return `[${GM_cordinate_x},${GM_cordinate_y}]`
 }
 
 // calculation for ttp barcode format
 export const calculateGMBarcode = (world_cordinate,offset_value,gm_offset) =>{
-    var GM_offset_x = 101135
-    var GM_offset_y = 1400
+    var GM_offset_x = gm_offset[0]
+    var GM_offset_y = gm_offset[1]
     var GM_cordinate_x = parseInt((Math.abs(world_cordinate[0] - offset_value[0]) + GM_offset_x)/10)
     var GM_cordinate_y = parseInt((Math.abs(world_cordinate[1] - offset_value[1]) + GM_offset_y)/10)
     var GM_barcode_x = GM_cordinate_x%1000
     var GM_barcode_y = GM_cordinate_y%1000
-    var GM_code_x = Math.floor(GM_cordinate_x/10000)
-    var GM_code_y = Math.floor(GM_cordinate_y/10000)
+    var GM_code_x = Math.floor(GM_cordinate_x/1000)
+    var GM_code_y = Math.floor(GM_cordinate_y/1000)
     
     var GM_code_value =  GM_code_x * 10 + GM_code_y
     // if GM_code_value is 0 then append 0 in begining to match two digit format
@@ -75,8 +75,8 @@ export const calculateGMBarcode = (world_cordinate,offset_value,gm_offset) =>{
       GM_code_value = "0".concat(GM_code_value)
     }
     
-    if(world_cordinate[0]===-3000 && world_cordinate[1] === 3000){
-
+    if(world_cordinate[0]===-4500 && world_cordinate[1] === 3000){
+      
       console.log("GM_barcode_x",GM_barcode_x)
       console.log("GM_barcode_y",GM_barcode_y)
       console.log("GM_cordinate_x",GM_cordinate_x)
@@ -85,8 +85,8 @@ export const calculateGMBarcode = (world_cordinate,offset_value,gm_offset) =>{
       console.log("GM_code_y",GM_code_y)
       console.log("GM_code_value",GM_code_value)
       console.log("world_cordinate",world_cordinate)
-    console.log("offset_value",offset_value)
-    console.log("gm_offset",gm_offset)
+      console.log("offset_value",offset_value)
+      console.log("gm_offset",gm_offset)
 
 
     }
@@ -104,9 +104,10 @@ export const getOffsetValue = (barcodeDict) =>{
       var convert = JSON.parse(barcodeInfo["world_coordinate"])
       coordinate_list.push(convert)
     }
-    const lowest_y = coordinate_list.reduce((a, b) => a[1] > b[1] ? a : b);
+    // [high_x,high_y]
+    const highest_y = coordinate_list.reduce((a, b) => a[1] > b[1] ? a : b);
     const lowest_x = coordinate_list.reduce((a, b) => a[0] < b[0] ? a : b);
-    var offset_value = [lowest_x[0],lowest_y[1]]
+    var offset_value = [lowest_x[0],highest_y[1]]
     return offset_value
 }
 
@@ -435,6 +436,7 @@ export var createMapFromCoordinateData = (
     downloadConveyor:[],
     conveyors:[],
     barcodeDistance:parseInt(barcode_distances / 2),
+    barcodeOffset:"[10000,10000]",
     floors: [
       createFloorFromCoordinateData({
         row_start,

@@ -35,10 +35,13 @@ export default (state = {}, action) => {
         ...state,
         [floorData.floor_id]: {
           ...floorData,
-          map_values: floorData.map_values.map(barcode => barcode.coordinate)
+          map_values: floorData.map_values.map(barcode => barcode.coordinate),
+          barcodeFormat:"default_format",
+          barcodeOffset:"[10000,10000]"
         }
       };
     }
+    
     case "EDIT-BARCODE": {
       const { coordinate, new_barcode } = action.value;
       var newCoordinate = implicitBarcodeToCoordinate(new_barcode);
@@ -68,7 +71,7 @@ export default (state = {}, action) => {
       const chargerInfo = action.value.chargerDetails;
       const entry_point_coordinate = implicitBarcodeToCoordinate(chargerInfo.entry_point_location);
       const charger_id = chargerInfo.charger_id;
-      let newState = _.cloneDeep(state);
+      var newState = _.cloneDeep(state);
       Object.keys(newState).forEach(floorId => {
         _.remove(newState[floorId].chargers, function (charger) {
           return charger === charger_id;
@@ -87,6 +90,18 @@ export default (state = {}, action) => {
         });
       });
       return newState;
+    }
+    case "CHANGE-FLOOR-BARCODE-FORMAT-MODE":{
+      var {barcode_value,currentFloor} = action.value
+      var newState = _.cloneDeep(state);
+      newState[currentFloor].barcodeFormat=barcode_value
+      return newState
+    }
+    case "BARCODE-FLOOR-OFFSET-VALUE":{
+      var {barcodeOffset,currentFloor} = action.value
+      var newState = _.cloneDeep(state);
+      newState[currentFloor].barcodeOffset=barcodeOffset
+      return newState
     }
   }
   return state;

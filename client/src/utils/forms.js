@@ -46,6 +46,11 @@ export const neighboursSchema = {
 
 // yup schemas
 
+export const yupMinMaxIntSchema = number()
+  .required("Required")
+  .min(0, "Should be more than 0")
+  .max(999999,"Should be less than 1000000")
+
 export const yupPosIntSchema = number()
   .required("Required")
   .integer("Should be integer")

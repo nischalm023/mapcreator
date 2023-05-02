@@ -81,6 +81,14 @@ export const mapChangeReducer = (state = dummyState.normalizedMap, action) => {
       if(map.mappingBarcodeCoord == undefined) map.mappingBarcodeCoord = {};
       if(map.mappingBarcodeWorldCoord == undefined) map.mappingBarcodeWorldCoord = {};
       if(map.sectors == undefined) map.sectors = [];
+      if(map.floors.map((obj,i)=>{
+        if(!obj.hasOwnProperty("barcodeFormat")){
+          obj["barcodeFormat"] = "default_format"
+        }
+        if(!obj.hasOwnProperty("barcodeOffset")){
+          obj["barcodeOffset"] = "[10000,10000]"
+        }
+      }))
       return normalizeMap(action.value);
   }
   return state;
