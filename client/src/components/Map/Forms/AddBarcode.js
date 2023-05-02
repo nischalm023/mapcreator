@@ -23,12 +23,14 @@ const baseSchema = {
 export const onlyOneTileSelected = selectedMapTiles =>
   Object.keys(selectedMapTiles).length == 1;
 
-export const hasBarcodeForTile = (selectedMapTiles, barcodes) =>
-  barcodes[Object.keys(selectedMapTiles)[0]];
+export const hasBarcodeForTile = (selectedMapTiles, barcodes) =>{
+  return barcodes[Object.keys(selectedMapTiles)[0]];
+}
 
 export const getValidEmptyNeighbours = (selectedMapTiles, barcodes) => {
   const coordinate = Object.keys(selectedMapTiles)[0];
   const nbTileIds = getNeighbourTiles(coordinate, barcodes);
+  console.log(">>>>>>>>>>>",nbTileIds)
   const emptyDirTileIdList = _.zip([0, 1, 2, 3], nbTileIds).filter(
     ([, nbTileId]) => !barcodes[nbTileId] && isValidCoordinateKey(nbTileId)
   );
@@ -57,14 +59,12 @@ export const getValidEmptyDirTileIdList = (barcodeDict, emptyNeighbour) => {
   return emptyNeighbour;
 };
 
-const shouldBeDisabled = (selectedMapTiles, barcodes, state) => {
-  return (
+const shouldBeDisabled = (selectedMapTiles, barcodes, state) => (
     !onlyOneTileSelected(selectedMapTiles) ||
     !hasBarcodeForTile(selectedMapTiles, barcodes) ||
-    getValidEmptyNeighbours(selectedMapTiles, barcodes).length == 0 ||
+    (getValidEmptyNeighbours(selectedMapTiles, barcodes).length == 0) ||
     state.selection.conveyorMode === true
   );
-};
 
 export const getExistingBarcodesAndCoordinates = (barcodeInfoList) => {
     var barcodes = {};
@@ -85,8 +85,14 @@ export const getExistingBarcodesAndCoordinates = (barcodeInfoList) => {
 // TODO: support customizing edges of new barcode
 class AddBarcode extends Component {
   render() {
-    const { selectedMapTiles, barcodes, onSubmit ,state } = this.props;
-    const disabled = shouldBeDisabled(selectedMapTiles, barcodes, state);
+    const { selectedMapTiles, barcodes, onSubmit ,state,current_floor, floor_value} = this.props;
+    var current_floor_value = floor_value[current_floor]
+    var floor_barcodes = {};
+    const barcodeKeys = current_floor_value.map_values;
+    barcodeKeys.forEach((barcodeKey) => {
+      floor_barcodes[barcodeKey] = barcodes[barcodeKey];
+    });
+    const disabled = shouldBeDisabled(selectedMapTiles, floor_barcodes, state);
     const tooltipData = {
       id: "add-barcode",
       title: "Add a barcode",
@@ -111,11 +117,12 @@ class AddBarcode extends Component {
     const dirStrs = ["top", "right", "bottom", "left"];
     const emptyDirTileIdList = getValidEmptyNeighbours(
       selectedMapTiles,
-      barcodes
+      floor_barcodes
     );
-    var barcode_cordinate = getExistingBarcodesAndCoordinates(barcodes)
+    var barcode_cordinate = getExistingBarcodesAndCoordinates(floor_barcodes)
     const validEmptyDirTileIdList =  getValidEmptyDirTileIdList(barcode_cordinate.barcodes,emptyDirTileIdList)
     const keys = validEmptyDirTileIdList.map(innerArray => JSON.stringify(innerArray))
+
     const schema = {
       ...baseSchema,
       required: ["direction", "tileId"],
@@ -159,7 +166,9 @@ export default connect(
   state => ({
     selectedMapTiles: state.selection.mapTiles,
     barcodes: getBarcodes(state),
-    state:state
+    state:state,
+    current_floor: state.currentFloor,
+    floor_value:state.normalizedMap.entities.floor,
   }),
   dispatch => ({
     onSubmit: ({ formData }) => {

@@ -31,7 +31,7 @@ const createMap = (denormalizedMap, name, gsb, uid, source, solution_id, agent_i
 const runHaiMapConversionScriptToMap = (autocad) => {
       let form = new FormData();
       form.append("arrFile", autocad)
-      return  fetch(`${window.location.protocol}//${window.location.hostname}:5001/data`, {
+      return  fetch("http://127.0.0.1:5001/data", {
           method: 'POST',
           body: form
           }).then((response) => response.json()).then(data => {return data;});

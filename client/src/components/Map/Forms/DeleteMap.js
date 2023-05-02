@@ -8,16 +8,20 @@ import { withRouter } from "react-router-dom";
 class DeleteMap extends Component {
   state = {
     show: false,
-    name: ""
+    name: "",
+    on_hover:false,
+    bgcolor:"red"
   };
   toggle = () => this.setState({ show: !this.state.show });
+  MouseOver = () => this.setState({ on_hover: true ,"bgcolor":"white"})
+  MouseOut = () => this.setState({ on_hover: false ,"bgcolor":"red"});
   onSubmit = () => {
     const { dispatch, history, mapId } = this.props;
     dispatch(deleteMap(mapId, history));
     this.toggle();
   };
   render() {
-    const { show, name } = this.state;
+    const { show, name,bgcolor } = this.state;
     const { mapId, mapName } = this.props;
     return (
       <ButtonForm
@@ -28,7 +32,9 @@ class DeleteMap extends Component {
         toggle={this.toggle}
         style={{textAlign:"-webkit-center", color:"black"}}
         title="Are you absolutely sure?"
-        bcolor = "red"
+        bcolor = {bgcolor}
+        handleMouseEnter={this.MouseOver}
+        handleMouseLeave={this.MouseOut}
       >
         <span>
           This will permanently delete map #{mapId}. This action cannot be

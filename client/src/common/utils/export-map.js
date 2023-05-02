@@ -36,16 +36,30 @@ export default (withWorldCoordinate, singleFloor = false) => {
         return barcode
     }),
   }));
-  
-  // convert coordinates to strings first!
-  ret.map = map.floors.map(({ floor_id, map_values }) => ({
-    floor_id,
-    map_values: map_values.map(({ coordinate, ...rest }) => ({
+
+  ret.map = map.floors.map(({ floor_id, map_values }) => {
+    var barcode_val = map_values[0]["barcode"]
+    if(/^(\d{10})$/.test(barcode_val)){
+      var vda_data = {"barcode":barcode_val,"vda5050_coordinate":map_values[0]["vda_world_coordinate"]}
+      return({
+        floor_id,
+        map_values:map_values.map(({ coordinate, ...rest }) => ({
       ...rest,
       coordinate: `[${coordinate}]`,
     })),
-  }));
-  
+        vda5050_reference:vda_data
+      })
+    }else{
+      return({
+        floor_id,
+        map_values: map_values.map(({ coordinate, ...rest }) => ({
+        ...rest,
+        coordinate: `[${coordinate}]`,
+        })),
+      })
+    }
+  })
+
   // make single floor if required
   if (singleFloor && ret.map.length == 1) {
     ret.map = ret.map[0].map_values;

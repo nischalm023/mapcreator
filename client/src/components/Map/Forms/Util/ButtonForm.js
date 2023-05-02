@@ -4,20 +4,23 @@ import BulletPointsTooltip from "./BulletPointsTooltip";
 
 class ButtonForm extends Component {
   render() {
-    const {
+    var {
       disabled = false,
       buttonText = "Submit",
       tooltipData = {
         id: "default-tooltip-id"
       },
       toggle,
+      handleMouseEnter,
+      handleMouseLeave,
       small = false,
       btnClass = "btn-secondary",
       show,
       wrapInButtonGroup = true,
       title = undefined,
-      bcolor = "orange"
+      bcolor = "orange",
     } = this.props;
+    
     return (
       // adding class and role since nested button groups give a cleaner look for some reason
       // making it configurable since single button in a btn-group looks wierd
@@ -25,7 +28,7 @@ class ButtonForm extends Component {
         className={wrapInButtonGroup ? "btn-group" : undefined}
         role="group"
         style={{ display: "inline-block" }}
-      >
+      > 
         <button
           key={0}
           type="button"
@@ -37,6 +40,8 @@ class ButtonForm extends Component {
           onClick={() => toggle()}
           data-tip
           data-for={tooltipData.id}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           {buttonText}
         </button>
