@@ -1,5 +1,5 @@
 import { setErrorMessage } from "./message";
-import { DEFAULT_BARCODE_FORMAT,MILIMETER_PER_DM } from "../constants";
+import { DEFAULT_BARCODE_FORMAT,MILIMETER_PER_DM,TTP_BARCODE_FORMAT } from "../constants";
 
 export const validateBarcodesDistance = (barcodesDict) => {
   for (var barcode in barcodesDict){
@@ -46,17 +46,20 @@ export const changeBarcodeFormat = barcode_value => (dispatch, getState) => {
     type:"CHANGE-BARCODE-FORMAT-ON-BASIS-OF-MODE",
     value:{"barcode_value":barcode_value,"barcodesDict":barcodesDict,"barcodeOffset":current_offset}
   })
-  const { error, reason } = validateBarcodesDistance(barcodesDict);
-  if (error) {
-      dispatch({
-          type: "CHANGE-FLOOR-BARCODE-FORMAT-MODE",
-          value: {"barcode_value":DEFAULT_BARCODE_FORMAT,currentFloor}
-        });
-      dispatch({
-        type:"CHANGE-BARCODE-FORMAT-ON-BASIS-OF-MODE",
-        value:{"barcode_value":DEFAULT_BARCODE_FORMAT,"barcodesDict":barcodesDict,"barcodeOffset":current_offset}
-      })
-      return dispatch(setErrorMessage(reason));
-    }
+  if(barcode_value == TTP_BARCODE_FORMAT){
+    const { error, reason } = validateBarcodesDistance(barcodesDict);
+    if (error) {
+        dispatch({
+            type: "CHANGE-FLOOR-BARCODE-FORMAT-MODE",
+            value: {"barcode_value":DEFAULT_BARCODE_FORMAT,currentFloor}
+          });
+        dispatch({
+          type:"CHANGE-BARCODE-FORMAT-ON-BASIS-OF-MODE",
+          value:{"barcode_value":DEFAULT_BARCODE_FORMAT,"barcodesDict":barcodesDict,"barcodeOffset":current_offset}
+        })
+        return dispatch(setErrorMessage(reason));
+      }
+  }
+  
   return Promise.resolve();
 };
