@@ -4,7 +4,7 @@ import JSONFileInput from "components/JSONFileInput";
 import { handleErrors } from "utils/util";
 import { withRouter } from "react-router-dom";
 import SweetAlertError from "components/SweetAlertError";
-import { createMap , runHaiMapConversionScriptToMap} from "utils/api";
+import { createMap , runHaiMapConversionScriptToMap, requestAutocadFileFromGsb} from "utils/api";
 import _ from "lodash";
 
 class ImportMap extends Component {
@@ -12,7 +12,17 @@ class ImportMap extends Component {
     name: "",
     error: undefined,
   };
-
+  componentDidMount() {
+    const params = new URLSearchParams(window.location.search);
+    let gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
+    let gsbSolutionId = params.get('gsb_solution_id');
+    let gsbAgentId = params.get('gsb_agent_id');
+    let gsbFunctionalAreaId = params.get('functional_area_id');
+    let uid = params.get('uid');
+    if(gsb){
+      this.getAutocadFileFromGsb(gsb,gsbSolutionId,gsbAgentId,gsbFunctionalAreaId,uid);
+    }
+  };
   handleChange = (evt) => {
       this.setState({["autocad"]: evt.target.files[0]});
   };
@@ -52,7 +62,26 @@ class ImportMap extends Component {
       })
       .catch((error) => this.setState({ error }));
   }
-
+  getAutocadFileFromGsb = (gsb,gsbSolutionId,gsbAgentId,gsbFunctionalAreaId,uid) => {
+    let imported;
+    var data = {'gsb': gsb, 'gsb_solution_id': gsbSolutionId, 'gsb_agent_id': gsbAgentId,'gsb_functional_area_id': gsbFunctionalAreaId,
+    'gsb_uid': uid
+  }
+    var xls_file_url = requestAutocadFileFromGsb(data)
+                      .then((res) => res.json())
+                      .then((response) => {
+                        var script_request = runHaiMapConversionScriptToMap(response.data)
+                        .then((script_response)=>{
+                          if (script_response["status"] == "404"){
+                           this.setState({ 'error':script_response["content"] })
+                          }
+                          else{
+                            imported = importMap(_.omit(script_response["content"], ["name", "error"]));
+                            this.createMap(imported)
+                          }
+                        })
+                      })
+  }
   onSubmit = (e) => {
     e.preventDefault();
     // validate the import by converting everything into the map using import function
@@ -81,6 +110,13 @@ class ImportMap extends Component {
   render() {
     // console.log(" State ",this.state);
     const { error } = this.state;
+    const params = new URLSearchParams(window.location.search);
+    let gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
+    let gsbSolutionId = params.get('gsb_solution_id');
+    let gsbAgentId = params.get('gsb_agent_id');
+    let gsbFunctionalAreaId = params.get('functional_area_id');
+    let uid = params.get('uid');
+    
     return (
       <div className="container">
         {/* sweetalert here*/}

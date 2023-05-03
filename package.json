@@ -6,6 +6,7 @@
   "dependencies": {
     "ajv": "^6.5.2",
     "async": "^3.1.0",
+    "axios": "^1.4.0",
     "babel-polyfill": "^6.26.0",
     "babel-register": "^6.26.0",
     "cors": "^2.8.4",

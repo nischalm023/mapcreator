@@ -5,8 +5,9 @@ import wrap from "express-async-handler";
 import getRacksJson from "server/scripts/make-racks-json";
 import sequelize, { Op } from "sequelize";
 import { requestValidation } from "./verifier-apis";
-import { UPLOAD_MAP_TO_GSB_API, SUBMIT_BTN_API_HIT_TO_GSB } from "./gsb-apis";
+import { UPLOAD_MAP_TO_GSB_API, SUBMIT_BTN_API_HIT_TO_GSB, DOWNLOAD_AUTOCAD_FILE_TO_GSB_API } from "./gsb-apis";
 import moment from "moment";
+import axios from "axios";
 // HACK: adding cors to fetch data from storybook. should remove this later.
 import cors from "cors";
 const multer = require('multer');
@@ -282,6 +283,37 @@ app.post(
 /* eslint-disable-next-line no-unused-vars */
 app.use((err, req, res, next) => {
   res.status(500).send(err.message);
+});
+app.post('/api/getAutocadFileFromGsb', async (req, res) => {
+  let formData = new FormData();
+  String.prototype.format = function () {
+    var i = 0, args = arguments;
+    return this.replace(/{}/g, function () {
+      return typeof args[i] != 'undefined' ? args[i++] : '';
+    });
+  };
+  let data = req.body;
+  let api = DOWNLOAD_AUTOCAD_FILE_TO_GSB_API.format(data.gsb_solution_id, data.gsb_functional_area_id, data.gsb_agent_id)+"?uid="+data.gsb_uid;
+  try{
+  const response = await fetch(api,{
+          method: "GET"             
+          }).then((res) => res.json())
+          .then((url_response) => {
+            return new Promise((resolve, reject) => { axios.get(url_response[0]["fileuri"], {
+                  method: 'GET',
+                  responseType: 'blob', // important
+                }).then((file_resp) => {
+                  resolve({ status:"200", message: 'Successfully get files from GSB','data':file_resp.data });
+                  // res.send(file_resp);
+                })
+              })
+                
+              })
+   return res.json(response); 
+    }catch (err) {
+      return res.status(500).json({ message: 'Failed to fetch url' });
+    }
+                   
 });
 
 export default app;
