@@ -398,7 +398,7 @@ const AdjustRightTransitPosition = (gridView,transit_corner_world_coordinate,tra
  }
 
 const getTransitBarcodeInfo = (dispatch, state, formData) => {
-  var [barcodeFormat,getCurrentOffset,barcode,map_offset_value,currentFloor] = getBarcodeOffsetAndFormat(state)
+  var [barcodeFormat,vda_offset,barcode,arbitrary_origin_value,currentFloor] = getBarcodeOffsetAndFormat(state)
   const { tileId, newBarcode, direction, distance } = formData;
   const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
   const barcodes = getBarcodes(state);
@@ -484,7 +484,7 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
   }
   if(barcodeFormat == TTP_BARCODE_FORMAT){
     var ttp_barcode_value = setCoexistenceBarcodeLabel(dispatch,barcode,direction,
-      [transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]],map_offset_value,getCurrentOffset,
+      [transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]],arbitrary_origin_value,vda_offset,
       state.barcodeDistance,currentFloor)
   }
   var unit = {

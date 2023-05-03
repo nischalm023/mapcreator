@@ -38,6 +38,7 @@ export var ADJACENCYDISTANCE = 3500;
 export var DEFAULT_BARCODE_FORMAT = "default_format";
 export var TTP_BARCODE_FORMAT = "ttp_format";
 export var DEFAULT_MAP_OFFSET = "[10000,10000]";
+export var MILIMETER_PER_DM = 100000;
 // constants for offsetting barcode string sprites
 export var AFTER_DOT_SPRITE_X_OFFSET = -10;
 // approx ~320k sprites are created for a map of size 200x200. if more than MAX_SPRITES

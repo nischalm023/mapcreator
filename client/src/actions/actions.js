@@ -2,8 +2,8 @@
 import { handleErrors,
          ConvertTTPFormatBarcodeIntoDefaultFormat, 
          ConvertDefaultFormatBarcodeIntoTTPFormat,
-         getOffsetValue,
-         calculateGMBarcode
+         getArbitraryOriginValue,
+         calculateVdaBarcode
        } from "utils/util";
 import { createSelector } from "reselect";
 import {
@@ -1106,7 +1106,7 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap) => {
       var adjacent_neighbour_dict = getLinearWorldCordXY(objSorted[data]["x"],objSorted[data]["y"],objSorted[data]["coord"],objSorted,worldcorld_tile_mapping)
       mappping_coord_with_adjacent_neighbour_dict[objSorted[data]["coord"]]=adjacent_neighbour_dict
     }
-    var offset_value = getOffsetValue(currentFloorBarcodeDict)
+    var offset_value = getArbitraryOriginValue(currentFloorBarcodeDict)
     for (var barcode in currentFloorBarcodeDict) {
       var barcodeInfo = currentFloorBarcodeDict[barcode];
       barcodeInfo["adjacency"] = mappping_coord_with_adjacent_neighbour_dict[barcode]["adjacency"];
@@ -1114,7 +1114,7 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap) => {
       if(barcodeFormat==DEFAULT_BARCODE_FORMAT){
         barcodeInfo["barcode"] = ConvertTTPFormatBarcodeIntoDefaultFormat(barcode,barcodeInfo)
       }else{
-        var GM_barcode = calculateGMBarcode(JSON.parse(barcodeInfo["world_coordinate"]),offset_value,JSON.parse(barcodeOffset))
+        var GM_barcode = calculateVdaBarcode(JSON.parse(barcodeInfo["world_coordinate"]),offset_value,JSON.parse(barcodeOffset))
         barcodeInfo["barcode"] = GM_barcode
       }
       currentFloorBarcodeDict[barcode] = barcodeInfo;

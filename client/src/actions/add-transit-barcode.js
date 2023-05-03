@@ -3,7 +3,7 @@ import {
   coordinateKeyToTupleOfIntegers,
   tupleOfIntegersToCoordinateKey,
   getNeighbourBarcodeIncludingDisconnectedInDirection,
-  calculateGMBarcode,
+  calculateVdaBarcode,
   getBarcodeOffsetAndFormat
 } from "utils/util";
 import {calculate_corner_world_cordinate} from "./actions";
@@ -162,7 +162,7 @@ export const getUpdatedBarcodes = (
 };
 
 const getTransitBarcodeInfo = (state, formData) => {
-  var [barcodeFormat,getCurrentOffset,barcode,map_offset_value,currentFloor] = getBarcodeOffsetAndFormat(state)
+  var [barcodeFormat,vda_offset,barcode,arbitrary_origin_value,currentFloor] = getBarcodeOffsetAndFormat(state)
   var { tileId, newBarcode, direction, distance } = formData;
   const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
   const barcodes = getBarcodes(state);
@@ -206,7 +206,7 @@ const getTransitBarcodeInfo = (state, formData) => {
     }
   }
   if(barcodeFormat==TTP_BARCODE_FORMAT){
-    var newBarcode = calculateGMBarcode([transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]],map_offset_value,getCurrentOffset)
+    var newBarcode = calculateVdaBarcode([transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]],arbitrary_origin_value,vda_offset)
   }
   var unit = {
     store_status: 0,

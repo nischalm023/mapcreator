@@ -8,6 +8,7 @@ import { FormikedInput, FormikedSelectInput } from "components/InlineTextInput";
 import { withFormik, Field } from "formik";
 import { object, ref } from "yup";
 import { yupMinMaxIntSchema } from "utils/forms";
+import { changeBarcodeOffset } from "actions/changeBarcodeOffset";
 
 const InnerForm = ({ handleSubmit, isSubmitting, values,onClear }) => {
   return (
@@ -42,9 +43,9 @@ const InnerForm = ({ handleSubmit, isSubmitting, values,onClear }) => {
 
 // form validation etc.
 const Form = withFormik({
-  mapPropsToValues: ({ barcode_offset }) => ({
-    offset_x: barcode_offset[0],
-    offset_y: barcode_offset[1]
+  mapPropsToValues: ({ current_vda_offset }) => ({
+    offset_x: current_vda_offset[0],
+    offset_y: current_vda_offset[1]
   }),
   validationSchema: () => {
     return object().shape({
@@ -53,16 +54,10 @@ const Form = withFormik({
     });
   },
   handleSubmit: (formValues, { props }) => {
-    const { onSuccess, onClear,dispatch,barcode_offset,barcode_value,barcode_dict,currentFloor} = props;
-    var barcodeOffset = `[${formValues.offset_x},${formValues.offset_y}]`
-    dispatch({
-    type: "BARCODE-FLOOR-OFFSET-VALUE",
-    value: {"barcodeOffset":barcodeOffset,"currentFloor":currentFloor}
-  })
-    dispatch({
-    type:"CHANGE-BARCODE-FORMAT-ON-BASIS-OF-MODE",
-    value:{"barcode_value":barcode_value,"barcodesDict":barcode_dict,"barcodeOffset":barcodeOffset}
-  })
+    const { onSuccess, onClear,dispatch,current_vda_offset,barcode_value,barcode_dict,currentFloor} = props;
+    var updated_vda_offset = `[${formValues.offset_x},${formValues.offset_y}]`
+    dispatch(changeBarcodeOffset(dispatch,updated_vda_offset,currentFloor,barcode_value,barcode_dict,current_vda_offset))
+    
     onSuccess();
   }
 })(InnerForm);
@@ -106,7 +101,7 @@ class ChangeBarcodeOffset extends Component {
         onSuccess={() => this.toggle()}
         onClear={() => this.toggle()}
         dispatch={dispatch}
-        barcode_offset={barcodeOffset}
+        current_vda_offset={barcodeOffset}
         barcode_value={barcodeFormat} 
         barcode_dict={barcodesDict}
         currentFloor={current_floor}
