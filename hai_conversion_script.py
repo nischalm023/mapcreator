@@ -172,8 +172,8 @@ class CreateMap:
 					sector_id = int(sector_id[0])
 				xloc,yloc,rtype,xcoords, ycoords = loc_cord[0],loc_cord[1],rtype,grid_cord[0],grid_cord[1]
 				barcode = "%03d.%03d"%(ycoords,xcoords)
-				print("coord------>",grid_cord,"matrix_cord---->",matrix_cord[grid_cord],"nameee",neighbours,size_info,adjacency_list,barcode)
 				neighbours,size_info,adjacency_list = self.getNeighbourSizeInfo(xcoords,ycoords,matrix_cord,allLocationCords)
+				print("coord------>",grid_cord,"matrix_cord---->",matrix_cord[grid_cord],"nameee",neighbours,size_info,adjacency_list,barcode)
 				if rtype =="p":
 					store_status = 0
 				elif rtype =="s":
