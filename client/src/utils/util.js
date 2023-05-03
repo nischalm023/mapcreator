@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { randomColor } from "randomcolor";
 import { getDirectionIncludingDisconnected } from "../reducers/barcode/util";
+import { MILIMETER_PER_DM } from "../constants";
 
 export const getCanvasSize = () => ({
   width: window.innerWidth,
@@ -45,20 +46,20 @@ export const ConvertTTPFormatBarcodeIntoDefaultFormat = (key,value) =>{
   return barcode
 };
 
-export const calculateVsdWorldCordinate = (world_cordinate,offset_value,gm_offset) =>{
-  var GM_offset_x = gm_offset[0]
-  var GM_offset_y = gm_offset[1]
-  var GM_cordinate_x = parseInt((Math.abs(world_cordinate[0] - offset_value[0]) + GM_offset_x))
-  var GM_cordinate_y = parseInt((Math.abs(world_cordinate[1] - offset_value[1]) + GM_offset_y))
-  return `[${GM_cordinate_x},${GM_cordinate_y}]`
+export const calculateVsdWorldCordinate = (world_cordinate,arbitrary_origin_value,vda_offset) =>{
+  var vda_offset_x = vda_offset[0]
+  var vda_offset_y = vda_offset[1]
+  var vda_cordinate_x = parseInt((Math.abs(world_cordinate[0] - arbitrary_origin_value[0]) + vda_offset_x))
+  var vda_cordinate_y = parseInt((Math.abs(world_cordinate[1] - arbitrary_origin_value[1]) + vda_offset_y))
+  return `[${vda_cordinate_x},${vda_cordinate_y}]`
 }
 
-export const setCoexistenceBarcodeLabel = (dispatch,barcode,direction,world_cordinate,map_offset_value,getCurrentOffset,distance,currentFloor) =>{
-  var map_offset_value = getOffsetValue(barcode)
-  var offset_value = getOffsetValue(barcode)
+export const setCoexistenceBarcodeLabel = (dispatch,barcode,direction,world_cordinate,arbitrary_origin_value,getCurrentOffset,distance,currentFloor) =>{
+  var arbitrary_origin_value = getArbitraryOriginValue(barcode)
+  var offset_value = getArbitraryOriginValue(barcode)
   
   if(direction == 2||direction==0){
-    if(world_cordinate[1]<=map_offset_value[1]){
+    if(world_cordinate[1]<=arbitrary_origin_value[1]){
       var barcodeOffset = getCurrentOffset
     }else{
       var barcodeOffset_y = getCurrentOffset[1] - (distance*2)
@@ -67,7 +68,7 @@ export const setCoexistenceBarcodeLabel = (dispatch,barcode,direction,world_cord
     }
   }
   if(direction == 3||direction==1){
-    if(world_cordinate[0]>=map_offset_value[0]){
+    if(world_cordinate[0]>=arbitrary_origin_value[0]){
       var barcodeOffset = getCurrentOffset
     }else{
       var barcodeOffset_x = getCurrentOffset[0] - (distance*2)
@@ -75,11 +76,11 @@ export const setCoexistenceBarcodeLabel = (dispatch,barcode,direction,world_cord
       var offset_value = [world_cordinate[0],offset_value[1]]
     }
   }
-  var ttp_barcode_value = calculateGMBarcode(world_cordinate,offset_value,barcodeOffset)
-  var barcodeOffset_format = `[${barcodeOffset[0]},${barcodeOffset[1]}]`
+  var ttp_barcode_value = calculateVdaBarcode(world_cordinate,offset_value,barcodeOffset)
+  var vda_offset_value = `[${barcodeOffset[0]},${barcodeOffset[1]}]`
   dispatch({
     type: "BARCODE-FLOOR-OFFSET-VALUE",
-    value: {"barcodeOffset":barcodeOffset_format,currentFloor}
+    value: {"barcodeOffset":vda_offset_value,currentFloor}
   });
   return ttp_barcode_value
 }
@@ -93,56 +94,58 @@ export const getBarcodeOffsetAndFormat = (state) => {
       barcode[barcodeKey] = normalizedMap.entities.barcode[barcodeKey];
     });
   var barcodeFormat = floorInfo[currentFloor].barcodeFormat
-  var getCurrentOffset = JSON.parse(floorInfo[currentFloor].barcodeOffset)
-  var map_offset_value = getOffsetValue(barcode)
-  return [barcodeFormat,getCurrentOffset,barcode,map_offset_value,currentFloor]
+  var vda_offset = JSON.parse(floorInfo[currentFloor].barcodeOffset)
+  var arbitrary_origin_value = getArbitraryOriginValue(barcode)
+  return [barcodeFormat,vda_offset,barcode,arbitrary_origin_value,currentFloor]
 }
 
 // calculation for ttp barcode format
-export const calculateGMBarcode = (world_cordinate,offset_value,gm_offset) =>{
-    var GM_offset_x = gm_offset[0]
-    var GM_offset_y = gm_offset[1]
-    var GM_cordinate_x = parseInt((Math.abs(world_cordinate[0] - offset_value[0]) + GM_offset_x)/10)
-    var GM_cordinate_y = parseInt((Math.abs(world_cordinate[1] - offset_value[1]) + GM_offset_y)/10)
-    var GM_barcode_x = GM_cordinate_x%1000
-    var GM_barcode_y = GM_cordinate_y%1000
-    var GM_code_x = Math.floor(GM_cordinate_x/10000)
-    var GM_code_y = Math.floor(GM_cordinate_y/10000)
+export const calculateVdaBarcode = (world_cordinate,arbitrary_origin_value,vda_offset) =>{
+    var vda_offset_x = vda_offset[0]
+    var vda_offset_y = vda_offset[1]
+    var vda_cordinate_x = (Math.abs(world_cordinate[0] - arbitrary_origin_value[0]) + vda_offset_x)
+    var vda_cordinate_y = (Math.abs(world_cordinate[1] - arbitrary_origin_value[1]) + vda_offset_y)
+    // vda barcode x and y value in cm
+    //mm per dm = 100000
+    var hai_barcode_x = parseInt((vda_cordinate_x%MILIMETER_PER_DM)/10)
+    var hai_barcode_y = parseInt((vda_cordinate_y%MILIMETER_PER_DM)/10)
+    var dm_code_x = Math.floor(vda_cordinate_x/MILIMETER_PER_DM)
+    var dm_code_y = Math.floor(vda_cordinate_y/MILIMETER_PER_DM)
     
-    var GM_code_value =  GM_code_x * 10 + GM_code_y
-    // if GM_code_value is 0 then append 0 in begining to match two digit format
-    if(GM_code_value == '0'){
-      GM_code_value = "0".concat(GM_code_value)
+    var dm_code_value =  dm_code_x * 10 + dm_code_y
+    // if dm_code_value is 0 then append 0 in begining to match two digit format
+    if(dm_code_value == '0'){
+      dm_code_value = "0".concat(dm_code_value)
     }
-    // if GM_code_value is one digit and GM_CODE_x is 0 and GM-code_y is greater than one
+    // if dm_code_value is one digit and GM_CODE_x is 0 and GM-code_y is greater than one
     // append 0 in the begining
-    if((GM_code_x * 10 == 0) && (GM_code_y>0)){
-      GM_code_value = "0".concat(GM_code_value)
+    if((dm_code_x * 10 == 0) && (dm_code_y>0)){
+      dm_code_value = "0".concat(dm_code_value)
     }
     
-    if(world_cordinate[0]===-3000 && world_cordinate[1] === 3000){
+    if(world_cordinate[0]===-9247 && world_cordinate[1] === 30082){
       
-      console.log("GM_barcode_x",GM_barcode_x)
-      console.log("GM_barcode_y",GM_barcode_y)
-      console.log("GM_cordinate_x",GM_cordinate_x)
-      console.log("GM_cordinate_y",GM_cordinate_y)
-      console.log("GM_code_x",GM_code_x)
-      console.log("GM_code_y",GM_code_y)
-      console.log("GM_code_value",GM_code_value)
+      console.log("hai_barcode_x",hai_barcode_x)
+      console.log("hai_barcode_y",parseInt(hai_barcode_y))
+      console.log("vda_cordinate_x",vda_cordinate_x)
+      console.log("vda_cordinate_y",vda_cordinate_y)
+      console.log("dm_code_x",dm_code_x)
+      console.log("dm_code_y",dm_code_y)
+      console.log("dm_code_value",dm_code_value)
       console.log("world_cordinate",world_cordinate)
-      console.log("offset_value",offset_value)
-      console.log("gm_offset",gm_offset)
+      console.log("offset_value",arbitrary_origin_value)
+      console.log("vda_offset",vda_offset)
 
 
     }
-    var GM_barcode = GM_code_value+stringify_number_ttp(GM_barcode_x)+stringify_number_ttp(GM_barcode_y)
-    return GM_barcode
+    var final_vda_barcode = dm_code_value+stringify_number_ttp(hai_barcode_x)+stringify_number_ttp(hai_barcode_y)
+    return final_vda_barcode
 }
 
 // get offset value
 // offset value is the right most edge cordinate
 
-export const getOffsetValue = (barcodeDict) =>{
+export const getArbitraryOriginValue = (barcodeDict) =>{
     var coordinate_list = []
     for (var barcode in barcodeDict) {
       var barcodeInfo = barcodeDict[barcode];

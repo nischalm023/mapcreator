@@ -13,8 +13,8 @@ import {
 import { stringify_number,
         encode_barcode, 
         ConvertTTPFormatBarcodeIntoDefaultFormat, 
-        getOffsetValue,
-        calculateGMBarcode,
+        getArbitraryOriginValue,
+        calculateVdaBarcode,
         calculateVsdWorldCordinate
       } from "utils/util";
 import shiftBarcode from "./shift-barcode";
@@ -185,10 +185,10 @@ export default (state = {}, action) => {
         })
         return { ...state, ...newBarcodeDict}
       }else{
-        var offset_value = getOffsetValue(barcodesDict)
+        var offset_value = getArbitraryOriginValue(barcodesDict)
         for (var barcode in barcodesDict){
             var barcodeInfo = barcodesDict[barcode]
-            var GM_barcode = calculateGMBarcode(JSON.parse(barcodeInfo["world_coordinate"]),offset_value,JSON.parse(barcodeOffset))
+            var GM_barcode = calculateVdaBarcode(JSON.parse(barcodeInfo["world_coordinate"]),offset_value,JSON.parse(barcodeOffset))
             var vsd_world_coordinate = calculateVsdWorldCordinate(JSON.parse(barcodeInfo["world_coordinate"]),offset_value,JSON.parse(barcodeOffset))
             barcodeInfo["barcode"] = GM_barcode
             barcodeInfo["vda_world_coordinate"] = vsd_world_coordinate
