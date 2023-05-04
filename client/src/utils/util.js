@@ -46,15 +46,7 @@ export const ConvertTTPFormatBarcodeIntoDefaultFormat = (key,value) =>{
   return barcode
 };
 
-export const calculateVsdWorldCordinate = (world_cordinate,arbitrary_origin_value,vda_offset) =>{
-  var vda_offset_x = vda_offset[0]
-  var vda_offset_y = vda_offset[1]
-  var vda_cordinate_x = (Math.abs(world_cordinate[0] - arbitrary_origin_value[0]) + vda_offset_x)
-  var vda_cordinate_y = (Math.abs(world_cordinate[1] - arbitrary_origin_value[1]) + vda_offset_y)
-  var final_vda_cordinate_x = ((Math.round(vda_cordinate_x/10)) * 10)
-  var final_vda_cordinate_y = ((Math.round(vda_cordinate_y/10)) * 10)
-  return `[${final_vda_cordinate_x},${final_vda_cordinate_y}]`
-}
+
 
 export const setCoexistenceBarcodeLabel = (dispatch,barcode,direction,world_cordinate,arbitrary_origin_value,getCurrentOffset,distance,currentFloor) =>{
   var arbitrary_origin_value = getArbitraryOriginValue(barcode)
@@ -101,18 +93,30 @@ export const getBarcodeOffsetAndFormat = (state) => {
   return [barcodeFormat,vda_offset,barcode,arbitrary_origin_value,currentFloor]
 }
 
+export const calculateVsdWorldCordinate = (world_cordinate,arbitrary_origin_value,vda_offset) =>{
+  var vda_offset_x = vda_offset[0]
+  var vda_offset_y = vda_offset[1]
+  var vda_cordinate_x = (Math.abs(world_cordinate[0] - arbitrary_origin_value[0]) + vda_offset_x)
+  var vda_cordinate_y = (Math.abs(world_cordinate[1] - arbitrary_origin_value[1]) + vda_offset_y)
+  var final_vda_cordinate_x = ((Math.round(vda_cordinate_x/10)) * 10)
+  var final_vda_cordinate_y = ((Math.round(vda_cordinate_y/10)) * 10)
+  return `[${final_vda_cordinate_x},${final_vda_cordinate_y}]`
+}
+
 // calculation for ttp barcode format
 export const calculateVdaBarcode = (world_cordinate,arbitrary_origin_value,vda_offset) =>{
     var vda_offset_x = vda_offset[0]
     var vda_offset_y = vda_offset[1]
     var vda_cordinate_x = (Math.abs(world_cordinate[0] - arbitrary_origin_value[0]) + vda_offset_x)
     var vda_cordinate_y = (Math.abs(world_cordinate[1] - arbitrary_origin_value[1]) + vda_offset_y)
+    var calculated_vda_cordinate_x = ((Math.round(vda_cordinate_x/10)) * 10)
+    var calculated_vda_cordinate_y = ((Math.round(vda_cordinate_y/10)) * 10)
     // vda barcode x and y value in cm
     //mm per dm = 100000
-    var hai_barcode_x = parseInt((vda_cordinate_x%MILIMETER_PER_DM)/10)
-    var hai_barcode_y = parseInt((vda_cordinate_y%MILIMETER_PER_DM)/10)
-    var dm_code_x = Math.floor(vda_cordinate_x/MILIMETER_PER_DM)
-    var dm_code_y = Math.floor(vda_cordinate_y/MILIMETER_PER_DM)
+    var hai_barcode_x = parseInt((calculated_vda_cordinate_x%MILIMETER_PER_DM)/10)
+    var hai_barcode_y = parseInt((calculated_vda_cordinate_y%MILIMETER_PER_DM)/10)
+    var dm_code_x = Math.floor(calculated_vda_cordinate_x/MILIMETER_PER_DM)
+    var dm_code_y = Math.floor(calculated_vda_cordinate_y/MILIMETER_PER_DM)
     
     var dm_code_value =  dm_code_x * 10 + dm_code_y
     // if dm_code_value is 0 then append 0 in begining to match two digit format
@@ -129,8 +133,8 @@ export const calculateVdaBarcode = (world_cordinate,arbitrary_origin_value,vda_o
       
       console.log("hai_barcode_x",hai_barcode_x)
       console.log("hai_barcode_y",parseInt(hai_barcode_y))
-      console.log("vda_cordinate_x",vda_cordinate_x)
-      console.log("vda_cordinate_y",vda_cordinate_y)
+      console.log("vda_cordinate_x",calculated_vda_cordinate_x)
+      console.log("vda_cordinate_y",calculated_vda_cordinate_y)
       console.log("dm_code_x",dm_code_x)
       console.log("dm_code_y",dm_code_y)
       console.log("dm_code_value",dm_code_value)

@@ -3,7 +3,9 @@ import {
   getNeighbouringBarcodes,
   getNeighbouringBarcodesIncludingDisconnected,
   implicitCoordinateKeyToBarcode,
-  coordinateKeyToTupleOfIntegers
+  coordinateKeyToTupleOfIntegers,
+  getBarcodeOffsetAndFormat,
+  calculateVdaBarcode
 } from "utils/util";
 import {
   coordinateKeyToBarcodeSelector,
@@ -15,7 +17,7 @@ import {
   getNeighbourBarcodeWorldCoord
 } from "./add-transit-barcode";
 import { addEntitiesToFloor, clearTiles, calculate_corner_world_cordinate } from "./actions";
-import { CHARGER_DISTANCE } from "../constants";
+import { CHARGER_DISTANCE,DEFAULT_BARCODE_FORMAT,TTP_BARCODE_FORMAT } from "../constants";
 import _ from "lodash";
 import { setErrorMessage } from "./message";
 
@@ -57,6 +59,7 @@ export const createAllChargerBarcodes = (
     throw new Error(
       `No neighbour for ${tileId} in direction ${charger_direction}`
     );
+  var [barcodeFormat,vda_offset,barcode,arbitrary_origin_value,currentFloor] = getBarcodeOffsetAndFormat(state)
   var entryTileId = getNeighbouringBarcodes(tileId,barcodesDict)[charger_direction].coordinate
   // special barcode
   // TODO: can ask user to add this, using transit barcode button
@@ -119,6 +122,10 @@ export const createAllChargerBarcodes = (
   specialBarcode["world_coordinate"] = `[${transitBarcodeWorldCoord["x"]},${transitBarcodeWorldCoord["y"]}]`
   specialBarcode["world_coordinate_reference_neighbour"]= tileId
   specialBarcode["corner_world_cooordinate"] = calculate_corner_world_cordinate(specialBarcode["size_info"],[transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]])
+  if(barcodeFormat==TTP_BARCODE_FORMAT){
+    specialBarcode["barcode"] = calculateVdaBarcode([transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]],arbitrary_origin_value,vda_offset)
+  }
+
   var originalChargerBarcodeSizeInfoInChargerDirection =
     chargerBarcode.size_info[charger_direction];
   chargerBarcode.size_info[charger_direction] = CHARGER_DISTANCE;

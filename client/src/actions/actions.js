@@ -1170,7 +1170,7 @@ export const ConvertEntitiesInBarcodeFormat = (dispatch,getState) => {
     Object.keys(chargerDict).forEach(function(charger_id) {
       var reinitPoint = chargerDict[charger_id]["reinit_point_location"]
       var chargerLocation = chargerDict[charger_id]["charger_location"]
-      if(barcodeMapping.hasOwnProperty(reinitPoint)){
+      if(barcodeMapping.hasOwnProperty(reinitPoint) && barcodeMapping.hasOwnProperty(chargerLocation)){
         var charger_location = BarcodeDict[barcodeMapping[chargerLocation]]["barcode"]
         var new_barcode = BarcodeDict[barcodeMapping[reinitPoint]]["barcode"]
         dispatch(editChargerBarcode(charger_location,new_barcode,charger_id))
