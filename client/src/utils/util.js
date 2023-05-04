@@ -49,9 +49,11 @@ export const ConvertTTPFormatBarcodeIntoDefaultFormat = (key,value) =>{
 export const calculateVsdWorldCordinate = (world_cordinate,arbitrary_origin_value,vda_offset) =>{
   var vda_offset_x = vda_offset[0]
   var vda_offset_y = vda_offset[1]
-  var vda_cordinate_x = parseInt((Math.abs(world_cordinate[0] - arbitrary_origin_value[0]) + vda_offset_x))
-  var vda_cordinate_y = parseInt((Math.abs(world_cordinate[1] - arbitrary_origin_value[1]) + vda_offset_y))
-  return `[${vda_cordinate_x},${vda_cordinate_y}]`
+  var vda_cordinate_x = (Math.abs(world_cordinate[0] - arbitrary_origin_value[0]) + vda_offset_x)
+  var vda_cordinate_y = (Math.abs(world_cordinate[1] - arbitrary_origin_value[1]) + vda_offset_y)
+  var final_vda_cordinate_x = ((Math.round(vda_cordinate_x/10)) * 10)
+  var final_vda_cordinate_y = ((Math.round(vda_cordinate_y/10)) * 10)
+  return `[${final_vda_cordinate_x},${final_vda_cordinate_y}]`
 }
 
 export const setCoexistenceBarcodeLabel = (dispatch,barcode,direction,world_cordinate,arbitrary_origin_value,getCurrentOffset,distance,currentFloor) =>{

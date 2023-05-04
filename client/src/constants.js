@@ -37,7 +37,7 @@ export var BARCODE_DIGIT_WIDTH = 23;
 export var ADJACENCYDISTANCE = 2000;
 export var DEFAULT_BARCODE_FORMAT = "default_format";
 export var TTP_BARCODE_FORMAT = "ttp_format";
-export var DEFAULT_MAP_OFFSET = "[10000,10000]";
+export var DEFAULT_MAP_OFFSET = "[100000,100000]";
 export var MILIMETER_PER_DM = 100000;
 // constants for offsetting barcode string sprites
 export var AFTER_DOT_SPRITE_X_OFFSET = -10;
