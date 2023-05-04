@@ -95,9 +95,16 @@ const createAdjacentAndNeighbour = (x_list,y_list,x,y,WorldCoordinateToTileIdMap
 
 export const mappedNeighbour = (new_neighbour,old_neighbour) => {
     var new_neighbour_list = []
+    
     for (var i = 0; i < old_neighbour.length; i++) {
+
         if (JSON.stringify(old_neighbour[i]) == JSON.stringify([1,1,0]) || JSON.stringify(old_neighbour[i]) == JSON.stringify([1,0,0])){
-            new_neighbour_list.splice(i, 0, old_neighbour[i]);
+            if(JSON.stringify(new_neighbour[i]) === JSON.stringify([0,0,0])){
+                new_neighbour_list.splice(i, 0, new_neighbour[i]);
+            }else{
+                new_neighbour_list.splice(i, 0, old_neighbour[i])
+            }
+
         }else{
             new_neighbour_list.splice(i, 0, new_neighbour[i])
         }
