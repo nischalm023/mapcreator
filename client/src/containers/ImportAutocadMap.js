@@ -6,6 +6,7 @@ import { withRouter } from "react-router-dom";
 import SweetAlertError from "components/SweetAlertError";
 import { createMap , runHaiMapConversionScriptToMap, requestAutocadFileFromGsb} from "utils/api";
 import _ from "lodash";
+import axios from "axios";
 
 class ImportMap extends Component {
   state = {
@@ -70,16 +71,24 @@ class ImportMap extends Component {
     var xls_file_url = requestAutocadFileFromGsb(data)
                       .then((res) => res.json())
                       .then((response) => {
-                        var script_request = runHaiMapConversionScriptToMap(response.data)
-                        .then((script_response)=>{
-                          if (script_response["status"] == "404"){
-                           this.setState({ 'error':script_response["content"] })
-                          }
+                        console.log("response" , response.data)
+                        axios.get(response.data[0]["fileuri"], {
+                                method: 'GET',
+                                responseType: 'blob', // important
+                              }).then((file_resp) => {
+                                console.log("fileresp",file_resp)
+                                var script_request = runHaiMapConversionScriptToMap(file_resp.data)
+                                .then((script_response)=>{
+                                if (script_response["status"] == "404"){
+                                  this.setState({ 'error':script_response["content"] })
+                                }
                           else{
                             imported = importMap(_.omit(script_response["content"], ["name", "error"]));
                             this.createMap(imported)
                           }
                         })
+                              })
+                            
                       })
   }
   onSubmit = (e) => {

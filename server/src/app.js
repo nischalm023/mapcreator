@@ -7,7 +7,7 @@ import sequelize, { Op } from "sequelize";
 import { requestValidation } from "./verifier-apis";
 import { UPLOAD_MAP_TO_GSB_API, SUBMIT_BTN_API_HIT_TO_GSB, DOWNLOAD_AUTOCAD_FILE_TO_GSB_API } from "./gsb-apis";
 import moment from "moment";
-import axios from "axios";
+// import axios from "axios";
 // HACK: adding cors to fetch data from storybook. should remove this later.
 import cors from "cors";
 const multer = require('multer');
@@ -299,14 +299,15 @@ app.post('/api/getAutocadFileFromGsb', async (req, res) => {
           method: "GET"             
           }).then((res) => res.json())
           .then((url_response) => {
-            return new Promise((resolve, reject) => { axios.get(url_response[0]["fileuri"], {
-                  method: 'GET',
-                  responseType: 'blob', // important
-                }).then((file_resp) => {
-                  resolve({ status:"200", message: 'Successfully get files from GSB','data':file_resp.data });
-                  // res.send(file_resp);
-                })
-              })
+            // return new Promise((resolve, reject) => { axios.get(url_response[0]["fileuri"], {
+            //       method: 'GET',
+            //       responseType: 'blob', // important
+            //     }).then((file_resp) => {
+            //       resolve({ status:"200", message: 'Successfully get files from GSB','data':file_resp.data });
+            //       // res.send(file_resp);
+            //     })
+            //   })
+            res.send({ status:"200", message: 'Successfully get files from GSB',data:url_response })
                 
               })
    return res.json(response); 
