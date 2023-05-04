@@ -40,7 +40,16 @@ export default (withWorldCoordinate, singleFloor = false) => {
   ret.map = map.floors.map(({ floor_id, map_values }) => {
     var barcode_val = map_values[0]["barcode"]
     if(/^(\d{10})$/.test(barcode_val)){
-      var vda_data = {"barcode":barcode_val,"vda5050_coordinate":map_values[0]["vda_world_coordinate"]}
+      var vda_data = ""
+      for(var i = 0; i < map_values.length; i++) {
+        if(map_values[i].world_coordinate_reference_neighbour=="0,0"){
+          var vda_data = {"barcode":map_values[i]["barcode"],"vda5050_coordinate":map_values[i]["vda_world_coordinate"]}
+          break
+        }
+      }
+      if(vda_data ===""){
+        var vda_data = {"barcode":barcode_val,"vda5050_coordinate":map_values[0]["vda_world_coordinate"]}
+      }
       return({
         floor_id,
         map_values:map_values.map(({ coordinate, ...rest }) => ({
