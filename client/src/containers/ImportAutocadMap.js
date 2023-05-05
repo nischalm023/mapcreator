@@ -18,6 +18,7 @@ class ImportMap extends Component {
     let gsbAgentId = params.get('gsb_agent_id');
     let gsbFunctionalAreaId = params.get('functional_area_id');
     let uid = params.get('uid');
+    let name  = params.get('name');
     if(gsb){
       this.getAutocadFileFromGsb(gsb,gsbSolutionId,gsbAgentId,gsbFunctionalAreaId,uid);
     }
@@ -41,7 +42,6 @@ class ImportMap extends Component {
   };
 
   createMap = (imported) => {
-    const { name } = this.state;
     const { history } = this.props;
     const params = new URLSearchParams(window.location.search);
     let gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
@@ -49,6 +49,8 @@ class ImportMap extends Component {
     let gsbAgentId = params.get('gsb_agent_id');
     let gsbFunctionalAreaId = params.get('functional_area_id');
     let uid = params.get('uid');
+    const name = params.get('name');
+    console.log("name",name)
     createMap(imported, name, gsb, uid, 'autocad_import', gsbSolutionId, gsbAgentId, gsbFunctionalAreaId)
       .then(handleErrors)
       .then((res) => res.json())
@@ -73,10 +75,10 @@ class ImportMap extends Component {
       return { message: 'Failed to fetch data','status': 400 };
     };
   }
-  getAutocadFileFromGsb = (gsb,gsbSolutionId,gsbAgentId,gsbFunctionalAreaId,uid) => {
+  getAutocadFileFromGsb = (gsb,gsbSolutionId,gsbAgentId,gsbFunctionalAreaId,uid,name) => {
     let imported;
     var data = {'gsb': gsb, 'gsb_solution_id': gsbSolutionId, 'gsb_agent_id': gsbAgentId,'gsb_functional_area_id': gsbFunctionalAreaId,
-    'gsb_uid': uid
+    'gsb_uid': uid , 'name':name
   }
     var xls_file_url = requestAutocadFileFromGsb(data)
                       .then((res) => res.json())
@@ -87,7 +89,7 @@ class ImportMap extends Component {
                           .then((response)=>{
                             console.log("response====", response);
                             if(response.status===200){
-                              var script_request = runHaiMapConversionScriptToMap(response)
+                              var script_request = runHaiMapConversionScriptToMap(response.data)
                               .then((script_response)=>{
                                 if (script_response["status"] == "404"){
                                  this.setState({ 'error':script_response["content"] })
