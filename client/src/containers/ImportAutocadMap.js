@@ -6,8 +6,6 @@ import { withRouter } from "react-router-dom";
 import SweetAlertError from "components/SweetAlertError";
 import { createMap , runHaiMapConversionScriptToMap, requestAutocadFileFromGsb} from "utils/api";
 import _ from "lodash";
-import axios from "axios";
-
 class ImportMap extends Component {
   state = {
     name: "",
@@ -63,6 +61,18 @@ class ImportMap extends Component {
       })
       .catch((error) => this.setState({ error }));
   }
+  fetchDoc = async(url) => {
+    try{
+      const response = await fetch(url,{
+        method: "GET", responseType: 'blob'
+      })
+      const data = await response.blob();
+       return {message: 'Fetched data successfully','status': 200 , data: data}
+    }
+    catch(error){
+      return { message: 'Failed to fetch data','status': 400 };
+    };
+  }
   getAutocadFileFromGsb = (gsb,gsbSolutionId,gsbAgentId,gsbFunctionalAreaId,uid) => {
     let imported;
     var data = {'gsb': gsb, 'gsb_solution_id': gsbSolutionId, 'gsb_agent_id': gsbAgentId,'gsb_functional_area_id': gsbFunctionalAreaId,
@@ -71,24 +81,30 @@ class ImportMap extends Component {
     var xls_file_url = requestAutocadFileFromGsb(data)
                       .then((res) => res.json())
                       .then((response) => {
-                        console.log("response" , response.data)
-                        axios.get(response.data[0]["fileuri"], {
-                                method: 'GET',
-                                responseType: 'blob', // important
-                              }).then((file_resp) => {
-                                console.log("fileresp",file_resp)
-                                var script_request = runHaiMapConversionScriptToMap(file_resp.data)
-                                .then((script_response)=>{
+                        try{
+                        console.log("responseee" , response)  
+                          this.fetchDoc(response.data[0]["fileuri"])
+                          .then((response)=>{
+                            console.log("response====", response);
+                            if(response.status===200){
+                              var script_request = runHaiMapConversionScriptToMap(response)
+                              .then((script_response)=>{
                                 if (script_response["status"] == "404"){
-                                  this.setState({ 'error':script_response["content"] })
+                                 this.setState({ 'error':script_response["content"] })
                                 }
-                          else{
-                            imported = importMap(_.omit(script_response["content"], ["name", "error"]));
-                            this.createMap(imported)
-                          }
-                        })
+                                else{
+                                  imported = importMap(_.omit(script_response["content"], ["name", "error"]));
+                                  this.createMap(imported)
+                                }
                               })
-                            
+                            }  
+                          }) 
+                          return  {message: 'Fetched url successfully','status': 200 , data: response}
+                        }
+                        catch(error){
+                          console.log("errorrr", response)
+                          return { message: 'Failed to fetch url data','status': 400 };
+                        }
                       })
   }
   onSubmit = (e) => {

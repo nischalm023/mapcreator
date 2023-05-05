@@ -299,20 +299,11 @@ app.post('/api/getAutocadFileFromGsb', async (req, res) => {
           method: "GET"             
           }).then((res) => res.json())
           .then((url_response) => {
-            // return new Promise((resolve, reject) => { axios.get(url_response[0]["fileuri"], {
-            //       method: 'GET',
-            //       responseType: 'blob', // important
-            //     }).then((file_resp) => {
-            //       resolve({ status:"200", message: 'Successfully get files from GSB','data':file_resp.data });
-            //       // res.send(file_resp);
-            //     })
-            //   })
-            res.send({ status:"200", message: 'Successfully get files from GSB',data:url_response })
-                
-              })
+            res.send({ status:"200", message: 'Successfully get files from GSB',data:url_response })    
+          })
    return res.json(response); 
     }catch (err) {
-      return res.status(500).json({ message: 'Failed to fetch url' });
+      return res.status(500).json({ 'status': 500, message: 'Failed to fetch url' });
     }
                    
 });
