@@ -48,6 +48,7 @@ class ImportMap extends Component {
     let gsbSolutionId = params.get('gsb_solution_id');
     let gsbAgentId = params.get('gsb_agent_id');
     let gsbFunctionalAreaId = params.get('functional_area_id');
+    let gsbAgentName = params.get("gsb_agent_name")
     let uid = params.get('uid');
     const name = params.get('name');
     createMap(imported, name, gsb, uid, 'autocad_import', gsbSolutionId, gsbAgentId, gsbFunctionalAreaId)
@@ -55,7 +56,7 @@ class ImportMap extends Component {
       .then((res) => res.json())
       .then(id => {
         if(gsb){
-          return history.push(`/map/${id}?gsb=true&gsb_solution_id=${gsbSolutionId}&gsb_agent_id=${gsbAgentId}&functional_area_id=${gsbFunctionalAreaId}&uid=${uid}`)
+          return history.push(`/map/${id}?gsb=true&gsb_solution_id=${gsbSolutionId}&gsb_agent_id=${gsbAgentId}&functional_area_id=${gsbFunctionalAreaId}&uid=${uid}&gsb_agent_name=${gsbAgentName}`)
         } else {
           return history.push(`/map/${id}`)
         }

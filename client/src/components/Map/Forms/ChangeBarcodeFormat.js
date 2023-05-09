@@ -1,16 +1,36 @@
-import React,{useState} from "react";
+import React,{useState,useEffect} from "react";
 import { connect } from "react-redux";
 import { changeBarcodeFormat } from "actions/changeBarcodeFormat";
 import ChangeBarcodeOffset from "components/Map/Forms/ChangeBarcodeOffset";
 import * as constants from "../../../constants";
 
-const ChangeBarcodeFormat = ({ onClick, current_floor,floor_value }) => {
+const ChangeBarcodeFormat = ({ onClick, current_floor,floor_value,dispatch }) => {
   var current_floor_value = floor_value[current_floor]
   if(current_floor_value.hasOwnProperty("barcodeOffset")){
     var barcodeOffset = JSON.parse(current_floor_value.barcodeOffset)
     var barcode_format = current_floor_value.barcodeFormat
     var barcode_offset = `${barcodeOffset[0]},${barcodeOffset[1]}`
-
+    const params = new URLSearchParams(window.location.search);
+    let gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
+    let gsbAgentName = params.get('gsb_agent_name') ? params.get('gsb_agent_name') : null;
+    if(gsb && gsbAgentName){
+      var barcode_format
+      if(gsbAgentName === "ttp" || gsbAgentName === "ttp_rtp"){
+        barcode_format = constants.TTP_BARCODE_FORMAT
+      }else{
+        barcode_format = constants.DEFAULT_BARCODE_FORMAT
+        }
+      }
+    else{
+      var barcode_format = current_floor_value.barcodeFormat
+    }
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+      if(gsb && (gsbAgentName==="ttp" || gsbAgentName==="ttp_rtp")){
+        dispatch(changeBarcodeFormat(constants.TTP_BARCODE_FORMAT));
+    }
+    },[gsb,gsbAgentName]);
+    
     return(
     <form className="form-inline">
       <div className="form-group">

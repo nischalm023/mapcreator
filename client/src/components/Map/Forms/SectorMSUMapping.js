@@ -19,9 +19,8 @@ const schema = (sectorDict, sectorMxUPreferences) => {
   };
 };
 
-const SectorMSUMapping = ({ onSubmit, disabled, sectorDict, sectorMxUPreferences }) => (
+const SectorMSUMapping = ({ onSubmit, sectorDict, sectorMxUPreferences }) => (
   <RackJsonForm
-    disabled={disabled}
     schema={schema(sectorDict, sectorMxUPreferences)}
     onSubmit={onSubmit}
     buttonText={"Sector MxU Preferences"}
@@ -32,7 +31,6 @@ export default connect(
   state => ({
     sectorDict: state.normalizedMap.entities.sector || {},
     sectorMxUPreferences: state.normalizedMap.entities.sectorMxUPreferences || {},
-    disabled:state.selection.conveyorMode === true
 
     //disabled: Object.keys(state.selection.mapTiles).length === 0
   }),

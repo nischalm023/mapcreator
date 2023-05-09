@@ -2,6 +2,7 @@ import _ from "lodash";
 import { randomColor } from "randomcolor";
 import { getDirectionIncludingDisconnected } from "../reducers/barcode/util";
 import { MILIMETER_PER_DM } from "../constants";
+import {getNeighbourBarcodeWorldCoord} from "actions/add-transit-barcode";
 
 export const getCanvasSize = () => ({
   width: window.innerWidth,
@@ -46,7 +47,31 @@ export const ConvertTTPFormatBarcodeIntoDefaultFormat = (key,value) =>{
   return barcode
 };
 
-
+export const setTtpBarcodeLabel = (barcode,direction,new_world_coordinate,getCurrentOffset,distance) =>{
+  var world_cordinate = [new_world_coordinate["x"],new_world_coordinate["y"]]
+  var arbitrary_origin_value = getArbitraryOriginValue(barcode)
+  var offset_value = getArbitraryOriginValue(barcode)
+  if(direction == 2||direction==0){
+    if(world_cordinate[1]<=arbitrary_origin_value[1]){
+      var barcodeOffset = getCurrentOffset
+    }else{
+      var barcodeOffset_y = getCurrentOffset[1] - (distance*2)
+      var barcodeOffset = [getCurrentOffset[0],barcodeOffset_y]
+      var offset_value = [offset_value[0],world_cordinate[1]]
+    }
+  }
+  if(direction == 3||direction==1){
+    if(world_cordinate[0]>=arbitrary_origin_value[0]){
+      var barcodeOffset = getCurrentOffset
+    }else{
+      var barcodeOffset_x = getCurrentOffset[0] - (distance*2)
+      var barcodeOffset = [barcodeOffset_x,getCurrentOffset[1]]
+      var offset_value = [world_cordinate[0],offset_value[1]]
+    }
+  }
+  var ttp_barcode_value = calculateVdaBarcode(world_cordinate,offset_value,barcodeOffset)
+  return ttp_barcode_value
+}
 
 export const setCoexistenceBarcodeLabel = (dispatch,barcode,direction,world_cordinate,arbitrary_origin_value,getCurrentOffset,distance,currentFloor) =>{
   var arbitrary_origin_value = getArbitraryOriginValue(barcode)
@@ -130,22 +155,6 @@ export const calculateVdaBarcode = (world_cordinate,arbitrary_origin_value,vda_o
     // append 0 in the begining
     if((dm_code_x * 10 == 0) && (dm_code_y>0)){
       dm_code_value = "0".concat(dm_code_value)
-    }
-    
-    if(world_cordinate[0]===-9247 && world_cordinate[1] === 30082){
-      
-      console.log("hai_barcode_x",hai_barcode_x)
-      console.log("hai_barcode_y",parseInt(hai_barcode_y))
-      console.log("vda_cordinate_x",calculated_vda_cordinate_x)
-      console.log("vda_cordinate_y",calculated_vda_cordinate_y)
-      console.log("dm_code_x",dm_code_x)
-      console.log("dm_code_y",dm_code_y)
-      console.log("dm_code_value",dm_code_value)
-      console.log("world_cordinate",world_cordinate)
-      console.log("offset_value",arbitrary_origin_value)
-      console.log("vda_offset",vda_offset)
-
-
     }
     var final_vda_barcode = dm_code_value+stringify_number_ttp(hai_barcode_x)+stringify_number_ttp(hai_barcode_y)
     return final_vda_barcode

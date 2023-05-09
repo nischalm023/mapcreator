@@ -1,5 +1,5 @@
 import React from "react";
-import { misaligned } from "actions/actions";
+import { manage_ttp_overlap } from "actions/manage_ttp_overlap";
 import { connect } from "react-redux";
 
 const PathButton = ({ onClick, disabled }) => (
@@ -12,13 +12,15 @@ const PathButton = ({ onClick, disabled }) => (
       onClick();
     }}
   >
-    Misaligned Node
+    Manage TTP Overlap
   </button>
 );
 
 export default connect(
-  () => ({}),
+  state => ({
+    disabled: state.selection.conveyorMode === true
+  }),
   (dispatch) => ({
-    onClick: () => dispatch(misaligned()),
+    onClick: () => dispatch(manage_ttp_overlap()),
   })
 )(PathButton);

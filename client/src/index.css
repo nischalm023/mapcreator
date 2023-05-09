@@ -4,3 +4,8 @@ body {
   font-family: sans-serif;
   padding-top: 20px;
 }
+
+.saved-map-disabled-row{
+  opacity: .4;
+  pointer-events:none
+}

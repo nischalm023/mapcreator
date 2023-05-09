@@ -6,13 +6,15 @@ import {
   implicitCoordinateKeyToBarcode,
   isValidCoordinateKey,
   encode_barcode,
-  coordinateKeyToTupleOfIntegers
+  coordinateKeyToTupleOfIntegers,
+  setTtpBarcodeLabel
 } from "utils/util";
-
+import * as constants from "../../../constants";
 import _ from "lodash";
 import { addNewBarcode } from "actions/barcode";
 import { getBarcodes } from "../../../utils/selectors";
 import titleCase from "title-case";
+import {getNeighbourBarcodeWorldCoord} from "actions/add-transit-barcode"
 
 const baseSchema = {
   title: "Add Barcode",
@@ -61,8 +63,7 @@ export const getValidEmptyDirTileIdList = (barcodeDict, emptyNeighbour) => {
 const shouldBeDisabled = (selectedMapTiles, barcodes, state) => (
     !onlyOneTileSelected(selectedMapTiles) ||
     !hasBarcodeForTile(selectedMapTiles, barcodes) ||
-    (getValidEmptyNeighbours(selectedMapTiles, barcodes).length == 0) ||
-    state.selection.conveyorMode === true
+    (getValidEmptyNeighbours(selectedMapTiles, barcodes).length == 0)
   );
 
 export const getExistingBarcodesAndCoordinates = (barcodeInfoList) => {
@@ -86,11 +87,14 @@ class AddBarcode extends Component {
   render() {
     const { selectedMapTiles, barcodes, onSubmit ,state,current_floor, floor_value} = this.props;
     var current_floor_value = floor_value[current_floor]
+    var distance = state.barcodeDistance
     var floor_barcodes = {};
     const barcodeKeys = current_floor_value.map_values;
     barcodeKeys.forEach((barcodeKey) => {
       floor_barcodes[barcodeKey] = barcodes[barcodeKey];
     });
+    var barcodeOffset = floor_value[current_floor].barcodeOffset
+    var barcodeFormat = floor_value[current_floor].barcodeFormat
     const disabled = shouldBeDisabled(selectedMapTiles, floor_barcodes, state);
     const tooltipData = {
       id: "add-barcode",
@@ -119,8 +123,27 @@ class AddBarcode extends Component {
       floor_barcodes
     );
     var barcode_cordinate = getExistingBarcodesAndCoordinates(floor_barcodes)
-    const validEmptyDirTileIdList =  getValidEmptyDirTileIdList(barcode_cordinate.barcodes,emptyDirTileIdList)
-    const keys = validEmptyDirTileIdList.map(innerArray => JSON.stringify(innerArray))
+    var validEmptyDirTileIdList =  getValidEmptyDirTileIdList(barcode_cordinate.barcodes,emptyDirTileIdList)
+    if(barcodeFormat===constants.TTP_BARCODE_FORMAT){
+      var new_validEmptyDirTileIdList = []
+      var refBarcodeWorldCoord = JSON.parse(floor_barcodes[Object.keys(selectedMapTiles)[0]]['world_coordinate'])
+      for (const [key, value] of Object.entries(validEmptyDirTileIdList)) {
+        var refrence_world_cordinate = { x: refBarcodeWorldCoord[0], y: refBarcodeWorldCoord[1] };
+        var new_world_coordinate =  getNeighbourBarcodeWorldCoord(
+                                      refrence_world_cordinate,
+                                      distance*2,
+                                      value[0]
+                                );
+        var ttp_barcode = setTtpBarcodeLabel(floor_barcodes,value[0],new_world_coordinate,JSON.parse(barcodeOffset),distance)
+        new_validEmptyDirTileIdList.push([value[0],ttp_barcode])
+      }
+    }else{
+      var new_validEmptyDirTileIdList = []
+      for (const [key, value] of Object.entries(validEmptyDirTileIdList)) {
+        new_validEmptyDirTileIdList.push([value[0],implicitCoordinateKeyToBarcode(value[1])])
+      }
+    }
+    const keys = new_validEmptyDirTileIdList.map(innerArray => JSON.stringify(innerArray))
 
     const schema = {
       ...baseSchema,
@@ -130,11 +153,9 @@ class AddBarcode extends Component {
           type: "string",
           title: "Direction",
           enum: keys,
-          enumNames: validEmptyDirTileIdList.map(
+          enumNames: new_validEmptyDirTileIdList.map(
             ([dir, tileId]) =>
-              `${titleCase(dirStrs[dir])} (${implicitCoordinateKeyToBarcode(
-                tileId
-              )})`
+              `${titleCase(dirStrs[dir])} (${tileId})`
           ),
           default: keys[0]
         },
@@ -173,7 +194,7 @@ export default connect(
     onSubmit: ({ formData }) => {
       var formDateValue = JSON.parse(formData.direction)
       formData["direction"] = formDateValue[0]
-      formData["barcode_value"] = implicitCoordinateKeyToBarcode(formDateValue[1])
+      formData["barcode_value"] = formDateValue[1]
       dispatch(addNewBarcode(formData));
     }
   })

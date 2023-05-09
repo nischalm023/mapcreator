@@ -68,21 +68,24 @@ export const tileNameWithoutEntityDataSelector = createSelector(
       // remove_conveyor_tile = 1 (remove selected conveyor tile)
       // conveyor_selected_status = 0 (selected conveyor tile for normal color)
     // }
-    if (barcode.conveyor_selected_status === 1 && !zoneViewMode && !sectorViewMode)
+    if (barcode.grid_attribute === "conveyor_track" && !zoneViewMode && !sectorViewMode)
       tileSprite = constants.SELECT_CONVEYOR;
-    if (barcode.conveyor_selected_status === 2 && !zoneViewMode && !sectorViewMode)
+    if (barcode.grid_attribute === "conveyor_entry" && !zoneViewMode && !sectorViewMode)
       tileSprite = constants.ENTRY_CONVEYOR;
-    if (barcode.conveyor_selected_status === 3 && !zoneViewMode && !sectorViewMode)
+    if (barcode.grid_attribute === "conveyor_exit" && !zoneViewMode && !sectorViewMode)
       tileSprite = constants.EXIT_CONVEYOR;
-    if (barcode.conveyor_selected_status === 4 && !zoneViewMode && !sectorViewMode)
+    if (barcode.grid_attribute === "conveyor_end" && !zoneViewMode && !sectorViewMode)
       tileSprite = constants.END_CONVEYOR;
-    if (barcode.conveyor_selected_status === 5 && !zoneViewMode && !sectorViewMode)
+    if (barcode.grid_attribute === "conveyor_pps_point" && !zoneViewMode && !sectorViewMode)
       tileSprite = constants.ACTIVE_CONVEYOR;
     if (barcode.remove_conveyor_tile === 1 && !zoneViewMode && !sectorViewMode)
       tileSprite = constants.ODS_EXCLUDED;
-    if (barcode.conveyor_selected_status === 0 && !zoneViewMode && !sectorViewMode)
-      tileSprite = constants.NORMAL;
-    
+    if ( barcode.success_overlap_barcode_status === 1 && !zoneViewMode && !sectorViewMode)
+     tileSprite = constants.QUEUE;
+    if ( barcode.unsuccess_overlap_barcode_status === 0 && !zoneViewMode && !sectorViewMode) 
+      tileSprite = constants.ODS_EXCLUDED;
+//    if (barcode.conveyor_selected_status === 0 && !zoneViewMode && !sectorViewMode)
+//      tileSprite = constants.NORMAL;
     return tileSprite;
   }
 );
@@ -219,6 +222,12 @@ export const getEditHighlight = (state) => {
     (key) => {
       if (key[1].highlight_status>0){
         ret[key[0]] = constants.HIGHLIGHT
+      }
+      if (key[1].unsuccess_overlap_barcode_status===0){
+        ret[key[0]] = constants.ODS_EXCLUDED
+      }
+      if (key[1].success_overlap_barcode_status===1){
+        ret[key[0]] = constants.QUEUE
       }
     }
   );

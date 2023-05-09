@@ -19,6 +19,7 @@ class ButtonForm extends Component {
       wrapInButtonGroup = true,
       title = undefined,
       bcolor = "orange",
+      bot_direction=null,
     } = this.props;
     
     return (
@@ -37,7 +38,7 @@ class ButtonForm extends Component {
           } tooltip-wrapper btn-group`}
           style={{ textAlign:"-webkit-center", color:bcolor }}
           disabled={disabled}
-          onClick={() => toggle()}
+          onClick={() => bot_direction?toggle(bot_direction):toggle()}
           data-tip
           data-for={tooltipData.id}
           onMouseEnter={handleMouseEnter}

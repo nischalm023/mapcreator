@@ -74,7 +74,6 @@ export const getWorldCoordUsingNeighbour = (
 
 export const getTileIdToWorldCoordMapFunc = barcodes => {
   var tileIdToWorldCoordinateMapInitial = {};
-  console.log("barcodes=========",barcodes)
   var neighbourWithValidWorldCoordinate = {};
   const startBarcode = Object.keys(barcodes)[0];
   var worldCoordinate = { x: 0, y: 0 };

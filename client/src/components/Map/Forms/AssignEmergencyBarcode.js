@@ -32,7 +32,7 @@ const AssignEmergencyBarcode = ({ onSubmit, disabled }) => (
 
 export default connect(
   state => ({
-    disabled: Object.keys(state.selection.mapTiles).length === 0 || state.selection.conveyorMode === true
+    disabled: Object.keys(state.selection.mapTiles).length === 0
   }),
   dispatch => ({
     onSubmit: ({ formData }) => {

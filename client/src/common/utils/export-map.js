@@ -38,6 +38,15 @@ export default (withWorldCoordinate, singleFloor = false) => {
     map_values:map_values.map((barcode) => {
         delete barcode.corner_world_cooordinate
         delete barcode.default_barcode
+        if (barcode.conveyor_selected_status !== undefined){
+            delete barcode.conveyor_selected_status
+        }
+        if (barcode.remove_conveyor_tile !== undefined){
+            delete barcode.remove_conveyor_tile
+        }
+        if (barcode.grid_attribute !== undefined && barcode.grid_attribute === 0){
+            delete barcode.grid_attribute
+        }
         return barcode
     }),
   }));

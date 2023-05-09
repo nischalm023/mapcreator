@@ -4,12 +4,10 @@ var fs = require("fs");
 
 var getRacksJson = async (id, racktype = "11") => {
   if (!id) {
-    console.log("pass map id");
     return;
   }
   var map = await Map.findByPk(id);
   if (!map) {
-    console.log("map not found");
     return;
   }
   const { map: mapObj } = map;

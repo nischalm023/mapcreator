@@ -3,18 +3,19 @@ import SweetAlertError from "components/SweetAlertError";
 import { connect } from "react-redux";
 import { downloadConveyor } from "actions/conveyor";
 
-const checkConveyorSystem = (ConveyorDict,conveyor_id) => {
-  const conveyorEnum = Object.keys(ConveyorDict);
-  var disable_status = true
-  if(!ConveyorDict.hasOwnProperty(conveyor_id)){
-    return disable_status
+
+const validateConveyorEntity = (conveyorTile) => {
+  var failed_list = []
+  for (const [key, value] of Object.entries(conveyorTile)) {
+     if(value.conveyor_active.length === 0 || !value.hasOwnProperty("conveyor_exit") || !value.hasOwnProperty("conveyor_entry")){
+        failed_list.push(key)
+     }
   }
-  if(ConveyorDict[conveyor_id].hasOwnProperty("conveyor_active")){
-    if(ConveyorDict[conveyor_id]["conveyor_active"].length>0){
-        var disable_status = false
-    }
+  if(failed_list.length !== 0){
+    return true
+  }else{
+    return false
   }
- return disable_status 
 };
 
 
@@ -28,8 +29,7 @@ class DownloadConveyorSystem extends Component {
   toggle = () => this.setState({ show: !this.state.show });
   render() {
     const { error, show } = this.state;
-    const { ConveyorDict,onClick,conveyor_id } = this.props;
-    const disabled = checkConveyorSystem(ConveyorDict,conveyor_id[0])
+    const { ConveyorDict,onClick,disabled } = this.props;
     return (
     <div>
       <SweetAlertError
@@ -56,10 +56,17 @@ class DownloadConveyorSystem extends Component {
 }
 
 export default connect(
-  state => ({
-    conveyor_id:state.normalizedMap.entities.map.dummy.current_conveyor_id,
-    ConveyorDict: state.normalizedMap.entities.conveyorTile || {}
-  }),
+  state => {
+    var conveyorTile = state.normalizedMap.entities.conveyorTile
+    if(conveyorTile == undefined || Object.keys(conveyorTile).length==0){
+      disabled = true
+    }else{
+      var disabled = validateConveyorEntity(conveyorTile);
+    }
+    return{
+          disabled:disabled,
+    }
+  },
   (dispatch) => ({
     onClick: () => dispatch(downloadConveyor()),
   })

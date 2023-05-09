@@ -42,11 +42,36 @@ class ImportMap extends Component {
     let gsbSolutionId = params.get('gsb_solution_id');
     let gsbAgentId = params.get('gsb_agent_id');
     let gsbFunctionalAreaId = params.get('functional_area_id');
+    let gsbAgentName = params.get("gsb_agent_name")
     let uid = params.get('uid');
     for(let i=0;i<imported.floors.length;i++){
       for(let j=0;j<imported.floors[i].map_values.length;j++){
         if(imported.floors[i].map_values[j].isIoPoint){
-          delete imported.floors[i].map_values[j].isIoPoint 
+          delete imported.floors[i].map_values[j].isIoPoint
+          }
+        if(imported.floors[i].map_values[j].grid_attribute){
+          imported.floors[i].map_values[j].grid_attribute = ''
+        }
+      }
+      //Delete PPS Point for non RTP PPS since conveyor json is not uploaded
+      for(let j=0;j<imported.floors[i].ppses.length;j++){
+        if(imported.floors[i].ppses[j]){
+            for(let k=0;k<imported.floors[i].ppses[j].pps_points.length;k++){
+                if(imported.floors[i].ppses[j].pps_points[k] && imported.floors[i].ppses[j].pps_points[k].type !== "rtp"){
+                    delete imported.floors[i].ppses[j].pps_points[k]
+                }
+                imported.floors[i].ppses[j].pps_points = imported.floors[i].ppses[j].pps_points.filter(elm => elm);
+            }
+            // //Delete PPS Point key since no pps point present
+            // var isPpsPointPresent = false;
+            // for(let k=0;k<imported.floors[i].ppses[j].pps_points.length;k++){
+            //     if(imported.floors[i].ppses[j].pps_points[k] && imported.floors[i].ppses[j].pps_points[k] !== null){
+            //         isPpsPointPresent = true;
+            //     }
+            // }
+            // if(!isPpsPointPresent){
+            //     delete imported.floors[i].ppses[j].pps_points
+            // }
         }
       }
     }
@@ -55,7 +80,7 @@ class ImportMap extends Component {
       .then(res => res.json())
       .then(id => {
         if(gsb){
-          return history.push(`/map/${id}?gsb=true&gsb_solution_id=${gsbSolutionId}&gsb_agent_id=${gsbAgentId}&functional_area_id=${gsbFunctionalAreaId}&uid=${uid}`)
+          return history.push(`/map/${id}?gsb=true&gsb_solution_id=${gsbSolutionId}&gsb_agent_id=${gsbAgentId}&functional_area_id=${gsbFunctionalAreaId}&uid=${uid}&gsb_agent_name=${gsbAgentName}`)
         } else {
           return history.push(`/map/${id}`)
         }

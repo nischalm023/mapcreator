@@ -45,8 +45,6 @@ const handleSubmit = (form, barcodes, nextIOPointId, dispatch) => {
 };
 
 const handleRemove = (form, barcodes, nextIOPointId, dispatch) => {
-    console.log(">>>>>>>>>>>. remove clicked!!!!!!!")
-    console.log(">>>>>>>>> remove form before dispatch:",form)
     dispatch(removeIOPoint(nextIOPointId, barcodes, form.bot_direction, form.agent));
 };
 
@@ -70,18 +68,8 @@ class AssignIOPoints extends Component {
 
 export default connect(
     state => {
-        // let selectedTiles = Object.keys(state.selection.mapTiles)
-        // let isIoPoint = false;
-        // for(let tile of selectedTiles){
-        //     let selectedBarcode = state.normalizedMap.entities.barcode[tile];
-        //     isIoPoint = selectedBarcode.isIoPoint;
-        //     if(isIoPoint){
-        //         break;
-        //     }
-        // }
         return {
-            disabled: Object.keys(state.selection.mapTiles).length === 0 
-                        || state.selection.conveyorMode === true,
+            disabled: Object.keys(state.selection.mapTiles).length === 0,
             barcodes: state.selection.mapTiles,
             nextIOPointId: Math.max(...(state.normalizedMap.entities.map.dummy.ioPointsIds || []), 0) + 1,
         };

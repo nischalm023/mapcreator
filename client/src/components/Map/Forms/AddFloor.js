@@ -151,5 +151,4 @@ export default connect(state => ({
         parseInt(floor_id)
       )
     ) + 1,
-    disabled:state.selection.conveyorMode === true
 }))(AddFloor);

@@ -27,7 +27,10 @@
         "conveyor_exit_location": {
           "type": "string"
         },
-        "conveyor_height": {
+        "conveyor_entry_height": {
+          "type": "integer"
+        },
+        "conveyor_exit_height": {
           "type": "integer"
         },
         "adjacency": {
@@ -169,7 +172,8 @@
       },
       "required": [
         "conveyor_id",
-        "conveyor_height"
+        "conveyor_entry_height",
+        "conveyor_exit_height"
       ]
     }
   ]

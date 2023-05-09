@@ -127,25 +127,6 @@ const DirectionViewCheckbox = ({ val, onChange, disabled }) => (
   </div>
 );
 
-const ConveyorCheckbox = ({ val, onChange }) => (
-  <label
-    style={{
-      textAlign: "-webkit-center",
-      margin: "3% 5% 3% 5%",
-      color: "orange"
-    }}
-  >
-    Conveyor builder mode:
-    <input
-      style={{ marginLeft: "10px" }}
-      name="queuemode"
-      type="checkbox"
-      checked={val}
-      onChange={onChange}
-    />
-  </label>
-);
-
 const TTPCheckbox = ({ val, onChange }) => (
   <label
     style={{
@@ -166,4 +147,4 @@ const TTPCheckbox = ({ val, onChange }) => (
 );
 
 
-export { MultiQueueCheckbox, QueueCheckbox, ZoneViewCheckbox, SectorViewCheckbox, DirectionViewCheckbox ,ConveyorCheckbox, TTPCheckbox};
+export { MultiQueueCheckbox, QueueCheckbox, ZoneViewCheckbox, SectorViewCheckbox, DirectionViewCheckbox , TTPCheckbox};

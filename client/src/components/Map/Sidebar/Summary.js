@@ -26,7 +26,8 @@ const Summary = ({
   const ppses = Object.entries(ppsDict).map(([, val]) => val);
   const elevators = Object.entries(elevatorDict).map(([, val]) => val);
   const title = "Summary";
-
+  const params = new URLSearchParams(window.location.search);
+  let checked_version = params.get('checked_version') ? eval(params.get('checked_version')) : false;
   const entityMap = [
     {
       name: "Chargers",
@@ -154,7 +155,7 @@ const Summary = ({
         </NonCollapsibleBaseCard>
       }
       <LegendsCard />
-      <CopyJSONsCard />
+      {checked_version?"":<CopyJSONsCard />}
     </div>
   );
 };

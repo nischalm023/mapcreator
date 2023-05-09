@@ -46,6 +46,11 @@ export const changeBarcodeFormat = barcode_value => (dispatch, getState) => {
     type:"CHANGE-BARCODE-FORMAT-ON-BASIS-OF-MODE",
     value:{"barcode_value":barcode_value,"barcodesDict":barcodesDict,"barcodeOffset":current_offset}
   })
+  dispatch({
+    type:"CHANGE-DYNAMIC-BARCODE-MAPPING",
+    value:{"barcodesDict":barcodesDict}
+  })
+
   if(barcode_value == TTP_BARCODE_FORMAT){
     const { error, reason } = validateBarcodesDistance(barcodesDict);
     if (error) {

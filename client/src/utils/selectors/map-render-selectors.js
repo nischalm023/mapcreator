@@ -65,13 +65,15 @@ export const getMainTileSpriteData = createSelector(
       // conveyor_selected_status = 0 (selected conveyor tile for normal color)
     // }
     if ( barcode.highlight_status > 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.HIGHLIGHT;
-    if ( barcode.conveyor_selected_status === 1 && !zoneViewMode && !sectorViewMode) tileSprite = constants.SELECT_CONVEYOR;
-    if ( barcode.conveyor_selected_status === 2 && !zoneViewMode && !sectorViewMode) tileSprite = constants.ENTRY_CONVEYOR;
-    if ( barcode.conveyor_selected_status === 3 && !zoneViewMode && !sectorViewMode) tileSprite = constants.EXIT_CONVEYOR;
-    if ( barcode.conveyor_selected_status === 4 && !zoneViewMode && !sectorViewMode) tileSprite = constants.END_CONVEYOR;
-    if ( barcode.conveyor_selected_status === 5 && !zoneViewMode && !sectorViewMode) tileSprite = constants.ACTIVE_CONVEYOR;
+    if ( barcode.grid_attribute === "conveyor_track" && !zoneViewMode && !sectorViewMode) tileSprite = constants.SELECT_CONVEYOR;
+    if ( barcode.grid_attribute === "conveyor_entry" && !zoneViewMode && !sectorViewMode) tileSprite = constants.ENTRY_CONVEYOR;
+    if ( barcode.grid_attribute === "conveyor_exit" && !zoneViewMode && !sectorViewMode) tileSprite = constants.EXIT_CONVEYOR;
+    if ( barcode.grid_attribute === "conveyor_end" && !zoneViewMode && !sectorViewMode) tileSprite = constants.END_CONVEYOR;
+    if ( barcode.grid_attribute === "conveyor_pps_point" && !zoneViewMode && !sectorViewMode) tileSprite = constants.ACTIVE_CONVEYOR;
     if ( barcode.remove_conveyor_tile === 1 && !zoneViewMode && !sectorViewMode) tileSprite = constants.ODS_EXCLUDED;
-    if ( barcode.conveyor_selected_status === 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.NORMAL;
+    if ( barcode.success_overlap_barcode_status === 1 && !zoneViewMode && !sectorViewMode) tileSprite = constants.QUEUE;
+    if ( barcode.unsuccess_overlap_barcode_status === 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.ODS_EXCLUDED;
+    //if ( barcode.conveyor_selected_status === 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.NORMAL;
     return {
       name: tileSprite,
       x: boundingBox.left,

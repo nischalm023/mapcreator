@@ -10,10 +10,10 @@ const debouncedFetchMaps = debounce(fetchMaps, 200, {
   trailing: true
 });
 
-export default ({ onResults }) => (
+export default ({ onResults,listView }) => (
   <input
     type="text"
-    className="form-control my-3"
+    className={listView? "saved-map-disabled-row form-control my-3" : "form-control my-3"}
     placeholder="Search"
     onChange={e => debouncedFetchMaps(e.target.value, onResults)}
   />

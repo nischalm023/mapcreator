@@ -29,9 +29,11 @@ export default (state = {}, action) => {
       if (!newState.dummy.hasOwnProperty('conveyors')){
         newState.dummy.conveyors = [];
       }
-      newState.dummy.conveyors.push(conveyor_id);
-      newState.dummy.current_conveyor_id = [];
-      newState.dummy.current_conveyor_id.push(conveyor_id);
+      if(!newState.dummy.conveyors.includes(conveyor_id)){
+        newState.dummy.conveyors.push(conveyor_id);
+        newState.dummy.current_conveyor_id = [];
+        newState.dummy.current_conveyor_id.push(conveyor_id);
+      }
       return newState;
     }
     case "ADD-IO-POINT":{

@@ -48,18 +48,9 @@ export default connect(
             agent = ioPointObj.agent;
             botDirection = ioPointObj.bot_direction; // botDirection: ["north", "south"]
             existingTotes = state.normalizedMap.entities.toteStorables;
-            // for(let key in state.normalizedMap.entities.toteStorables){
-            //     let toteStorable = state.normalizedMap.entities.toteStorables[key];
-            //     for(let key2 in toteStorable.multiSchema){
-            //         let tote = toteStorable.multiSchema[key2];
-            //         nextToteId = Math.max(tote.tote_id.value,nextToteId);
-            //     }
-            // }
-            // nextToteId = nextToteId + 1;
         }
         return {
             disabled: Object.keys(state.selection.mapTiles).length !== 1
-                        || state.selection.conveyorMode === true
                         || !selectedBarcode.isIoPoint,
             barcode: state.selection.mapTiles,
             nextToteStorableId: Math.max(...(state.normalizedMap.entities.map.dummy.toteStorablesIds || []), 0) + 1,

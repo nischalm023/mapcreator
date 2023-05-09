@@ -156,12 +156,17 @@ class CreateMap:
 		return neighbourList, sizeInfoList, adjacencyList
 	# create map json
 	def create_map(self, matrix_cord, allLocationCords, location_cord_name_mapping, \
-														floor_dict, sector_mapping):
+														floor_dict, sector_mapping,location_cord_type_mapping):
 		mapValueDict = {}
 		mapValueList = []
 		MapList = []
 		for grid_cord,loc_cord in matrix_cord.items():
 			if loc_cord in allLocationCords:
+				barcode_type = [x for x in location_cord_type_mapping[loc_cord] if pd.isnull(x) == False]
+				if len(barcode_type)<1:
+					barcode_type = False
+				else:
+					barcode_type = True
 				get_storable = list(filter(lambda x: 'storage' in x.lower(), location_cord_name_mapping[loc_cord]))
 				rtype = 's' if len(get_storable)>0 else 'p'
 				# sector_id = 0
@@ -189,7 +194,8 @@ class CreateMap:
 					"zone": "defzone",
 					"floor_id" : int(floor_dict[grid_cord]),
 					"sector": sector_id,
-					"adjacency":adjacency_list
+					"adjacency":adjacency_list,
+					"ttp_type_attibute":barcode_type
 				}
 				if len(mapValueDict.keys())>0:
 					mapValueList.append(mapValueDict)
@@ -446,7 +452,8 @@ class NormalizedDenormalizedMap:
 					"store_status": item["store_status"],
 					"zone": item["zone"],
 					"adjacency":item["adjacency"],
-					"sector":item["sector"]
+					"sector":item["sector"],
+					"ttp_type_attibute":item["ttp_type_attibute"]
 					}
 			mapList[item["floor_id"]].append(map_value_dict)
 		map_parsed_list = [{"floor_id":k, "map_values":v} for k,v in mapList.items()]
@@ -663,6 +670,8 @@ def my_link_1():
 	# Location coordinate and name mapping "(x,y):'name'}
 	location_cord_name_mapping = df.groupby(['Position X','Position Y','FLOOR'])['Name'].apply(list).to_dict()
 	
+	location_cord_type_mapping = df.groupby(['Position X','Position Y','FLOOR'])['TTP Barcode'].apply(list).to_dict()
+
 	# list of all location coordinate [(x1,y1),(x2,y2)]
 	allLocationCords = list(df[['Position X', 'Position Y','FLOOR']].apply(tuple, axis=1))
 	
@@ -672,7 +681,7 @@ def my_link_1():
 		# Create map json and get map value list for denomalised map
 		data,mapValueList = CreateMap().create_map(matrix_cord,allLocationCords,\
 											location_cord_name_mapping,floor_dict,\
-											sector_mapping)
+											sector_mapping,location_cord_type_mapping)
 	except Exception as e:
 		return {"content":"Error in parsing autocad file --> Map Json","status":404}
 	

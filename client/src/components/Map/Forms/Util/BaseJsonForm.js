@@ -33,7 +33,6 @@ class BaseForm extends Component {
             barcodes ? onSubmit(formData, barcodes, nextIOPointId, dispatch) : onSubmit(formData) ;
             this.toggle();
           }}
-          // onSubmit={console.log(">>>>>>>>> submit formData:",formData)}
           onChange={({ formData }) => this.setState({ formData })}
           formData={fullFormData}
           onError={onError}
@@ -61,7 +60,6 @@ class BaseForm extends Component {
                 onRemove(formData, barcodes, nextIOPointId, dispatch);
                 this.toggle();
               }}
-              // onClick={console.log(">>>>>>>>> remove formData:",formData)}
             >
               Remove IO Points
             </button>}

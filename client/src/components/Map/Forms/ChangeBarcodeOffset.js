@@ -26,7 +26,7 @@ const InnerForm = ({ handleSubmit, isSubmitting, values,onClear }) => {
         type="number"
       />
       <span>
-        This may result in all barcode being change.
+        This may result in all barcode being changed.
         Are you sure you want to continue?
       </span>
       <div>

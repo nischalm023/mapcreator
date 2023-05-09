@@ -21,10 +21,9 @@ const makeSchema = (specialBarcodeValues) => ({
   }
 });
 
-const EditBarcode = ({ onSubmit, specialBarcodeValues,disabled }) => (
+const EditBarcode = ({ onSubmit, specialBarcodeValues }) => (
   <BaseJsonForm
     schema={makeSchema(specialBarcodeValues)}
-    disabled={disabled}
     onSubmit={onSubmit}
     buttonText={"Edit Special Barcode"}
   />
@@ -32,7 +31,6 @@ const EditBarcode = ({ onSubmit, specialBarcodeValues,disabled }) => (
 export default connect(
   state => ({
     specialBarcodeValues: specialBarcodesSelector(state),
-    disabled:state.selection.conveyorMode === true
   }),
   dispatch => ({
     onSubmit: ({ formData }) => {

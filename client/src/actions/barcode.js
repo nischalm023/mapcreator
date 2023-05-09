@@ -164,7 +164,7 @@ const addNewBarcode = formData => (dispatch, getState) => {
   const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
   const newBarcodeWorldCoord = getNeighbourBarcodeWorldCoord(
     refBarcodeWorldCoord,
-    DEFAULT_BOT_WITH_RACK_THRESHOLD*2,
+    state.barcodeDistance*2,
     direction
   );
   const NewBarcodeWorldCoordinate = `[${newBarcodeWorldCoord["x"]},${newBarcodeWorldCoord["y"]}]`

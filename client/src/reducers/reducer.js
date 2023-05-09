@@ -53,6 +53,7 @@ export const entitiesReducer = combineReducers({
   sectorBarcodeMapping: sectorBarcodeMappingReducer,
   sectorMxUPreferences: sectorMxUPreferencesReducer,
   mappingBarcodeCoord:mappingBarcodeCoordReducer,
+  // dynamicMappingBarcodeCoord:mappingBarcodeCoordReducer,
   // TODO: make reducers for these
   mapObj: m => m || null
 });
@@ -87,7 +88,6 @@ export const mapChangeReducer = (state = dummyState.normalizedMap, action) => {
       if(map.sectorBarcodeMapping == undefined) map.sectorBarcodeMapping = [];
       if(map.sectorMxUPreferences == undefined) map.sectorMxUPreferences = {};
       if(map.mappingBarcodeCoord == undefined) map.mappingBarcodeCoord = {};
-      if(map.mappingBarcodeWorldCoord == undefined) map.mappingBarcodeWorldCoord = {};
       if(map.ioPoints == undefined) map.ioPoints = {};
       if(map.toteStorables == undefined) map.toteStorables = {};
       if(map.sectors == undefined) map.sectors = [];
@@ -178,14 +178,6 @@ const queueModeReducer = (state = false, action) => {
   return state;
 };
 
-const conveyorModeReducer = (state = false, action) => {
-  switch (action.type) {
-    case "TOGGLE-CONVEYOR-VIEW-MODE":
-      return !state;
-  }
-  return state;
-};
-
 const TTPModeReducer = (state = false, action) => {
   switch (action.type) {
     case "TOGGLE-TTP-VIEW-MODE":
@@ -230,7 +222,6 @@ export const baseSelectionReducer = combineReducers({
   mapTiles: selectedMapTilesReducer,
   distanceTiles: selectedDistanceTilesReducer,
   queueMode: queueModeReducer,
-  conveyorMode: conveyorModeReducer,
   TTPMode: TTPModeReducer,
   multiQueueMode: multiQueueModeReducer,
   zoneViewMode: zoneViewModeReducer,
@@ -255,7 +246,6 @@ export const selectionReducer = (
     metaKey: false,
     shiftKey: false,
     queueMode: false,
-    conveyorMode: false,
     TTPMode:false,
     multiQueueMode: false,
     zoneViewMode: false,
@@ -404,6 +394,14 @@ const barcodeSpacingReducer = (state = 1500, action) => {
   return state;
 };
 
+const viewConveyorReducer = (state = false, action) => {
+  switch (action.type) {
+    case "VIEW-CONVEYOR-STATUS":
+      return !state;
+  }
+  return state;
+};
+
 export default combineReducers({
   normalizedMap: normalizedMapReducer,
   currentFloor: currentFloorReducer,
@@ -414,5 +412,6 @@ export default combineReducers({
   viewport: viewportReducer,
   successMessage: successMessageReducer,
   errorMessage: errorMessageReducer,
-  barcodeSpacing: barcodeSpacingReducer
+  barcodeSpacing: barcodeSpacingReducer,
+  viewConveyor:viewConveyorReducer
 });

@@ -5,14 +5,15 @@ import PPSes from "./PPSes";
 import Elevators from "./Elevators";
 import Summary from "./Summary";
 
-var Menu = ({ menuItems }) => (
+var Menu = ({ menuItems,checked_version }) => (
   <div className="row">
+
     {menuItems.map(({ name, isActive, onClick }, idx) => (
       <div
         className={`col leftsidebar-icon ${isActive ? "active" : ""}`}
         key={idx}
-        onClick={onClick}
-      >
+        onClick={checked_version?null:onClick}
+        >
         <i className={`fa ${name}`} />
       </div>
     ))}
@@ -26,6 +27,8 @@ class LeftSidebar extends Component {
   };
   render() {
     const { open, activeIdx } = this.state;
+    const params = new URLSearchParams(window.location.search);
+    let checked_version = params.get('checked_version') ? eval(params.get('checked_version')) : false;
     var menuItems = [
       ["fa-bars", Summary],
       ["fa-chevron-up", Elevators],
@@ -44,6 +47,7 @@ class LeftSidebar extends Component {
         </button>
         <div className="container menu-container">
           <Menu
+            checked_version={checked_version}
             menuItems={menuItems.map(([name], idx) => ({
               name,
               isActive: activeIdx === idx,

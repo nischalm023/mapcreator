@@ -5,7 +5,7 @@ import wrap from "express-async-handler";
 import getRacksJson from "server/scripts/make-racks-json";
 import sequelize, { Op } from "sequelize";
 import { requestValidation } from "./verifier-apis";
-import { UPLOAD_MAP_TO_GSB_API, SUBMIT_BTN_API_HIT_TO_GSB, DOWNLOAD_AUTOCAD_FILE_TO_GSB_API } from "./gsb-apis";
+import { UPLOAD_MAP_TO_GSB_API, SUBMIT_BTN_API_HIT_TO_GSB, DOWNLOAD_AUTOCAD_FILE_TO_GSB_API, EXPORT_DATA_TO_GSB_API } from "./gsb-apis";
 import moment from "moment";
 // import axios from "axios";
 // HACK: adding cors to fetch data from storybook. should remove this later.
@@ -68,7 +68,12 @@ app.post(
       throw new Error("name is required");
     }
     // store the map created in db
-    var created = await Map.create({ map:map, name:name,BaseMap:map});
+    if(gsb){
+      var isGsb = true
+    }else{
+      var isGsb = false
+    }
+    var created = await Map.create({ map:map, name:name,BaseMap:map,isGsb:isGsb});
     if (gsb) {
       String.prototype.format = function () {
         var i = 0, args = arguments;
@@ -139,7 +144,10 @@ app.get(
     } else {
       maps = await Map.findAll({
         attributes,
-        order
+        order,
+        where: {
+          isGsb: false
+        } 
       });
     }
     var mapsJson = maps.map(map => map.toJSON());
@@ -252,7 +260,7 @@ app.post('/api/cloneMap', async (req, res) => {
     } 
     // ? create a clone for map having id -> `mapId`
     let mapJson = map.toJSON();
-    var created = await Map.create({ map:mapJson.map, name:`${mapJson.name}_clone`, BaseMap:mapJson.map});
+    var created = await Map.create({ map:mapJson.map, name:`${mapJson.name}_clone`, BaseMap:mapJson.map,isGsb:true});
     return res.json({"cloned_map_id": created.id});
   }
   catch (err) {
@@ -314,6 +322,55 @@ app.post(
 app.use((err, req, res, next) => {
   res.status(500).send(err.message);
 });
+
+app.post('/api/exportDataToGsb', upload.array('files'), async (req, res) => {
+  if (!req.files) {
+    return res.status(400).json({ message: 'No files uploaded' });
+  }
+  String.prototype.format = function () {
+    var i = 0, args = arguments;
+    return this.replace(/{}/g, function () {
+      return typeof args[i] != 'undefined' ? args[i++] : '';
+    });
+  };
+  let formData = new FormData();
+  let data = req.body;
+  var map = await Map.findByPk(data.map_tool_id);
+  let api = EXPORT_DATA_TO_GSB_API.format(data.gsb_solution_id, data.functional_area_id, data.gsb_agent_id);
+  let solutionVersionId = data.gsb_solution_version;
+  let gsbKeyList = ["map_tool_id","gsb_solution_id","gsb_agent_id","functional_area_id", "gsb_solution_version",
+  "requested_user","title"];
+  gsbKeyList.forEach((gsbKey) => {
+    formData.append(gsbKey, data[gsbKey]);
+    delete data[gsbKey]
+  });
+  formData.append("map_summary_details", JSON.stringify(data));
+  var fileIndex = 0;
+  req.files.forEach((file) => {
+    formData.append(`files[${fileIndex}]file`, file.buffer, file.originalname);
+    formData.append(`files[${fileIndex}]file_type`, file.originalname.replace(".json",""));
+    fileIndex++;
+  });
+  try {    
+    const response = await fetch(api, {
+      method: 'POST',
+      body: formData,
+      headers: { "Solution-Version": solutionVersionId },
+    });
+    if (response.status === 200) {
+      await map.update({isGsb: true});
+      return res.json({ message: 'Successfully export map details to GSB' });
+    } else {
+      return res.status(500).json({ message: 'Failed to send'})
+    }
+  }
+  catch (err) {
+      console.log(err)
+      return res.status(500).json({ message: 'Failed to export map data to remote server' });
+    }
+  
+});
+
 app.post('/api/getAutocadFileFromGsb', async (req, res) => {
   let formData = new FormData();
   String.prototype.format = function () {

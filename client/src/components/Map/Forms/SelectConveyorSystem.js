@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { selectConveyor } from "actions/conveyor";
+import { convertNestedListToList } from "actions/conveyor";
 import { connect } from "react-redux";
 import { getBarcodes } from "../../../utils/selectors";
 import AddConveyorEntryPoint from "components/Map/Forms/AddConveyorEntryPoint";
@@ -7,7 +7,22 @@ import AddConveyorEntryPoint from "components/Map/Forms/AddConveyorEntryPoint";
 export const hasBarcodeForTile = (selectedMapTiles, barcodes) =>
   barcodes[Object.keys(selectedMapTiles)[0]];
 
-const shouldBeDisabled = (selectedMapTiles, barcodes) => {
+const checkIfSelectedPointLieOnExistingConveyor = (selectedMapTiles, conveyorTile) => {
+  if(conveyorTile == undefined || Object.keys(conveyorTile).length==0){
+    return true
+  }else{
+    for (const [key, value] of Object.entries(conveyorTile)) {
+      var selected_tile = convertNestedListToList(value["selected_tile"])
+      if(Object.keys(selectedMapTiles).some(r=> selected_tile.includes(r))){
+        return true
+      } 
+    
+  }
+  }
+};
+
+const shouldBeDisabled = (selectedMapTiles, barcodes, conveyorTile) => {
+  var check_kariyo = checkIfSelectedPointLieOnExistingConveyor(selectedMapTiles,conveyorTile)
   return (
     !hasBarcodeForTile(selectedMapTiles, barcodes)
   );
@@ -23,8 +38,8 @@ class SelectConveyorSystemPoint extends Component {
   toggle = () => this.setState({ show: !this.state.show });
   render() {
     const { error, show } = this.state;
-    const { selectedMapTiles, barcodes, onClick } = this.props;
-    const disabled = shouldBeDisabled(selectedMapTiles, barcodes);
+    const { selectedMapTiles, barcodes, onClick, conveyorTile } = this.props;
+    const disabled = shouldBeDisabled(selectedMapTiles, barcodes, conveyorTile);
     if (disabled || this.state.show)
       return (
         <div>
@@ -36,11 +51,6 @@ class SelectConveyorSystemPoint extends Component {
           >
           Select Conveyor System
           </button>
-          <div className="row py-1">
-            <div className="col">
-              {this.state.show===true?<AddConveyorEntryPoint/>:null}
-            </div>
-          </div>
         </div>
       );
     return (
@@ -75,9 +85,10 @@ class SelectConveyorSystemPoint extends Component {
 export default connect(
   state => ({
     selectedMapTiles: state.selection.mapTiles,
-    barcodes: getBarcodes(state)
+    barcodes: getBarcodes(state),
+    conveyorTile:state.normalizedMap.entities.conveyorTile
   }),
   (dispatch) => ({
-    onClick: () => dispatch(selectConveyor()),
+    // onClick: () => dispatch(selectConveyor()),
   })
 )(SelectConveyorSystemPoint);

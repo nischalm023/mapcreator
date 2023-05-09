@@ -19,7 +19,7 @@ class AddPPS extends Component {
       if(!this.state.show){
         this.setState({ 
           error: undefined,
-          eligible_type:"rtp",
+          eligible_type:this.state.eligible_type,
           pick_direction:0,
           pps_type:"manual" 
         });
@@ -42,8 +42,23 @@ class AddPPS extends Component {
         this.toggle()
         dispatch(addPPSes(formData));
     };
+
+    componentDidMount() {
+    const params = new URLSearchParams(window.location.search);
+    let gsbAgentName = params.get('gsb_agent_name') ? params.get('gsb_agent_name') : null;
+    let gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
+    if(gsbAgentName=="ttp"){
+          this.setState({ eligible_type: "ttp" })
+        }
+    if(gsbAgentName=="ttp_rtp"){
+          this.setState({ eligible_type: "ttp_rtp" })
+        }
+    };
     render() {
         const { error, show, eligible_type, pick_direction, pps_type} = this.state;
+        const params = new URLSearchParams(window.location.search);
+        let gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
+        let gsbAgentName = params.get('gsb_agent_name') ? params.get('gsb_agent_name') : 'rtp';
         const { disabled ,dispatch} = this.props;
         return (
             <div>
@@ -71,7 +86,13 @@ class AddPPS extends Component {
                             </select>
                           <br/>
                           <label for="type">Eligible Agent</label>
-                            <select onChange={(e)=>this.onClickk(e)} className="form-control" id="eligible_system" name="eligible_system">
+                            <select 
+                              onChange={(e)=>this.onClickk(e)} 
+                              className="form-control" 
+                              id="eligible_system" 
+                              name="eligible_system"
+                              defaultValue={gsbAgentName}
+                            >
                               <option value="rtp">RTP</option>
                               <option value="ttp">TTP</option>
                               <option value="ttp_rtp">TTP+RTP</option>

@@ -4,6 +4,10 @@ import { connect } from "react-redux";
 import BaseJsonForm from "./Util/BaseJsonForm";
 import { directionSchema, barcodeStringSchema } from "utils/forms";
 import { coordinateKeyToBarcodeSelector, getNewBarcode } from "utils/selectors";
+import * as constants from "../../../constants";
+import {setTtpBarcodeLabel} from "utils/util";
+import {getNeighbourBarcodeWorldCoord} from "actions/add-transit-barcode"
+
 const schema = {
   title: "Add TTP Transit Barcode",
   type: "object",
@@ -26,9 +30,23 @@ const schema = {
   }
 };
 
+const newBarcodeWidget = (props) => {
+  return (
+    <div class="form-group">
+      <input type="text" className="form-control" value={props.value}/>
+      <span className="help-block text-muted">The actual barcode value will get updated on submit</span>
+    </div>
+  );
+};
+
+const widgets = {
+  newBarcodeWidget: newBarcodeWidget
+}
+
 const uiSchema = {
   tileId: { "ui:widget": "hidden" },
-  barcodeString: { "ui:readonly": true }
+  barcodeString: { "ui:readonly": true },
+  newBarcode:{"ui:widget":newBarcodeWidget}
 };
 
 const TransitBarcode = ({ onSubmit, disabled, initialData }) => (
@@ -49,17 +67,32 @@ export default connect(
     if (mapTilesArr.length != 1) {
       return { disabled: true };
     }
-    if (state.selection.conveyorMode === true){
-      return {
-        disabled: true
-      };
-    }
     const tileId = mapTilesArr[0];
-    const barcodeString = coordinateKeyToBarcodeSelector(state, {
-      tileId: tileId
+    var floor_value = state.normalizedMap.entities.floor
+    var barcodes = state.normalizedMap.entities.barcode
+    var current_floor = state.currentFloor
+    var current_floor_value = floor_value[current_floor]
+    var distance = state.barcodeDistance
+    var floor_barcodes = {};
+    const barcodeKeys = current_floor_value.map_values;
+    barcodeKeys.forEach((barcodeKey) => {
+      floor_barcodes[barcodeKey] = barcodes[barcodeKey];
     });
-    const newBarcode = getNewBarcode(state);
-    
+    const barcodeString = floor_barcodes[tileId]["barcode"]
+    var barcodeOffset = floor_value[current_floor].barcodeOffset
+    var barcodeFormat = floor_value[current_floor].barcodeFormat
+    if(barcodeFormat===constants.TTP_BARCODE_FORMAT){
+      var refBarcodeWorldCoord = JSON.parse(floor_barcodes[tileId]['world_coordinate'])
+      var refrence_world_cordinate = { x: refBarcodeWorldCoord[0], y: refBarcodeWorldCoord[1] };
+      var new_world_coordinate =  getNeighbourBarcodeWorldCoord(
+                                      refrence_world_cordinate,
+                                      750,
+                                      0
+                                );
+      var newBarcode = setTtpBarcodeLabel(floor_barcodes,0,new_world_coordinate,JSON.parse(barcodeOffset),750)
+    }else{
+      var newBarcode = getNewBarcode(state);
+    }
     return {
       disabled: false,
       initialData: {

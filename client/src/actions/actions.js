@@ -81,6 +81,12 @@ export const clickOnViewport = (worldCoordinate, onShiftClickOnMapTile) => (
           if (normalizedMap.entities.barcode[key].highlight_status == 1){
               normalizedMap.entities.barcode[key].highlight_status = 0
           }
+          if (normalizedMap.entities.barcode[key].success_overlap_barcode_status == 1){
+              delete normalizedMap.entities.barcode[key].success_overlap_barcode_status
+          }
+          if (normalizedMap.entities.barcode[key].unsuccess_overlap_barcode_status == 0){
+              delete normalizedMap.entities.barcode[key].unsuccess_overlap_barcode_status
+          }
           });
     return dispatch(outsideTilesClick);
   } else {
@@ -185,7 +191,7 @@ export const setSectorsMxUPreferences = (getState) => {
     .then((res) => res.json())
     .then((map) => {
       sectorMxUPreferences = map.map.sectorMxUPreferences;
-      if (sectorMxUPreferences[undefined] != undefined) {
+      if (sectorMxUPreferences !== undefined || sectorMxUPreferences!==null || sectorMxUPreferences[undefined] != undefined) {
         setSectorsMxUPreferences(getState);
       }
       normalizedMap.entities.sectorMxUPreferences = sectorMxUPreferences;
@@ -304,7 +310,7 @@ const setTtpBarcodeFormat = (dispatch,getState) => {
   }
 }
 
-export const fetchMap = (mapId) => (dispatch, getState) => {
+export const fetchMap = (mapId, onSuccess) => (dispatch, getState) => {
   dispatch(clearMap);
   return getMap(parseInt(mapId))
     .then(handleErrors)
@@ -320,6 +326,7 @@ export const fetchMap = (mapId) => (dispatch, getState) => {
     .then(() => getBarcodeSpacing(dispatch,getState,parseInt(mapId)))
     .then(() => setIOPoints(getState))
     .then(() => setToteStorables(getState))
+    .then(onSuccess)
     .catch((error) => console.warn(error)); // eslint-disable-line no-console
 };
 
@@ -649,6 +656,7 @@ export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
   var checkChargerNeighbour = updateAndCheckChargerNeighbour(dispatch,getState)
   var convertBarcodeEntities = ConvertEntitiesInBarcodeFormat(dispatch,getState)
   var { normalizedMap, barcodeFormat } = getState();
+  var conveyor_data = normalizedMap.entities.conveyorTile
   setSectorsBarcodeMapping(dispatch, getState);
   // denormalize it
   const mapObj = denormalizeMap(normalizedMap);
@@ -664,6 +672,23 @@ export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
     .catch(onError);
 };
 
+const validateConveyorEntity = (conveyorTile) => {
+  var failed_list = []
+  var failed_conveyors_info = {}
+  for (const [key, value] of Object.entries(conveyorTile)) {
+     if(value.conveyor_active.length === 0 || !value.hasOwnProperty("conveyor_exit") || !value.hasOwnProperty("conveyor_entry")){
+        failed_list.push(key)
+        failed_conveyors_info[value.conveyor_id] = {
+          conveyor_id : value.conveyor_id,
+          no_active_points : value.conveyor_active.length === 0,
+          no_exit_point : !value.hasOwnProperty("conveyor_exit"),
+          no_entry_point : !value.hasOwnProperty("conveyor_entry")
+        }
+     }
+  }
+  return [failed_list, failed_conveyors_info]
+};
+
 const validatePpsPoint = (entities) => {
   var pps_dict = entities.pps
   var nonactive_pps_list = []
@@ -671,16 +696,50 @@ const validatePpsPoint = (entities) => {
     if(pps_dict[i].pps_points && pps_dict[i].pps_points.length === 0){
       nonactive_pps_list.push(pps_dict[i].pps_id)
     }
-    if(pps_dict[i].pps_points && pps_dict[i].pps_points.length === 1 && pps_dict[i].eligible_system.length === 2){
+    if(pps_dict[i].pps_points && pps_dict[i].eligible_system && pps_dict[i].pps_points.length === 1 && pps_dict[i].eligible_system.length === 2){
       nonactive_pps_list.push(pps_dict[i].pps_id)
     }
   }
   console.log("nonactive_pps_list",nonactive_pps_list)
   return nonactive_pps_list
 }
+
 export const downloadMap = (singleFloor = false) => (dispatch, getState) => {
   var { normalizedMap } = getState();
   setSectorsBarcodeMapping(dispatch, getState);
+  if(Object.keys(normalizedMap.entities.conveyorTile).length !== 0){
+    var result = validateConveyorEntity(normalizedMap.entities.conveyorTile) 
+    var failed_list = result[0]
+    var failed_conveyors_info = result[1]
+    if(failed_list.length !== 0){
+      let errorMessage = '';
+      Object.keys(failed_conveyors_info).map(key => {
+        const conveyor = failed_conveyors_info[key];
+        if (conveyor.no_active_points && conveyor.no_entry_point && conveyor.no_exit_point) {
+          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active, entry and exit points defined.`
+        } 
+        else if(conveyor.no_active_points && conveyor.no_entry_point){
+          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active and entry points defined.`
+        }
+        else if(conveyor.no_entry_point && conveyor.no_exit_point){
+          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any entry and exit points defined.`
+        }
+        else if(conveyor.no_active_points && conveyor.no_exit_point){
+          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active and exit points defined.`
+        }
+        else if(conveyor.no_active_points){
+          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active points defined.`
+        }
+        else if(conveyor.no_entry_point){
+          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have entry point defined.`
+        }
+        else if(conveyor.no_exit_point){
+          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have exit point defined.`
+        }
+      })
+      return dispatch(setErrorMessage(errorMessage));
+    }
+  }
   if(Object.keys(normalizedMap.entities.pps).length !== 0){
    var nonactive_pps_list = validatePpsPoint(normalizedMap.entities) 
    if(nonactive_pps_list.length !== 0){
@@ -711,6 +770,37 @@ export const copyJSONToClipboard = (fieldName, singleFloor = false) => (
   var { normalizedMap } = getState();
   // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   const exportedJson = exportMap(normalizedMap, singleFloor);
+  if(Object.keys(normalizedMap.entities.conveyorTile).length !== 0){
+    var failed_list, failed_conveyors_info = validateConveyorEntity(normalizedMap.entities.conveyorTile) 
+    if(failed_list.length !== 0){
+      let errorMessage = '';
+      Object.keys(failed_conveyors_info).map(key => {
+        const conveyor = failed_conveyors_info[key];
+        if (conveyor.no_active_points && conveyor.no_entry_point && conveyor.no_exit_point) {
+          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active, entry and exit points defined.`
+        } 
+        else if(conveyor.no_active_points && conveyor.no_entry_point){
+          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active and entry points defined.`
+        }
+        else if(conveyor.no_entry_point && conveyor.no_exit_point){
+          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any entry and exit points defined.`
+        }
+        else if(conveyor.no_active_points && conveyor.no_exit_point){
+          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active and exit points defined.`
+        }
+        else if(conveyor.no_active_points){
+          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active points defined.`
+        }
+        else if(conveyor.no_entry_point){
+          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have entry point defined.`
+        }
+        else if(conveyor.no_exit_point){
+          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have exit point defined.`
+        }
+      })
+      return dispatch(setErrorMessage(errorMessage));
+    }
+  }
   if(Object.keys(normalizedMap.entities.pps).length !== 0){
     var nonactive_pps_list = validatePpsPoint(normalizedMap.entities) 
     if(nonactive_pps_list.length !== 0){
@@ -747,8 +837,10 @@ export const editChargerBarcode = (charger_location, new_barcode,charger_id ) =>
 
 export const createMapCopy = ({ name }) => (dispatch, getState) => {
   const { normalizedMap } = getState();
+  const params = new URLSearchParams(window.location.search);
+  let gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
   // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
-  return createMap(denormalizeMap(normalizedMap).map, name)
+  return createMap(denormalizeMap(normalizedMap).map, name,gsb)
     .then(handleErrors)
     .then((res) => res.json())
     .then((id) =>

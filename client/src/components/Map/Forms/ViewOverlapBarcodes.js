@@ -1,5 +1,5 @@
 import React from "react";
-import { misaligned } from "actions/actions";
+import { view_overlap_barcode } from "actions/view_overlap_barcodes";
 import { connect } from "react-redux";
 
 const PathButton = ({ onClick, disabled }) => (
@@ -12,13 +12,15 @@ const PathButton = ({ onClick, disabled }) => (
       onClick();
     }}
   >
-    Misaligned Node
+    View Overlap Barcodes
   </button>
 );
 
 export default connect(
-  () => ({}),
+  state => ({
+    disabled: state.selection.conveyorMode === true
+  }),
   (dispatch) => ({
-    onClick: () => dispatch(misaligned()),
+    onClick: () => dispatch(view_overlap_barcode()),
   })
 )(PathButton);

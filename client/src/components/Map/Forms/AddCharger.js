@@ -141,7 +141,7 @@ export default connect(
   state => ({
     // TODO: disabling adding multiple chargers; adding neighbouring chargers together messes up
     // adjacency, should be fixed...
-    disabled: Object.keys(state.selection.mapTiles).length !== 1 || state.selection.conveyorMode === true,
+    disabled: Object.keys(state.selection.mapTiles).length !== 1,
     ttpMode:state.selection.TTPMode
   })
 )(AddCharger);

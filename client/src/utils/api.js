@@ -69,6 +69,12 @@ const getAllMaps = () => fetch(`${BASENAME}/api/maps`);
 const getSampleRacksJson = (mapId) =>
   fetch(`${BASENAME}/api/racksJson/${mapId}`);
 
+const postMapDataToGsb = (data) =>
+fetch(`${BASENAME}/api/exportDataToGsb`, {
+  method: "POST",
+  body:data,
+});  
+
 const requestAutocadFileFromGsb = (data) =>
 fetch(`${BASENAME}/api/getAutocadFileFromGsb`, {
   method: "POST",
@@ -88,5 +94,6 @@ export {
   getSampleRacksJson,
   runHaiMapConversionScriptToMap,
   stitchingTtpRtpMapApi,
-  requestAutocadFileFromGsb
+  requestAutocadFileFromGsb,
+  postMapDataToGsb
 };

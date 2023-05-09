@@ -2,7 +2,18 @@
 // json files (conveyor.json)
 
 function checkPoint(entity_array, selected_array) {
+  if(entity_array){
   return entity_array.some(e => JSON.stringify(e) == JSON.stringify(selected_array))
+      
+  }  
+}
+
+function activeCheckPoint(entity_array, selected_array) {
+    var conveyor_active_list = []
+    for (var i = 0; i < entity_array.length; i++) {
+     conveyor_active_list.push(entity_array[i]["conveyor_active_point"][0].split(",").map((val) => parseInt(val)))
+    }
+    return conveyor_active_list.some(e => JSON.stringify(e) == JSON.stringify(selected_array))
 }
 
 function ConveyorStepData(id,type,cooradinate,barcode) {
@@ -24,7 +35,7 @@ const getStepConveyorData = (value, barcode) =>{
         else if(checkPoint(value["conveyor_exit"], value["selected_tile"][i])){
             var step_data = ConveyorStepData(i+1,"conveyor_exit",value["selected_tile"][i],barcode)
         }
-        else if(checkPoint(value["conveyor_active"], value["selected_tile"][i])){
+        else if(activeCheckPoint(value["conveyor_active"], value["selected_tile"][i])){
             var step_data = ConveyorStepData(i+1,"conveyor_pps_point",value["selected_tile"][i],barcode)
         }
         else if(checkPoint(value["conveyor_end"], value["selected_tile"][i])){
@@ -45,7 +56,12 @@ const FormConveyorJson = (value, barcode) =>{
     conveyor_dict["map_exit_location"] = value["conveyor_io_exit"]
     conveyor_dict["conveyor_entry_location"] = "CONVEYOR_IN_"+value["conveyor_id"]
     conveyor_dict["conveyor_exit_location"] = "CONVEYOR_OUT_"+value["conveyor_id"]
-    conveyor_dict["conveyor_height"] = value["conveyor_height"]
+    conveyor_dict["conveyor_entry_direction"] = value["entry_point_direction"]
+    conveyor_dict["conveyor_exit_direction"] = value["exit_point_direction"]
+    conveyor_dict["bot_orientation_entry"] = value["bot_orientation_entry"]
+    conveyor_dict["bot_orientation_exit"] = value["bot_orientation_exit"]
+    conveyor_dict["conveyor_height_entry"] = value["conveyor_entry_height"]
+    conveyor_dict["conveyor_height_exit"] = value["conveyor_exit_height"]
     conveyor_dict["adjacency"] = [null,null,null,null]
     var conveyor_steps = getStepConveyorData(value, barcode)
     conveyor_dict["steps"]=conveyor_steps
@@ -55,11 +71,9 @@ const FormConveyorJson = (value, barcode) =>{
 export default (normalizedMap) => {
   var conveyor_data = normalizedMap.entities.conveyorTile
   var barcode = normalizedMap.entities.barcode
+  
   var conveyor_json = []
   for (const [key, value] of Object.entries(conveyor_data)) {
-    if((value["selected_tile"].length===0) || (value["conveyor_exit"].length===0) || (value["conveyor_entry"].length===0) || (value["conveyor_active"].length===0)){
-        continue
-    }
     var converted_dict_value = FormConveyorJson(value, barcode)
     conveyor_json.push(converted_dict_value)
  }

@@ -15,7 +15,7 @@ import {
 } from "actions/message";
 import SweetAlertError from "components/SweetAlertError";
 import SweetAlertSuccess from "components/SweetAlertSuccess";
-
+import { LinkContainer } from "react-router-bootstrap";
 import LeftSidebar from "components/Map/Sidebar/LeftSidebar";
 import RightSidebar from "components/Map/Sidebar/RightSidebar";
 import BarcodeViewPopup from "components/Map/BarcodeViewPopup";
@@ -29,6 +29,7 @@ import UploadMapDetailsToGsb from "components/Map/Forms/UploadMapDetailsToGsb";
 import { runSanity , showHighlight } from "actions/actions";
 import { runHaiMapConversionScriptToMap} from "utils/api";
 import _ from "lodash";
+import "./savedMap.css";
 const pendo = window.pendo;
 
 class Map extends Component {
@@ -39,7 +40,9 @@ class Map extends Component {
     },
     modalShow : false,
     floor : false,
-    emptyIOList : []
+    emptyIOList : [],
+    conveyorModalShow : false,
+    failedConveyorsInfo : {}
   };
   componentDidMount() {
     const {
@@ -73,6 +76,32 @@ class Map extends Component {
     }
     return empty_IO_list
   }
+
+  validateConveyorEntity = (conveyorTile) => {
+    var failed_list = []
+    var failed_conveyors_info = {}
+    for (const [key, value] of Object.entries(conveyorTile)) {
+       if(value.conveyor_active.length === 0 || !value.hasOwnProperty("conveyor_exit") || !value.hasOwnProperty("conveyor_entry")){
+          failed_list.push(key)
+          failed_conveyors_info[value.conveyor_id] = {
+            conveyor_id : value.conveyor_id,
+            no_active_points : value.conveyor_active.length === 0,
+            no_exit_point : !value.hasOwnProperty("conveyor_exit"),
+            no_entry_point : !value.hasOwnProperty("conveyor_entry")
+          }
+       }
+    }
+    if(failed_list.length !== 0){
+      this.setState({
+        failedConveyorsInfo : failed_conveyors_info
+      })
+      return true
+    }else{
+      return false
+    }
+  };
+
+
   handleDownloadClick(nMap,floor = null){
     const {dispatch} = this.props;
     let empty_IO_list = this.validateIOPoint(nMap.entities)
@@ -115,6 +144,38 @@ class Map extends Component {
     else{
       dispatch(downloadMap())
     }
+  }
+  handleSaveClick(nMap){
+    const {dispatch} = this.props;
+    let failed_conveyor = this.validateConveyorEntity(nMap.entities.conveyorTile)
+    if(failed_conveyor){
+      this.setState({
+        conveyorModalShow : true
+      })
+    }
+    else{
+      dispatch(
+        saveMap(
+          error => dispatch(setErrorMessage(error)),
+          () =>
+            dispatch(setSuccessMessage("Successfully saved map."))
+        )
+      )
+    }
+  }
+  handleConveyorOKClick(){
+    const {dispatch} = this.props;
+    this.setState({
+      conveyorModalShow : false
+    })
+    // dispatch(saveMap())
+    dispatch(
+      saveMap(
+        error => dispatch(setErrorMessage(error)),
+        () =>
+          dispatch(setSuccessMessage("Successfully saved map."))
+      )
+    )
   }
 
   componentDidUpdate(prevProps) {
@@ -162,7 +223,6 @@ class Map extends Component {
       errorMessage,
       successMessage,
       queueMode,
-      conveyorMode,
       TTPMode,
       zoneViewMode,
       sectorViewMode,
@@ -177,7 +237,9 @@ class Map extends Component {
     const agentId = params.get('gsb_agent_id') ? params.get('gsb_agent_id') : null;
     const functionalAreaId = params.get('functional_area_id') ? params.get('functional_area_id') : null;
     const uid = params.get('uid') ? params.get('uid') : null;
-    
+    const solutionVersion = params.get('gsb_solution_version') ? params.get('gsb_solution_version') : null;
+    const requestedUser = params.get('requested_user') ? params.get('requested_user') : null;
+    const checked_version = params.get('checked_version');
     return (
       <div>
         <div style={{ float: "left" }}>
@@ -191,13 +253,25 @@ class Map extends Component {
               onConfirm={() => dispatch(clearSuccessMessage())}
             />
             <div className="row justify-content-between p-0">
-              <div className="col-3">
+              <div className="col-1">
                 <h3 className="display-5">
                   {nMap ? nMap.entities.mapObj[mapId].name : "..."}
                 </h3>
               </div>
-              <div className="col-9">
+              <div className="col-15">
                 <div className="float-right">
+                {checked_version?<a>
+                    <LinkContainer to={`/version/?gsb=${gsb}&gsb_solution_id=${solutionId}&gsb_agent_id=${agentId}&functional_area_id=${functionalAreaId}&gsb_solution_version=${solutionVersion}&requested_user=${requestedUser}`}>
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary mr-1 exportToGsb"
+                      style={{textAlign:"-webkit-center", color:"orange"}}
+                      >
+                      Back to save Map
+                    </button>
+                    </LinkContainer>
+                  </a>:""}
+                  {checked_version === "true"?"":<span>
                   <SampleRacksJson />
                   <DeleteMap />
                   <RequestValidation />
@@ -210,21 +284,22 @@ class Map extends Component {
                       : 
                     "" 
                   }
+                  </span>
+                }
                 </div>
               </div>
             </div>
             <LeftSidebar />
-            <RightSidebar
+            {checked_version === "true"?"":<RightSidebar
               dispatch={dispatch}
               queueMode={queueMode}
-              conveyorMode={conveyorMode}
               TTPMode={TTPMode}
               zoneViewMode={zoneViewMode}
               sectorViewMode={sectorViewMode}
               directionViewMode={directionViewMode}
-            />
+            />}
             <form onSubmit={this.onSubmit}>
-              <div className="form-row">
+              <div className={checked_version === "true" ? "d-none" : "form-row"}>
                 <div className="col float-right">
                   <label for="fileSelect" >Import autocad file &nbsp;</label>
                   <input
@@ -238,7 +313,7 @@ class Map extends Component {
               </div>
             </form>
             <div className="row py-2 p-2">
-              <div className="btn-group" role="group">
+              <div className={checked_version === "true" ? "d-none" : "btn-group"} role="group">
                 <button
                   className="btn btn-outline-secondary"
                   type="button"
@@ -253,14 +328,7 @@ class Map extends Component {
                   className="btn btn-outline-secondary"
                   type="button"
                   style={{ textAlign: "-webkit-center", color: "grey" }}
-                  onClick={() =>
-                    dispatch(
-                      saveMap(
-                        error => dispatch(setErrorMessage(error)),
-                        () =>
-                          dispatch(setSuccessMessage("Successfully saved map."))
-                      )
-                    )
+                  onClick={() =>this.handleSaveClick(nMap)
                   }
                 >
                   Save
@@ -298,9 +366,10 @@ class Map extends Component {
               <div className="col float-right">
                 <ChangeFloorDropdown />
               </div>
-              <div className="row py-2 p-2">
+              <div className={checked_version === "true" ? "d-none" : "row py-2 p-2"}>
                 <div className="col float-right">
-                  <ChangeBarcodeFormat />
+                  <ChangeBarcodeFormat 
+                  dispatch={dispatch}/>
                 </div>
               </div>
             </div>
@@ -311,7 +380,7 @@ class Map extends Component {
                 this.setState({
                   barcodeView: {
                     tileId,
-                    show: true
+                    show: checked_version === "true"? "" : true
                   }
                 })
               }
@@ -353,6 +422,48 @@ class Map extends Component {
                   </button>
                 </div>
             </Modal>
+         <Modal isOpen={this.state.conveyorModalShow} toggle = {() => {this.setState({conveyorModalShow: !this.state.conveyorModalShow})}} className = "confirmation-modal">
+                {/* <span>Please define Entry,Exit,Active point for conveyor system.</span> */}
+                {Object.keys(this.state.failedConveyorsInfo).map(key => {
+                  const conveyor = this.state.failedConveyorsInfo[key];
+                  if (conveyor.no_active_points && conveyor.no_entry_point && conveyor.no_exit_point) {
+                    return <span key={key}>Conveyor ID {conveyor.conveyor_id} does not have active, entry and exit points defined.</span>;
+                  } 
+                  else if(conveyor.no_active_points && conveyor.no_entry_point){
+                    return <span key={key}>Conveyor ID {conveyor.conveyor_id} does not have active and entry points defined.</span>;
+                  }
+                  else if(conveyor.no_entry_point && conveyor.no_exit_point){
+                    return <span key={key}>Conveyor ID {conveyor.conveyor_id} does not have entry and exit points defined.</span>;
+                  }
+                  else if(conveyor.no_active_points && conveyor.no_exit_point){
+                    return <span key={key}>Conveyor ID {conveyor.conveyor_id} does not have active and exit points defined.</span>;
+                  }
+                  else if(conveyor.no_active_points){
+                    return <span key={key}>Conveyor ID {conveyor.conveyor_id} does not have any active points defined.</span>;
+                  }
+                  else if(conveyor.no_entry_point){
+                    return <span key={key}>Conveyor ID {conveyor.conveyor_id} does not have entry point defined.</span>;
+                  }
+                  else if(conveyor.no_exit_point){
+                    return <span key={key}>Conveyor ID {conveyor.conveyor_id} does not have exit point defined.</span>;
+                  }
+                })}
+                <br/>
+                <span> Do you want to continue?</span>
+                <br></br>
+                <div>
+                  <button onClick={() => {this.handleConveyorOKClick()}} className="btn btn-outline-primary mr-1">
+                    OK
+                    </button>
+                  <button className="btn btn-outline-danger" onClick={() => {
+                    this.setState({
+                      conveyorModalShow: false
+                    })
+                  }}
+                  >Cancel
+                  </button>
+                </div>
+            </Modal>   
       </div>
     );
   }
@@ -361,7 +472,6 @@ class Map extends Component {
 export default connect(state => ({
   nMap: state.normalizedMap,
   queueMode: state.selection.queueMode,
-  conveyorMode: state.selection.conveyorMode,
   TTPMode:state.selection.TTPMode,
   successMessage: state.successMessage,
   errorMessage: state.errorMessage,

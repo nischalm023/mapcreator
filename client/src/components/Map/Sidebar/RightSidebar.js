@@ -34,8 +34,16 @@ import AddTransitBarcode from "components/Map/Forms/AddTransitBarcode";
 import AddTTPTransitBarcode from "components/Map/Forms/AddTTPTransitBarcode";
 import LocateBarcode from "components/Map/Forms/LocateBarcode";
 import SectorMSUMapping from "components/Map/Forms/SectorMSUMapping";
-import RemoveConveyorSystem from "components/Map/Forms/RemoveConveyorSystem";
+import ManageConveyorSystem from "components/Map/Forms/ManageConveyorSystem";
 import ViewConveyorSystem from "components/Map/Forms/ViewConveyorSystem";
+import AddConveyorEntryPoint from "components/Map/Forms/AddConveyorEntryPoint";
+import AddConveyorExitPoint from "components/Map/Forms/AddConveyorExitPoint";
+import ConveyorActivePoint from "components/Map/Forms/ConveyorActivePoint";
+import ConveyorEndPoint from "components/Map/Forms/ConveyorEndPoint";
+import ConveyorDownload from "components/Map/Forms/ConveyorDownload";
+import ManageTtpOverlap from "components/Map/Forms/ManageTtpOverlap";
+import ViewOverlapBarcodes from "components/Map/Forms/ViewOverlapBarcodes";
+import ManageStorableSizeInfo from "components/Map/Forms/ManageStorableSizeInfo";
 
 import {
   QueueCheckbox,
@@ -52,11 +60,20 @@ class RightSidebar extends Component {
     open: false,
     activeIdx: 0
   };
+  componentDidMount() {
+    const params = new URLSearchParams(window.location.search);
+    let gsbAgentName = params.get('gsb_agent_name') ? params.get('gsb_agent_name') : null;
+    let gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
+    const {dispatch} = this.props
+    if(gsb && (gsbAgentName==="ttp" || gsbAgentName==="ttp_rtp")){
+      dispatch({ type: "TOGGLE-TTP-VIEW-MODE" });
+    }
+  };
 
   render() {
-    const { queueMode, multiQueueMode, zoneViewMode, sectorViewMode, directionViewMode, conveyorMode, TTPMode, dispatch } = this.props;
+    const { queueMode, multiQueueMode, zoneViewMode, sectorViewMode, directionViewMode, TTPMode, dispatch } = this.props;
     const { open } = this.state;
-
+    
     return (
       <nav id="rightsidebar" className={open ? "active" : ""}>
         <button
@@ -100,7 +117,10 @@ class RightSidebar extends Component {
               ShiftBarcode,
               AlignBarcode,
               AssignIOPoints,
-              CreateToteLocations
+              CreateToteLocations,
+              ManageTtpOverlap,
+              ManageStorableSizeInfo,
+              ViewOverlapBarcodes
             ].map((Elm, idx) => (
               <div
                 key={idx}
@@ -115,9 +135,9 @@ class RightSidebar extends Component {
               {this.props.TTPMode === true ?<AddTTPTransitBarcode />: <AddTransitBarcode />}
           </div>
           <div className="conveyor-buttons">
-            <div className="row">
+          <div className="row">
               <div className="col">
-                <RemoveConveyorSystem />
+                <ManageConveyorSystem />
               </div>
             </div>
             <div className="row py-1">
@@ -125,20 +145,35 @@ class RightSidebar extends Component {
                 <ViewConveyorSystem />
               </div>
             </div>
-            <div className="row">
+            <div className="row py-1">
               <div className="col">
-                {this.props.conveyorMode === true ?<ConveyorCheckboxMode />: null}
+                <ConveyorCheckboxMode />
               </div>
             </div>
-          </div>
-          <div className="row">
-            <div className="col">
-              <ConveyorCheckbox
-                val={conveyorMode}
-                onChange={() =>
-                  dispatch({ type: "TOGGLE-CONVEYOR-VIEW-MODE" })
-                }
-              />
+            <div className="row py-1">
+              <div className="col">
+                <AddConveyorEntryPoint/>
+              </div>
+            </div>
+            <div className="row py-1">
+              <div className="col">
+                <AddConveyorExitPoint/>
+              </div>
+            </div>
+            <div className="row py-1">
+              <div className="col">
+                <ConveyorActivePoint/>
+              </div>
+            </div>
+            <div className="row py-1">
+              <div className="col">
+                <ConveyorEndPoint/>
+              </div>
+            </div>
+            <div className="row py-1">
+              <div className="col">
+                <ConveyorDownload/>
+              </div>
             </div>
           </div>
           <div className="row">
@@ -155,7 +190,6 @@ class RightSidebar extends Component {
             <div className="col">
               <QueueCheckbox
                 val={queueMode}
-                disabled={this.props.conveyorMode === true}
                 onChange={() => dispatch({ type: "TOGGLE-QUEUE-MODE" })}
               />
             </div>
@@ -164,7 +198,6 @@ class RightSidebar extends Component {
             <div className="col">
               <MultiQueueCheckbox
                 val={multiQueueMode}
-                disabled={this.props.conveyorMode === true}
                 onChange={() => dispatch({ type: "TOGGLE-MULTI-QUEUE-MODE" })}
               />
             </div>
@@ -173,7 +206,6 @@ class RightSidebar extends Component {
             <div className="col">
               <ZoneViewCheckbox
                 val={zoneViewMode}
-                disabled={this.props.conveyorMode === true}
                 onChange={() => { 
                   if(sectorViewMode) dispatch({ type: "TOGGLE-SECTOR-VIEW-MODE" }); 
                   dispatch({ type: "TOGGLE-ZONE-VIEW-MODE" });
@@ -185,7 +217,6 @@ class RightSidebar extends Component {
             <div className="col">
               <SectorViewCheckbox
                 val={sectorViewMode}
-                disabled={this.props.conveyorMode === true}
                 onChange={() => {
                   if(zoneViewMode) dispatch({ type: "TOGGLE-ZONE-VIEW-MODE" });
                   dispatch({ type: "TOGGLE-SECTOR-VIEW-MODE" });
@@ -198,7 +229,6 @@ class RightSidebar extends Component {
             <div className="col">
               <DirectionViewCheckbox
                 val={directionViewMode}
-                disabled={this.props.conveyorMode === true}
                 onChange={() =>
                   dispatch({ type: "TOGGLE-DIRECTION-VIEW-MODE" })
                 }

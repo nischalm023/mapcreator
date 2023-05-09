@@ -90,6 +90,18 @@ export default (state = {}, action) => {
       }
       return Object.assign({}, state, newState);
     }
+    case "HIGHLIGHT-SUCCESS-OVERLAP-BAROCDE": {
+      const success_overlap_barcode = action.value[Object.keys(action.value)[0]] 
+      const success_overlap_barcode_status = action.value[Object.keys(action.value)[1]] 
+      let newState = {};
+      var k = 0;
+
+      while (k < success_overlap_barcode.length) {
+        newState[success_overlap_barcode[k]] = { ...state[success_overlap_barcode[k]], success_overlap_barcode_status: success_overlap_barcode_status};
+        k++;
+      }
+      return Object.assign({}, state, newState);
+    }
     case "IO-POINT-REMOVE-HIGHLIGHT": {
       const { barcode } = action.value;
       const conveyor_tile = [barcode.split(',').map(Number)];
@@ -105,15 +117,26 @@ export default (state = {}, action) => {
       }
       return Object.assign({}, state, newState);
     }
+    case "HIGHLIGHT-UNSUCCESS-OVERLAP-BAROCDE": {
+      const unsuccess_overlap_barcode = action.value[Object.keys(action.value)[0]] 
+      const unsuccess_overlap_barcode_status = action.value[Object.keys(action.value)[1]] 
+      let newState = {};
+      var k = 0;
 
+      while (k < unsuccess_overlap_barcode.length) {
+        newState[unsuccess_overlap_barcode[k]] = { ...state[unsuccess_overlap_barcode[k]], unsuccess_overlap_barcode_status: unsuccess_overlap_barcode_status};
+        k++;
+      }
+      return Object.assign({}, state, newState);
+    }
     case "CONVEYOR-TILES-STRIPES": {
       const conveyor_tile = action.value[Object.keys(action.value)[0]] 
-      const conveyor_selected_status = action.value[Object.keys(action.value)[1]] 
+      const grid_attribute = action.value[Object.keys(action.value)[1]] 
       let newState = {};
       var k = 0;
 
       while (k < conveyor_tile.length) {
-        newState[conveyor_tile[k]] = { ...state[conveyor_tile[k]], conveyor_selected_status: conveyor_selected_status};
+        newState[conveyor_tile[k]] = { ...state[conveyor_tile[k]], grid_attribute: grid_attribute};
         k++;
       }
       return Object.assign({}, state, newState);
@@ -248,7 +271,14 @@ export default (state = {}, action) => {
       );
       return { ...state, ...newState };
     }
-
+    case "MANAGE-OVERLAP-BAROCDE":{
+      let newState = action.value
+      return { ...state, ...newState };
+    }
+    case "VIEW-OVERLAP-BAROCDES":{
+      let newState = action.value
+      return { ...state, ...newState };
+    }
     case "ADD-ELEVATOR":
       return addElevator(state, action);
 
