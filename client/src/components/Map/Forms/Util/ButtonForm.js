@@ -47,7 +47,7 @@ class ButtonForm extends Component {
         </button>
         <BulletPointsTooltip {...tooltipData} />
         <div key={1} className="modal fade" tabIndex="-1" role="dialog">
-          <FormModal show={show} toggle={toggle} title={title}>
+          <FormModal className={this.props.modalClass} show={show} toggle={toggle} title={title}>
             <div>{this.props.children}</div>
           </FormModal>
         </div>

@@ -27,6 +27,8 @@ import AddZone from "components/Map/Forms/AddZone";
 import AddSector from "components/Map/Forms/AddSector";
 import EditSpecialBarcode from "components/Map/Forms/EditSpecialBarcodes";
 import AlignBarcode from "components/Map/Forms/AlignBarcode";
+import AssignIOPoints from "components/Map/Forms/AssignIOPoints";
+import CreateToteLocations from "components/Map/Forms/CreateToteLocations";
 import ShiftBarcode from "components/Map/Forms/ShiftBarcode";
 import AddTransitBarcode from "components/Map/Forms/AddTransitBarcode";
 import AddTTPTransitBarcode from "components/Map/Forms/AddTTPTransitBarcode";
@@ -96,7 +98,9 @@ class RightSidebar extends Component {
               Exclude,
               EditSpecialBarcode,
               ShiftBarcode,
-              AlignBarcode
+              AlignBarcode,
+              AssignIOPoints,
+              CreateToteLocations
             ].map((Elm, idx) => (
               <div
                 key={idx}

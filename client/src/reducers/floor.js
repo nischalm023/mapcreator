@@ -92,6 +92,24 @@ export default (state = {}, action) => {
       });
       return newState;
     }
+    case "DELETE-IO-POINT-BY-ID": {
+      var newState = _.clone(state);
+      Object.keys(newState).forEach(floorId => {
+        _.remove(newState[floorId].ioPointsIds, function (iopoint) {
+          return iopoint === action.value;
+        });
+      });
+      return newState;
+    }
+    case "DELETE-TOTE-STORABLE-BY-ID": {
+      var newState = _.clone(state);
+      Object.keys(newState).forEach(floorId => {
+        _.remove(newState[floorId].toteStorablesIds, function (tote) {
+          return tote === action.value;
+        });
+      });
+      return newState;
+    }
     case "CHANGE-FLOOR-BARCODE-FORMAT-MODE":{
       var {barcode_value,currentFloor} = action.value
       var newState = _.cloneDeep(state);

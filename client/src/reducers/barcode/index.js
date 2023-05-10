@@ -22,6 +22,7 @@ import alignBarcode from "./align-barcode"
 import { getNeighbouringBarcodesIncludingDisconnected } from "../../utils/util";
 
 export default (state = {}, action) => {
+  var newState = _.clone(state);
   switch (action.type) {
     case "ADD-QUEUE-BARCODES-TO-PPS":
       return addPPSQueue(state, action);
@@ -77,6 +78,42 @@ export default (state = {}, action) => {
 
       return Object.assign({}, state, newState);
     }
+    case "IO-POINT-HIGHLIGHT": {
+      const { barcode } = action.value;
+      const conveyor_tile = [barcode.split(',').map(Number)];
+      const conveyor_selected_status = 1
+      let newState = {};
+      var k = 0;
+
+      while (k < conveyor_tile.length) {
+        newState[conveyor_tile[k]] = { ...state[conveyor_tile[k]], conveyor_selected_status: conveyor_selected_status, isIoPoint: true};
+        k++;
+      }
+      console.log(">>>>>>> add state:",state);
+      console.log(">>>>>>> newState:",newState);
+      console.log(">>>>>>>>>>>> Object.assign({}, state, newState):",Object.assign({}, state, newState))
+      return Object.assign({}, state, newState);
+    }
+    case "IO-POINT-REMOVE-HIGHLIGHT": {
+      const { barcode } = action.value;
+      const conveyor_tile = [barcode.split(',').map(Number)];
+      let newState = { ...state };
+      var k = 0;
+
+      while (k < conveyor_tile.length) {
+        if (newState[conveyor_tile[k]] && newState[conveyor_tile[k]].conveyor_selected_status) {
+          // delete newState[conveyor_tile[k]].conveyor_selected_status;
+          newState[conveyor_tile[k]] = { ...state[conveyor_tile[k]], conveyor_selected_status: 0, isIoPoint: false};
+          delete newState[conveyor_tile[k]].isIoPoint;
+        }
+        k++;
+      }
+      console.log(">>>>>>> remove state:",state);
+      console.log(">>>>>>> newState:",newState);
+      console.log(">>>>>>>>>>>> Object.assign({}, state, newState):",Object.assign({}, state, newState))
+      return Object.assign({}, state, newState);
+    }
+
     case "CONVEYOR-TILES-STRIPES": {
       const conveyor_tile = action.value[Object.keys(action.value)[0]] 
       const conveyor_selected_status = action.value[Object.keys(action.value)[1]] 

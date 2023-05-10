@@ -239,9 +239,41 @@ export const setConveyorTile = (getState) => {
     .then(handleErrors)
     .then((res) => res.json())
     .then((map) => {
-      if(!map.hasOwnProperty("conveyorTile")){
+      if(!map.map.hasOwnProperty("conveyorTile")){
         normalizedMap.entities.conveyorTile = conveyorTile;
         normalizedMap.entities.map.dummy.conveyorTile = conveyorTile;
+      }
+    });
+};
+
+export const setIOPoints = (getState) => {
+  const state = getState();
+  const normalizedMap = state.normalizedMap;
+  var mapId = getMapId(state);
+  var ioPoints = {};
+  return getMap(mapId)
+    .then(handleErrors)
+    .then((res) => res.json())
+    .then((map) => {
+      if(!map.map.hasOwnProperty("ioPoints")){
+        normalizedMap.entities.ioPoints = ioPoints;
+        normalizedMap.entities.map.dummy.ioPoints = ioPoints;
+      }
+    });
+};
+
+export const setToteStorables = (getState) => {
+  const state = getState();
+  const normalizedMap = state.normalizedMap;
+  var mapId = getMapId(state);
+  var toteStorables = {};
+  return getMap(mapId)
+    .then(handleErrors)
+    .then((res) => res.json())
+    .then((map) => {
+      if(!map.map.hasOwnProperty("toteStorables")){
+        normalizedMap.entities.toteStorables = toteStorables;
+        normalizedMap.entities.map.dummy.toteStorables = toteStorables;
       }
     });
 };
@@ -281,11 +313,13 @@ export const fetchMap = (mapId) => (dispatch, getState) => {
     .then((map) => barcodeCordMapping(getState))
     .then(() => dispatch(setViewportClamp))
     .then(() => dispatch(fitToViewport))
+    .then(() => getBarcodeDistance(dispatch,getState,parseInt(mapId)))
+    .then(()=>  setTtpBarcodeFormat(dispatch,getState))
     .then(() => setSectorsMxUPreferences(getState))
     .then(() => setConveyorTile(getState))
-    .then(()=>  setTtpBarcodeFormat(dispatch,getState))
-    .then(() => getBarcodeDistance(dispatch,getState,parseInt(mapId)))
     .then(() => getBarcodeSpacing(dispatch,getState,parseInt(mapId)))
+    .then(() => setIOPoints(getState))
+    .then(() => setToteStorables(getState))
     .catch((error) => console.warn(error)); // eslint-disable-line no-console
 };
 

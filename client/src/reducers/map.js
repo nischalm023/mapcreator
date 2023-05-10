@@ -34,6 +34,48 @@ export default (state = {}, action) => {
       newState.dummy.current_conveyor_id.push(conveyor_id);
       return newState;
     }
+    case "ADD-IO-POINT":{
+      const { io_point_id } = action.value;
+      if (!newState.dummy.hasOwnProperty('ioPointsIds')){
+        newState.dummy.ioPointsIds = [];
+      }
+      // newState.dummy.ioPointsIds.push(io_point_id);
+      if (!newState.dummy.ioPointsIds.includes(io_point_id)) {
+        newState.dummy.ioPointsIds.push(io_point_id);
+      }
+      return newState;
+    }
+    case "ADD-TOTE-STORABLE":{
+      const { next_tote_storable_id } = action.value;
+      if (!newState.dummy.hasOwnProperty('toteStorablesIds')){
+        newState.dummy.toteStorablesIds = [];
+      }
+      // newState.dummy.toteStorablesIds.push(next_tote_storable_id);
+      if (!newState.dummy.toteStorablesIds.includes(next_tote_storable_id)) {
+        newState.dummy.toteStorablesIds.push(next_tote_storable_id);
+      }
+      return newState;
+    }
+    case "REMOVE-IO-POINT": {
+      var io_point_id = parseInt(action.value.io_point_id)
+      if (newState.dummy.hasOwnProperty('ioPointsIds')){
+        var newList = newState.dummy.ioPointsIds.filter(function(item) {
+              return item !== io_point_id
+          })
+        newState.dummy.ioPointsIds = newList
+      }
+      return newState;
+    }
+    case "REMOVE-TOTE-STORABLE": {
+      var next_tote_storable_id = parseInt(action.value.next_tote_storable_id)
+      if (newState.dummy.hasOwnProperty('toteStorablesIds')){
+        var newList = newState.dummy.toteStorablesIds.filter(function(item) {
+              return item !== next_tote_storable_id
+          })
+        newState.dummy.toteStorablesIds = newList
+      }
+      return newState;
+    }
     case "REMOVE-CONVEYOR-ID": {
       var conveyor_id = parseInt(action.value.conveyor_id)
       if (newState.dummy.hasOwnProperty('conveyors')){

@@ -5,17 +5,21 @@ import ButtonForm from "./ButtonForm";
 class BaseForm extends Component {
   state = {
     show: false,
-    formData: {}
+    formData: {},
   };
   toggle = () => this.setState({ show: !this.state.show, formData: {} });
   render() {
     const {
       schema,
       onSubmit,
+      onRemove,
       onError = () => {},
       validate = null,
       uiSchema = undefined,
       initialData = {},
+      barcodes = null,
+      nextIOPointId = '',
+      dispatch = dispatch,
       ...rest
     } = this.props;
     const { formData } = this.state;
@@ -26,16 +30,20 @@ class BaseForm extends Component {
           schema={schema}
           uiSchema={uiSchema}
           onSubmit={formData => {
-            onSubmit(formData);
+            barcodes ? onSubmit(formData, barcodes, nextIOPointId, dispatch) : onSubmit(formData) ;
             this.toggle();
           }}
+          // onSubmit={console.log(">>>>>>>>> submit formData:",formData)}
           onChange={({ formData }) => this.setState({ formData })}
           formData={fullFormData}
           onError={onError}
           validate={validate}
         >
           <div>
-            <button type="submit" className="btn btn-outline-primary mr-1">
+            <button 
+              type="submit" 
+              className="btn btn-outline-primary mr-1"
+            >
               Submit
             </button>
             <button
@@ -45,6 +53,18 @@ class BaseForm extends Component {
             >
               Cancel
             </button>
+            {barcodes && <button
+              type="button"
+              className="btn btn-outline-danger"
+              style={{ float: "right" }}
+              onClick={() => {
+                onRemove(formData, barcodes, nextIOPointId, dispatch);
+                this.toggle();
+              }}
+              // onClick={console.log(">>>>>>>>> remove formData:",formData)}
+            >
+              Remove IO Points
+            </button>}
           </div>
         </Form>
       </ButtonForm>

@@ -465,6 +465,8 @@ export var createFloorFromCoordinateData = ({
     floor_id,
     chargers: [],
     ppses: [],
+    ioPointsIds:[],
+    toteStorablesIds:[],
     odsExcludeds: [],
     dockPoints: [],
     fireEmergencies: [],
@@ -496,6 +498,8 @@ export var createMapFromCoordinateData = (
     queueDatas: [],
     downloadConveyor:[],
     conveyors:[],
+    toteStorablesIds:[],
+    ioPointsIds:[],
     barcodeDistance:parseInt(barcode_distances / 2),
     barcodeSpacing: barcode_distances,
     floors: [

@@ -6,6 +6,8 @@ import floorReducer from "./floor";
 import barcodeReducer from "./barcode/index";
 import ppsReducer from "./pps";
 import conveyorReducer from "./conveyor";
+import iopointReducer from "./iopoint";
+import totestorableReducer from "./totestorable";
 import DownloadConveyorReducer from "./download_conveyor";
 import currentFloorReducer from "./currentFloor";
 import barcodeDistanceReducer from "./barcodeDistance";
@@ -25,6 +27,8 @@ export var basePPSReducer = createEntityReducer("PPS", "pps_id");
 export var baseElevatorReducer = createEntityReducer("ELEVATOR", "elevator_id");
 export var baseChargerReducer = createEntityReducer("CHARGER", "charger_id");
 export var baseConveyorReducer = createEntityReducer("CONVEYOR", "conveyor_id");
+export var baseIopointReducer = createEntityReducer("IO-POINT", "io_point_id");
+export var baseTotestorableReducer = createEntityReducer("TOTE-STORABLE", "next_tote_storable_id");
 
 export const entitiesReducer = combineReducers({
   elevator: reduceReducers(elevatorReducer, baseElevatorReducer),
@@ -35,6 +39,10 @@ export const entitiesReducer = combineReducers({
   odsExcluded: createEntityReducer("ODS-EXCLUDED", "ods_excluded_id"),
   dockPoint: createEntityReducer("DOCK-POINT", "dock_point_id"),
   fireEmergency: createEntityReducer("FIRE-EMERGENCY", "fire_emergency_id"),
+  // ioPoints: createEntityReducer("IO-POINT", "io_point_id"),
+  ioPoints: reduceReducers(baseIopointReducer, iopointReducer),
+  // toteStorables: createEntityReducer("TOTE-STORABLE", "next_tote_storable_id"),
+  toteStorables: reduceReducers(baseTotestorableReducer, totestorableReducer),
   barcode: reduceReducers(barcodeReducer, baseBarcodeReducer),
   DownloadconveyorTile: reduceReducers(baseConveyorReducer, conveyorReducer),
   floor: floorReducer,
@@ -79,6 +87,8 @@ export const mapChangeReducer = (state = dummyState.normalizedMap, action) => {
       if(map.sectorMxUPreferences == undefined) map.sectorMxUPreferences = {};
       if(map.mappingBarcodeCoord == undefined) map.mappingBarcodeCoord = {};
       if(map.mappingBarcodeWorldCoord == undefined) map.mappingBarcodeWorldCoord = {};
+      if(map.ioPoints == undefined) map.ioPoints = {};
+      if(map.toteStorables == undefined) map.toteStorables = {};
       if(map.sectors == undefined) map.sectors = [];
       if(map.floors.map((obj,i)=>{
         if(!obj.hasOwnProperty("barcodeFormat")){
