@@ -423,24 +423,53 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
         barcodes,
         direction
       );
+  const barcodeDistance = state.barcodeDistance
   if (nTileId == null) {
     if(distance<sizeInfo[direction]){
-      sizeInfo[direction] = refBarcodeInfo.size_info[direction] - distance
-      sizeInfo[(direction + 2) % 4] = distance/2
+      sizeInfo[direction] = parseInt((2 * refBarcodeInfo.size_info[direction] - distance) / 2);
+      if(direction===2||direction===3){
+        sizeInfo[(direction + 2) % 4] = parseInt(distance / 2);
+        refBarcodeInfo.size_info[direction] = distance - sizeInfo[(direction + 2) % 4];
+      }
+      else if(direction===0||direction===1){
+        refBarcodeInfo.size_info[direction] = parseInt(distance/2);
+        sizeInfo[(direction + 2) % 4] = distance - refBarcodeInfo.size_info[direction] ;
+      }
     }else{
-      sizeInfo[(direction + 2) % 4] = distance / 2; 
+      if(direction===2||direction===3){
+        sizeInfo[(direction + 2) % 4] = parseInt(distance / 2);
+        refBarcodeInfo.size_info[direction] = distance - sizeInfo[(direction + 2) % 4];
+      }
+      else if(direction===0||direction===1){
+        refBarcodeInfo.size_info[direction] = parseInt(distance/2);
+        sizeInfo[(direction + 2) % 4] = distance - refBarcodeInfo.size_info[direction] ;
+      }
     }
   }else{
     if(distance<sizeInfo[direction]){
-      sizeInfo[direction] = refBarcodeInfo.size_info[direction] - distance
-      sizeInfo[(direction + 2) % 4] = distance/2
+      sizeInfo[direction] = parseInt((2 * refBarcodeInfo.size_info[direction] - distance) / 2);
+      if(direction===2||direction===3){
+        sizeInfo[(direction + 2) % 4] = parseInt(distance / 2);
+        refBarcodeInfo.size_info[direction] = distance - sizeInfo[(direction + 2) % 4];
+      }
+      else if(direction===0||direction===1){
+        refBarcodeInfo.size_info[direction] = parseInt(distance/2);
+        sizeInfo[(direction + 2) % 4] = distance - refBarcodeInfo.size_info[direction] ;
+      }
     }else{
-    sizeInfo[direction] =
-      (2 * refBarcodeInfo.size_info[direction] - distance) / 2;
-    sizeInfo[(direction + 2) % 4] = distance / 2;
+      sizeInfo[direction] = parseInt((2 * refBarcodeInfo.size_info[direction] - distance) / 2);
+      if(direction===2||direction===3){
+        sizeInfo[(direction + 2) % 4] = parseInt(distance / 2);
+        refBarcodeInfo.size_info[direction] = distance - sizeInfo[(direction + 2) % 4];
+      }
+      else if(direction===0||direction===1){
+        refBarcodeInfo.size_info[direction] = parseInt(distance/2);
+        sizeInfo[(direction + 2) % 4] = distance - refBarcodeInfo.size_info[direction] ;
+      }
   }
   }
-  
+  oldNeighbour.size_info[(direction + 2) % 4] = oldNeighbour.size_info[(direction + 1) % 4]+oldNeighbour.size_info[(direction)]- (sizeInfo[(direction + 2) % 4]+refBarcodeInfo.size_info[direction]+ sizeInfo[direction])
+ 
 
   var cornerWorldCooordinate = calculate_corner_world_cordinate(sizeInfo,[transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]])
   // Adjacency and Neighbour structure

@@ -424,6 +424,13 @@ export var createFloorFromCoordinateData = ({
   // iterate and fill up map_values
   var map_values = [];
   var size = parseInt(barcode_distances / 2);
+  var sizeInfo
+  if(barcode_distances % 2 !== 0){
+    sizeInfo =  [size, size, size+1, size+1]
+  }
+  else{
+    sizeInfo = [size, size, size, size]
+  }
   for (var row = row_start; row <= row_end; row++) {
     for (var column = column_start; column <= column_end; column++) {
       var barcode = encode_barcode(row, column);
@@ -436,7 +443,7 @@ export var createFloorFromCoordinateData = ({
         neighbours: [[1, 1, 1], [1, 1, 1], [1, 1, 1], [1, 1, 1]],
         coordinate: `${column},${row}`,
         blocked: false,
-        size_info: [size, size, size, size],
+        size_info: sizeInfo,
         msu_dimensions: msu_dimensions
       };
       if (row == row_start) {
@@ -490,6 +497,7 @@ export var createMapFromCoordinateData = (
     downloadConveyor:[],
     conveyors:[],
     barcodeDistance:parseInt(barcode_distances / 2),
+    barcodeSpacing: barcode_distances,
     floors: [
       createFloorFromCoordinateData({
         row_start,

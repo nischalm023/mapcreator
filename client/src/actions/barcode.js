@@ -169,7 +169,27 @@ const addNewBarcode = formData => (dispatch, getState) => {
         addNeighbourToBarcode(nbNbBarcode, (idx + 2) % 4, nbTileId)
       );
       nbNeighbourStructure.push([1, 1, 1]);
-      nbSizeInfo[idx] = nbNbBarcode.size_info[(idx + 2) % 4];
+      // nbSizeInfo[idx] = nbNbBarcode.size_info[(idx + 2) % 4];
+      for(let i=0;i<4;i++){
+        if(i === 0 || i ===1){
+          if(nbNbBarcode.size_info[0]>nbNbBarcode.size_info[1])
+          {
+            nbSizeInfo[i] = nbNbBarcode.size_info[0];
+          }
+          else{
+            nbSizeInfo[i] = nbNbBarcode.size_info[1];
+
+          }         
+        }
+        if(i === 2 || i ===3){
+          if(nbNbBarcode.size_info[2]>nbNbBarcode.size_info[3]){
+            nbSizeInfo[i] = nbNbBarcode.size_info[2];
+          }
+          else{
+            nbSizeInfo[i] = nbNbBarcode.size_info[3];
+          }
+        }
+      }
     } else {
       nbNeighbourStructure.push([0, 0, 0]);
     }

@@ -385,6 +385,13 @@ const viewportReducer = (
   }
   return state;
 };
+const barcodeSpacingReducer = (state = null, action) => {
+  switch (action.type) {
+    case "CHANGE-BARCODE-SPACING":
+      return action.value;
+  }
+  return state;
+};
 
 export default combineReducers({
   normalizedMap: normalizedMapReducer,
@@ -395,5 +402,6 @@ export default combineReducers({
   selectedArea: selectedAreaReducer,
   viewport: viewportReducer,
   successMessage: successMessageReducer,
-  errorMessage: errorMessageReducer
+  errorMessage: errorMessageReducer,
+  barcodeSpacing: barcodeSpacingReducer
 });

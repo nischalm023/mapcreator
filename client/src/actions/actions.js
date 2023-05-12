@@ -217,6 +217,19 @@ export const setbarcodeDistance = (barcodeDistance) => ({
   value: barcodeDistance
 });
 
+export const getBarcodeSpacing = (dispatch,getState,mapId) => {  
+  const state = getState();
+  var mapIdVal = state.normalizedMap.entities.mapObj[mapId]
+  if (mapIdVal.BaseMap.hasOwnProperty("barcodeSpacing")){
+  var barcodeSpacing = mapIdVal.BaseMap.barcodeSpacing
+  dispatch(setbarcodeSpacing(barcodeSpacing))
+}
+};
+export const setbarcodeSpacing = (barcodeSpacing) => ({
+  type: "CHANGE-BARCODE-SPACING",
+  value: barcodeSpacing
+});
+
 export const setConveyorTile = (getState) => {
   const state = getState();
   const normalizedMap = state.normalizedMap;
@@ -272,6 +285,7 @@ export const fetchMap = (mapId) => (dispatch, getState) => {
     .then(() => setConveyorTile(getState))
     .then(()=>  setTtpBarcodeFormat(dispatch,getState))
     .then(() => getBarcodeDistance(dispatch,getState,parseInt(mapId)))
+    .then(() => getBarcodeSpacing(dispatch,getState,parseInt(mapId)))
     .catch((error) => console.warn(error)); // eslint-disable-line no-console
 };
 
