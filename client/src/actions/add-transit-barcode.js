@@ -192,6 +192,7 @@ const getTransitBarcodeInfo = (state, formData) => {
   }
   oldNeighbour.size_info[(direction + 2) % 4] = oldNeighbour.size_info[(direction + 1) % 4]+oldNeighbour.size_info[(direction)]  - (sizeInfo[(direction + 2) % 4]+refBarcodeInfo.size_info[direction]+ sizeInfo[direction])
   // Adjacency and Neighbour structure
+
   const adjacency = [null, null, null, null];
   const nStructure = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
   for (var dir = 0; dir < 4; dir++) {
