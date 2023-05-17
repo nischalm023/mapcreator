@@ -167,7 +167,8 @@ const getTransitBarcodeInfo = (state, formData) => {
   const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
   const barcodes = getBarcodes(state);
   const refBarcodeInfo = barcodes[tileId];
-  const barcodeDistance = state.barcodeDistance
+  const barcodeSpacing = state.barcodeSpacing
+  console.log("state",state)
   const oldNeighbour = getNeighbourBarcodeIncludingDisconnectedInDirection(
     tileId,
     barcodes,
@@ -190,7 +191,7 @@ const getTransitBarcodeInfo = (state, formData) => {
     refBarcodeInfo.size_info[direction] = parseInt(distance/2);
     sizeInfo[(direction + 2) % 4] = distance - refBarcodeInfo.size_info[direction] ;
   }
-  oldNeighbour.size_info[(direction + 2) % 4] = oldNeighbour.size_info[(direction + 1) % 4]+oldNeighbour.size_info[(direction)]  - (sizeInfo[(direction + 2) % 4]+refBarcodeInfo.size_info[direction]+ sizeInfo[direction])
+  oldNeighbour.size_info[(direction + 2) % 4] = barcodeSpacing  - (sizeInfo[(direction + 2) % 4]+refBarcodeInfo.size_info[direction]+ sizeInfo[direction])
   // Adjacency and Neighbour structure
 
   const adjacency = [null, null, null, null];

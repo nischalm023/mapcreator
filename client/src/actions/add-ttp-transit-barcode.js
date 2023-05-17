@@ -403,6 +403,7 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
   const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
   const barcodes = getBarcodes(state);
   const refBarcodeInfo = barcodes[tileId];
+  const barcodeSpacing = state.barcodeSpacing
   const oldNeighbour = getNeighbourBarcodeIncludingDisconnectedInDirection(
     tileId,
     barcodes,
@@ -423,7 +424,6 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
         barcodes,
         direction
       );
-  const barcodeDistance = state.barcodeDistance
   if (nTileId == null) {
     if(distance<sizeInfo[direction]){
       sizeInfo[direction] = parseInt((2 * refBarcodeInfo.size_info[direction] - distance) / 2);
@@ -447,7 +447,7 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
     }
   }else{
     if(distance<sizeInfo[direction]){
-      sizeInfo[direction] = parseInt((2 * refBarcodeInfo.size_info[direction] - distance) / 2);
+      // sizeInfo[direction] = parseInt((2 * refBarcodeInfo.size_info[direction] - distance) / 2);
       if(direction===2||direction===3){
         sizeInfo[(direction + 2) % 4] = parseInt(distance / 2);
         refBarcodeInfo.size_info[direction] = distance - sizeInfo[(direction + 2) % 4];
@@ -456,8 +456,9 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
         refBarcodeInfo.size_info[direction] = parseInt(distance/2);
         sizeInfo[(direction + 2) % 4] = distance - refBarcodeInfo.size_info[direction] ;
       }
+      sizeInfo[direction] = barcodeSpacing-sizeInfo[(direction + 2) % 4]-refBarcodeInfo.size_info[direction];
     }else{
-      sizeInfo[direction] = parseInt((2 * refBarcodeInfo.size_info[direction] - distance) / 2);
+      // sizeInfo[direction] = parseInt((2 * refBarcodeInfo.size_info[direction] - distance) / 2);
       if(direction===2||direction===3){
         sizeInfo[(direction + 2) % 4] = parseInt(distance / 2);
         refBarcodeInfo.size_info[direction] = distance - sizeInfo[(direction + 2) % 4];
@@ -466,9 +467,10 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
         refBarcodeInfo.size_info[direction] = parseInt(distance/2);
         sizeInfo[(direction + 2) % 4] = distance - refBarcodeInfo.size_info[direction] ;
       }
+      sizeInfo[direction] = barcodeSpacing-sizeInfo[(direction + 2) % 4]-refBarcodeInfo.size_info[direction];
   }
   }
-  oldNeighbour.size_info[(direction + 2) % 4] = oldNeighbour.size_info[(direction + 1) % 4]+oldNeighbour.size_info[(direction)]- (sizeInfo[(direction + 2) % 4]+refBarcodeInfo.size_info[direction]+ sizeInfo[direction])
+  // oldNeighbour.size_info[(direction + 2) % 4] = barcodeSpacing - (sizeInfo[(direction + 2) % 4]+refBarcodeInfo.size_info[direction]+ sizeInfo[direction])
  
 
   var cornerWorldCooordinate = calculate_corner_world_cordinate(sizeInfo,[transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]])

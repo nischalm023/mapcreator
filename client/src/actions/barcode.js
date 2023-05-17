@@ -272,7 +272,7 @@ const addNewMultipleBarcode = formData => (dispatch, getState) => {
     const newBarcode = createNewBarcode({
       coordinate: nbTileId,
       neighbours: nbNeighbourStructure,
-      barcode: (barcodeFormat == TTP_BARCODE_FORMAT)?ttp_barcode_value:barocde_value,
+      barcode: (barcodeFormat == TTP_BARCODE_FORMAT)?ttp_barcode_value:implicitCoordinateKeyToBarcode(barocde_value),
       size_info: nbSizeInfo,
       world_coordinate:NewBarcodeWorldCoordinate,
       world_coordinate_reference_neighbour:val,
