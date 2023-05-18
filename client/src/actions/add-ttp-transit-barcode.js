@@ -456,9 +456,9 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
         refBarcodeInfo.size_info[direction] = parseInt(distance/2);
         sizeInfo[(direction + 2) % 4] = distance - refBarcodeInfo.size_info[direction] ;
       }
-      sizeInfo[direction] = barcodeSpacing-sizeInfo[(direction + 2) % 4]-refBarcodeInfo.size_info[direction];
+      sizeInfo[direction] = barcodeSpacing-sizeInfo[(direction + 2) % 4]-refBarcodeInfo.size_info[direction]-oldNeighbour.size_info[(direction + 2) % 4];
     }else{
-      // sizeInfo[direction] = parseInt((2 * refBarcodeInfo.size_info[direction] - distance) / 2);
+      sizeInfo[direction] = parseInt((2 * refBarcodeInfo.size_info[direction] - distance) / 2);
       if(direction===2||direction===3){
         sizeInfo[(direction + 2) % 4] = parseInt(distance / 2);
         refBarcodeInfo.size_info[direction] = distance - sizeInfo[(direction + 2) % 4];
@@ -467,7 +467,7 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
         refBarcodeInfo.size_info[direction] = parseInt(distance/2);
         sizeInfo[(direction + 2) % 4] = distance - refBarcodeInfo.size_info[direction] ;
       }
-      sizeInfo[direction] = barcodeSpacing-sizeInfo[(direction + 2) % 4]-refBarcodeInfo.size_info[direction];
+      oldNeighbour.size_info[(direction + 2) % 4] = barcodeSpacing - (sizeInfo[(direction + 2) % 4]+refBarcodeInfo.size_info[direction]+ sizeInfo[direction])
   }
   }
   // oldNeighbour.size_info[(direction + 2) % 4] = barcodeSpacing - (sizeInfo[(direction + 2) % 4]+refBarcodeInfo.size_info[direction]+ sizeInfo[direction])
