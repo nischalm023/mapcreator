@@ -1,0 +1,61 @@
+function orientationFunction(direction){
+    let orientation
+    if(direction === "NORTH"|| direction === "north"){
+      orientation = 0;
+    }
+    else if(direction === "EAST"|| direction === "east"){
+      orientation = 1;
+    }
+    else if(direction=== "SOUTH"|| direction === "south"){
+      orientation = 2;
+    }
+    else{
+      orientation = 3;
+    }
+    return orientation;
+}
+function getCoordinates(value,barcode){
+    var coordinates =[]  
+    for(let k in barcode ){
+        if(barcode[k].barcode === value.io_point.value){
+            coordinates = barcode[k].world_coordinate
+            break;
+        }
+    }
+    return coordinates
+}
+const getDirections = (value)=>{
+    var directions = []
+    value.storable_direction.value.map((data)=>{
+        directions.push(orientationFunction(data.value))
+    })
+    return directions
+}
+const getIOPointData = (value,barcode)=>{
+    var toteStorage_io_dict = {}
+    var coordinate_data = getCoordinates(value,barcode)
+    toteStorage_io_dict["coordinate"] = coordinate_data
+    var orientation = orientationFunction(value.bot_direction.value)
+    toteStorage_io_dict["bot_orientation"] = orientation
+    return toteStorage_io_dict
+}
+const FormToteStorageJson = (value,barcode)=>{
+    var toteStorage_dict = {}
+    var directions = getDirections(value)
+    toteStorage_dict["location"] = value.tote_location.value
+    var io_data = getIOPointData(value,barcode)
+    toteStorage_dict["io_point"] = io_data
+    toteStorage_dict["storage_direction "] = directions
+    toteStorage_dict["ndeep"] = value.ndeep.value.value
+    toteStorage_dict["height"] = value.tote_height.value
+    return toteStorage_dict
+}
+export default (normalizedMap) => {
+    var toteStorage_data = normalizedMap.entities.toteStorables
+    var barcode = normalizedMap.entities.barcode
+    var toteStorage_json =[]
+    for (const [key, value] of Object.entries(toteStorage_data)) {
+        var tote_storage_dict_value = FormToteStorageJson(value,barcode)
+        toteStorage_json.push(tote_storage_dict_value)    }
+    return toteStorage_json;
+};

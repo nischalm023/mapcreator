@@ -2,17 +2,22 @@
 // json files (map.json, pps.json, fire_emergency.json etc.)
 import { denormalizeMap } from "utils/normalizr";
 import conveyor_json from "common/utils/conveyor_json";
+import toteStorage_json from "common/utils/tote_storage_json";
 
 export default (withWorldCoordinate, singleFloor = false) => {
   if(Object.keys(withWorldCoordinate.entities.conveyorTile).length > 0){
     var conveyorJson = conveyor_json(withWorldCoordinate);
     withWorldCoordinate.entities.DownloadconveyorTile = conveyorJson
   }
+  console.log("withWorldCoordinate",withWorldCoordinate)
+  var toteStorageJson = toteStorage_json(withWorldCoordinate);
+  withWorldCoordinate.entities.DownloadToteStorage = toteStorageJson
   var mapObj = denormalizeMap(withWorldCoordinate);
   var map = mapObj.map;
   var ret = {};
   ret.elevator = map.elevators;
   ret.conveyor = withWorldCoordinate.entities.DownloadconveyorTile;
+  ret.tote_storage = withWorldCoordinate.entities.DownloadToteStorage;
   ret.zone = {
     header: {
       "content-type": "application/json",
