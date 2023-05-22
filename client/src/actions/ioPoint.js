@@ -1,8 +1,4 @@
 import { addEntitiesToFloor, clearTiles } from "./actions";
-import {
-    coordinateKeyToBarcodeSelector,
-    getIdsForNewEntities
-} from "utils/selectors";
 import _ from "lodash";
 
 // 1. Add ioPoint data in state
@@ -91,7 +87,7 @@ export const addIOPoint = (io_point_id, barcodes, bot_direction, agent) => (disp
     }
     dispatch(clearTiles);
     if(nonEligibleBarcodes.length>0){
-        alert(`IO point(s) ${nonEligibleBarcodes} are linked to storables! Hence these are not updated.`)
+        alert(`IO point(s) ${nonEligibleBarcodes} is/are linked to tote storables! Hence the attributes of these IO points have not been updated.`)
     }
     return Promise.resolve();
 };
@@ -155,7 +151,7 @@ export const removeIOPoint = (io_point_id, barcodes, bot_direction, agent) => (d
     }
     dispatch(clearTiles);
     if(nonEligibleBarcodes.length>0){
-        alert(`IO point(s) ${nonEligibleBarcodes} are linked to storables! Hence these are not removed.`)
+        alert(`IO point(s) ${nonEligibleBarcodes} is/are linked to tote storables! Hence the attributes of these IO points have not been removed.`)
     }
     return Promise.resolve();
 };

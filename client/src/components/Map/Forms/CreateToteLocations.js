@@ -1,7 +1,6 @@
 import React from "react";
 import CreateToteLocationsForm from "./Util/CreateToteLocationsForm";
 import { connect } from "react-redux";
-import { sectorMxUPreferences } from "actions/sectorMxUPreferences";
 import { createStorable } from "actions/ioPoint";
 import "./uploadMaptoGsb.css";
 

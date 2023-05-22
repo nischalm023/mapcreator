@@ -23,7 +23,7 @@ const schema = {
             title: "Agent",
             default: "ttp",
             enum: ["ttp", "rtp"],
-            enumNames: ["TTP", "RTP"]
+            enumNames: ["HAI-TTP-A42D", "RTP"]
         },
     }
 };

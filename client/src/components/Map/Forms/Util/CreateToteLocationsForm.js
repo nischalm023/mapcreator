@@ -35,6 +35,12 @@ class BaseForm extends Component {
       );
       let initialMultiSchema = {};
       let initialStorableDirection = '';
+      if(botDirection==="north"||botDirection==="south"){
+        initialStorableDirection = [{value: 'west', label: 'West'}]
+      }
+      else if(botDirection==="east"||botDirection==="west"){
+        initialStorableDirection = [{value: 'north', label: 'North'}]
+      }
       let i = 0;
       for(let key in existingTotesInIoPoint){
         let tote = existingTotesInIoPoint[key];
@@ -54,7 +60,7 @@ class BaseForm extends Component {
       this.setState({
         schema: {
           io_point: { type: "string", title: "Tote Id", value: ioPointBarcode },
-          agent: { type: "string", title: "Tote Id", value: agent.toUpperCase() },
+          agent: { type: "string", title: "Tote Id", value: "HAI-TTP-A42D" },
           bot_direction: { type: "string", title: "Tote Id", value: botDirection.charAt(0).toUpperCase() + botDirection.slice(1) },
           storable_direction: { type: "string", title: "Tote Id", value: initialStorableDirection},
         }
@@ -88,6 +94,11 @@ class BaseForm extends Component {
         if(this.state.multiSchema[key].tote_height.value===''){
           error = true;
           message = "Tote height cannot be empty"; 
+          break;
+        }
+        if(this.state.multiSchema[key].tote_height.value>10000){
+          error = true;
+          message = "Tote height should be less than 10m"; 
           break;
         }
         if(this.state.multiSchema[key].ndeep.value===''){
@@ -282,6 +293,7 @@ class BaseForm extends Component {
               </div>
             </div>
             <br/><br/>
+            {Object.keys(this.state.multiSchema).length!==0 &&
             <div className="row">
               <div className="col-lg-11 col-md-11 col-sm-11 col-11">
                 <div className="form-group field">
@@ -301,7 +313,7 @@ class BaseForm extends Component {
                   </div>
                 </div>
               </div>
-            </div>
+            </div>}
             {multiRows}
             <button type="button" onClick={() => this.addNewRow(nextToteStorableId, existingTotes)} className="btn btn-outline-secondary mr-1">
               Add Tote Location
