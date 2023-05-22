@@ -46,7 +46,12 @@ const FormToteStorageJson = (value,barcode)=>{
     var io_data = getIOPointData(value,barcode)
     toteStorage_dict["io_point"] = io_data
     toteStorage_dict["storage_direction "] = directions
-    toteStorage_dict["ndeep"] = value.ndeep.value.value
+    if(value.ndeep.value.value === "single"){
+        toteStorage_dict["ndeep"] = 0
+    }
+    if(value.ndeep.value.value === "double"){
+        toteStorage_dict["ndeep"] = 1
+    }
     toteStorage_dict["height"] = value.tote_height.value
     return toteStorage_dict
 }
