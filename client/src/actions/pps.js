@@ -7,17 +7,20 @@ import _ from "lodash";
 import {implicitBarcodeToCoordinate} from "utils/util";
 
 // exported for testing
-export const createNewPPSes = ({ pick_direction, type }, state) => {
+export const createNewPPSes = ({ eligible_type,pick_direction, type }, state) => {
   const {
     selection: { mapTiles }
   } = state;
+  var eligible_type_value = eligible_type.split("_")
   var ppses = Object.keys(mapTiles).map(tileId => {
     const barcode = coordinateKeyToBarcodeSelector(state, { tileId });
     return {
+
       coordinate: tileId,
       location: barcode,
       status: "disconnected",
       queue_barcodes: [],
+      eligible_system : eligible_type_value,
       pick_position: barcode,
       pick_direction,
       put_docking_positions: [],
@@ -40,6 +43,7 @@ export const addPPSes = formData => (dispatch, getState) => {
   const state = getState();
   const { currentFloor } = state;
   const ppses = createNewPPSes(formData, state);
+  console.log("pps==========",ppses)
   dispatch({
     type: "ADD-MULTIPLE-PPS",
     value: ppses
