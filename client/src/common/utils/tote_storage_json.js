@@ -52,7 +52,7 @@ const FormToteStorageJson = (value,barcode)=>{
     if(value.ndeep.value.value === "double"){
         toteStorage_dict["ndeep"] = 1
     }
-    toteStorage_dict["height"] = value.tote_height.value
+    toteStorage_dict["height"] = parseInt(value.tote_height.value)
     return toteStorage_dict
 }
 export default (normalizedMap) => {
