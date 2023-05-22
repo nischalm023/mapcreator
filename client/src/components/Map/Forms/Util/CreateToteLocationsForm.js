@@ -23,7 +23,8 @@ class BaseForm extends Component {
         tote_location: { type: "string", title: "Tote Location", value: "" },
         tote_type: { type: "string", title: "Tote Type", value: "Type_1" },
         tote_height: { type: "string", title: "Tote Height", value: "" },
-        ndeep: { type: "string", title: "ndeep", value: "single" }
+        ndeep: { type: "string", title: "ndeep", value: "single" },
+        edit: true
       }
     },
     lastKey: 0
@@ -47,10 +48,11 @@ class BaseForm extends Component {
         initialStorableDirection = tote.storable_direction.value;
         initialMultiSchema[i] = {
           tote_id: { type: "string", title: "Tote Id", value: tote.tote_id.value },
-          tote_location: { type: "string", title: "Tote Location", value: 'TOT_' + String(tote.tote_id.value).padStart(6, '0') },
+          tote_location: { type: "string", title: "Tote Location", value: 'TOT_' + String(tote.tote_id.value).padStart(7, '0') },
           tote_type: { type: "string", title: "Tote Type", value: "Type_1" },
           tote_height: { type: "string", title: "Tote Height", value: tote.tote_height.value },
-          ndeep: { type: "string", title: "ndeep", value: tote.ndeep.value }
+          ndeep: { type: "string", title: "ndeep", value: tote.ndeep.value },
+          edit: true
         }
         i++;
       }
@@ -91,7 +93,12 @@ class BaseForm extends Component {
     var message = "";
     if(!error){
       for (let key in this.state.multiSchema){
-        if(this.state.multiSchema[key].tote_height.value===''){
+        if(this.state.schema.storable_direction.value.length===0){
+          error = true;
+          message = "Storable direction cannot be empty"; 
+          break;
+        }
+        if(this.state.multiSchema[key].tote_height.value===''||this.state.multiSchema[key].tote_height.value<0){
           error = true;
           message = "Tote height cannot be empty"; 
           break;
@@ -104,6 +111,11 @@ class BaseForm extends Component {
         if(this.state.multiSchema[key].ndeep.value===''){
           error = true;
           message = "Ndeep value cannot be empty"; 
+          break;
+        }
+        if(this.state.multiSchema[key].edit===true){
+          error = true;
+          message = "You have unsaved changes. Please confirm them."; 
           break;
         }
       };
@@ -138,10 +150,11 @@ class BaseForm extends Component {
     nextToteStorableId = nextToteStorableId + 1;
     multiSchema[nextId] = {
       tote_id: { type: "string", title: "Tote Id", value: nextId },
-      tote_location: { type: "string", title: "Tote Location", value: 'TOT_'+String(nextId).padStart(6, '0') },
+      tote_location: { type: "string", title: "Tote Location", value: 'TOT_'+String(nextId).padStart(7, '0') },
       tote_type: { type: "string", title: "Tote Type", value: "Type_1" },
       tote_height: { type: "string", title: "Tote Height", value: "" },
-      ndeep: { type: "string", title: "ndeep", value: "single" }
+      ndeep: { type: "string", title: "ndeep", value: "single" },
+      edit: true
     };
     this.setState({ multiSchema: multiSchema });
   }
@@ -159,6 +172,17 @@ class BaseForm extends Component {
   deleteRow = (key) => {
     var multiSchema = { ...this.state.multiSchema };
     delete multiSchema[key];
+    this.setState({ multiSchema: multiSchema });
+  };
+  // editClick = (e,key) => {
+  //   var multiSchema = { ...this.state.multiSchema };
+  //   console.log(">>>>>>> edit val:",e.target.value)
+  //   multiSchema[key].edit = e.target.value==="OK" ? false : true;
+  //   this.setState({ multiSchema: multiSchema });
+  // };
+  editClick = (key) => {
+    var multiSchema = { ...this.state.multiSchema };
+    multiSchema[key].edit = !multiSchema[key].edit;
     this.setState({ multiSchema: multiSchema });
   };
   reAssignKeys = (multiSchema) => {
@@ -196,7 +220,7 @@ class BaseForm extends Component {
       Object.keys(_this.state.multiSchema).forEach(function (key, index) {
         multiRows.push(<div key={"rack-" + index}>
           <div className="row">
-            <div className="col-lg-11 col-md-11 col-sm-11 col-11">
+            <div className="col-lg-10 col-md-10 col-sm-10 col-10">
               <div className="form-group field">
                 <div className="row">
                   <div className="col-3 col-lg-3 col-sm-3 col-md-3">
@@ -215,6 +239,7 @@ class BaseForm extends Component {
                       placeholder={"Enter..."} 
                       onChange={(e) => _this.changeMultiSchemaHandler(key, "tote_height", e.target.value)} 
                       value={_this.state.multiSchema[key].tote_height.value} 
+                      disabled={!_this.state.multiSchema[key].edit}
                     />
                   </div>
                   <div className="col-3 col-lg-3 col-sm-3 col-md-3">
@@ -222,14 +247,51 @@ class BaseForm extends Component {
                       value={_this.state.multiSchema[key].ndeep.value}
                       onChange={(selected) => _this.changeMultiSchemaHandler(key, "ndeep", selected)}
                       options={ndeepOptions}
+                      isDisabled={!_this.state.multiSchema[key].edit}
                     />
                   </div>
                 </div>
               </div>
             </div>
+            {/* <div className="col-lg-1 col-md-1 col-sm-1 col-1">
+              <span onClick={() => _this.deleteRow(key)} style={{
+                justifyContent: "center",
+                display: "flex",
+              }}><i class="fa fa-times" aria-hidden="true"></i></span>
+            </div> */}
             <div className="col-lg-1 col-md-1 col-sm-1 col-1">
-              <span onClick={() => _this.deleteRow(key)}>x</span>
+              <button
+                id={"tote-delete-btn-"+index}
+                className="btn"
+                type="button"
+                onClick={() => _this.deleteRow(key)}
+              >
+                <i className="fa fa-times" />
+              </button>
             </div>
+            {/* <div className="col-lg-1 col-md-1 col-sm-1 col-1" style={{ cursor: 'pointer' }}>
+              <i className="fa fa-times" onClick={() => _this.deleteRow(key)} style={{ cursor: 'pointer' }}/>
+            </div> */}
+            {/* <div className="col-lg-1 col-md-1 col-sm-1 col-1">
+              <input type="button" value={_this.state.multiSchema[key].edit?"OK":"EDIT"} 
+                onClick={(e) => _this.editClick(e,key)}></input>
+            </div> */}
+            <div className="col-lg-1 col-md-1 col-sm-1 col-1">
+              <button
+                id={"tote-edit-btn"+index}
+                className="btn"
+                type="button"
+                onClick={() => _this.editClick(key)}
+              >
+                {_this.state.multiSchema[key].edit?<i className="fa fa-check"/>:<i className="fas fa-edit"/>} 
+              </button>
+            </div>
+            {/* <div className="col-lg-1 col-md-1 col-sm-1 col-1" style={{ cursor: 'pointer' }}>
+              {_this.state.multiSchema[key].edit ? 
+                <i className="fa fa-check" onClick={() => _this.editClick(key)} />
+                :
+                <i className="fa fa-pencil-square-o" onClick={() => _this.editClick(key)} />} 
+            </div> */}
           </div>
         </div>);
       })
@@ -295,7 +357,7 @@ class BaseForm extends Component {
             <br/><br/>
             {Object.keys(this.state.multiSchema).length!==0 &&
             <div className="row">
-              <div className="col-lg-11 col-md-11 col-sm-11 col-11">
+              <div className="col-lg-10 col-md-10 col-sm-10 col-10">
                 <div className="form-group field">
                   <div className="row">
                     <div className="col-3 col-lg-3 col-sm-3 col-md-3">
