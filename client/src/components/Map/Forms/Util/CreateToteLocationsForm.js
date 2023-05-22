@@ -174,12 +174,6 @@ class BaseForm extends Component {
     delete multiSchema[key];
     this.setState({ multiSchema: multiSchema });
   };
-  // editClick = (e,key) => {
-  //   var multiSchema = { ...this.state.multiSchema };
-  //   console.log(">>>>>>> edit val:",e.target.value)
-  //   multiSchema[key].edit = e.target.value==="OK" ? false : true;
-  //   this.setState({ multiSchema: multiSchema });
-  // };
   editClick = (key) => {
     var multiSchema = { ...this.state.multiSchema };
     multiSchema[key].edit = !multiSchema[key].edit;
@@ -253,12 +247,6 @@ class BaseForm extends Component {
                 </div>
               </div>
             </div>
-            {/* <div className="col-lg-1 col-md-1 col-sm-1 col-1">
-              <span onClick={() => _this.deleteRow(key)} style={{
-                justifyContent: "center",
-                display: "flex",
-              }}><i class="fa fa-times" aria-hidden="true"></i></span>
-            </div> */}
             <div className="col-lg-1 col-md-1 col-sm-1 col-1">
               <button
                 id={"tote-delete-btn-"+index}
@@ -269,13 +257,6 @@ class BaseForm extends Component {
                 <i className="fa fa-times" />
               </button>
             </div>
-            {/* <div className="col-lg-1 col-md-1 col-sm-1 col-1" style={{ cursor: 'pointer' }}>
-              <i className="fa fa-times" onClick={() => _this.deleteRow(key)} style={{ cursor: 'pointer' }}/>
-            </div> */}
-            {/* <div className="col-lg-1 col-md-1 col-sm-1 col-1">
-              <input type="button" value={_this.state.multiSchema[key].edit?"OK":"EDIT"} 
-                onClick={(e) => _this.editClick(e,key)}></input>
-            </div> */}
             <div className="col-lg-1 col-md-1 col-sm-1 col-1">
               <button
                 id={"tote-edit-btn"+index}
@@ -286,12 +267,6 @@ class BaseForm extends Component {
                 {_this.state.multiSchema[key].edit?<i className="fa fa-check"/>:<i className="fas fa-edit"/>} 
               </button>
             </div>
-            {/* <div className="col-lg-1 col-md-1 col-sm-1 col-1" style={{ cursor: 'pointer' }}>
-              {_this.state.multiSchema[key].edit ? 
-                <i className="fa fa-check" onClick={() => _this.editClick(key)} />
-                :
-                <i className="fa fa-pencil-square-o" onClick={() => _this.editClick(key)} />} 
-            </div> */}
           </div>
         </div>);
       })
