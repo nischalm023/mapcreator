@@ -9,7 +9,6 @@ export default (withWorldCoordinate, singleFloor = false) => {
     var conveyorJson = conveyor_json(withWorldCoordinate);
     withWorldCoordinate.entities.DownloadconveyorTile = conveyorJson
   }
-  console.log("withWorldCoordinate",withWorldCoordinate)
   var toteStorageJson = toteStorage_json(withWorldCoordinate);
   withWorldCoordinate.entities.DownloadToteStorage = toteStorageJson
   var mapObj = denormalizeMap(withWorldCoordinate);
