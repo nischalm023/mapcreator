@@ -18,7 +18,7 @@ function getCoordinates(value,barcode){
     var coordinates =[]  
     for(let k in barcode ){
         if(barcode[k].barcode === value.io_point.value){
-            coordinates = barcode[k].world_coordinate
+            coordinates = `[${barcode[k].coordinate}]`
             break;
         }
     }
