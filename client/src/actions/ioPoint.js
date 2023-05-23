@@ -1,4 +1,5 @@
 import { addEntitiesToFloor, clearTiles } from "./actions";
+import { setSuccessMessage, setErrorMessage } from "./../actions/message";
 import _ from "lodash";
 
 // 1. Add ioPoint data in state
@@ -8,6 +9,7 @@ export const addIOPoint = (io_point_id, barcodes, bot_direction, agent) => (disp
     const { currentFloor } = state;
     let i = 0;
     let nonEligibleBarcodes = [];
+    let eligibleBarcodes = [];
     for (let key in barcodes) {
         // check if barcode is an IO Point already
         if(state.normalizedMap.entities.barcode[key].isIoPoint){
@@ -56,6 +58,7 @@ export const addIOPoint = (io_point_id, barcodes, bot_direction, agent) => (disp
                         idField: "io_point_id"
                     })
                 );
+                eligibleBarcodes.push(state.normalizedMap.entities.barcode[key].barcode);
             }
         }
         else{
@@ -82,12 +85,23 @@ export const addIOPoint = (io_point_id, barcodes, bot_direction, agent) => (disp
                     idField: "io_point_id"
                 })
             );
+            eligibleBarcodes.push(state.normalizedMap.entities.barcode[key].barcode);
         }
         i++;
     }
     dispatch(clearTiles);
-    if(nonEligibleBarcodes.length>0){
-        alert(`IO point(s) ${nonEligibleBarcodes} is/are linked to tote storables! Hence the attributes of these IO points have not been updated.`)
+    let message = '';
+    if(nonEligibleBarcodes.length>0 && eligibleBarcodes.length>0){
+        message = `IO point(s) for barcode(s) ${eligibleBarcodes[0]} ${eligibleBarcodes.length > 1 ? `and ${eligibleBarcodes.length} others` : ''}is/are created/updated.\n\nIO point(s) for barcodes ${nonEligibleBarcodes}\nis/are linked to tote storables!\nHence these IO point(s) cannot be updated.`
+        dispatch(setSuccessMessage(message));
+    }
+    else if(nonEligibleBarcodes.length>0){
+        message = `IO point(s) for barcode(s) ${nonEligibleBarcodes}\nis/are linked to tote storables!\nHence these IO point(s) cannot be updated.`
+        dispatch(setErrorMessage(message));
+    }
+    else if(eligibleBarcodes.length>0){
+        message = `IO point(s) for barcode(s) ${eligibleBarcodes[0]} ${eligibleBarcodes.length > 1 ? `and ${eligibleBarcodes.length-1} other(s) ` : ''} is/are created/updated.`
+        dispatch(setSuccessMessage(message));
     }
     return Promise.resolve();
 };
@@ -97,6 +111,7 @@ export const removeIOPoint = (io_point_id, barcodes, bot_direction, agent) => (d
     const { currentFloor } = state;
     let i = 0;
     let nonEligibleBarcodes = [];
+    let eligibleBarcodes = [];
     for (let key in barcodes) {
         // check if barcode is an IO Point
         if(state.normalizedMap.entities.barcode[key].isIoPoint){
@@ -145,13 +160,24 @@ export const removeIOPoint = (io_point_id, barcodes, bot_direction, agent) => (d
                     type: "DELETE-IO-POINT-BY-ID", // remove from floor
                     value: currentIoPointId
                 });
+                eligibleBarcodes.push(state.normalizedMap.entities.barcode[key].barcode);
             }
         }
         i++;
     }
     dispatch(clearTiles);
-    if(nonEligibleBarcodes.length>0){
-        alert(`IO point(s) ${nonEligibleBarcodes} is/are linked to tote storables! Hence the attributes of these IO points have not been removed.`)
+    let message = '';
+    if(nonEligibleBarcodes.length>0 && eligibleBarcodes.length>0){
+        message = `IO point(s) for barcode(s) ${eligibleBarcodes[0]} ${eligibleBarcodes.length > 1 ? `and ${eligibleBarcodes.length} others ` : ''}is/are removed.\n\nIO point(s) for barcodes ${nonEligibleBarcodes}\nis/are linked to tote storables!\nHence these IO point(s) cannot be removed.`
+        dispatch(setSuccessMessage(message));
+    }
+    else if(nonEligibleBarcodes.length>0){
+        message = `IO point(s) for barcode(s) ${nonEligibleBarcodes}\nis/are linked to tote storables!\nHence these IO point(s) cannot be removed.`
+        dispatch(setErrorMessage(message));
+    }
+    else if(eligibleBarcodes.length>0){
+        message = `IO point(s) for barcode(s) ${eligibleBarcodes[0]} ${eligibleBarcodes.length > 1 ? `and ${eligibleBarcodes.length-1} other(s) ` : ''} is/are removed.`
+        dispatch(setSuccessMessage(message));
     }
     return Promise.resolve();
 };
@@ -168,7 +194,7 @@ export const createStorable = (data, barcode, ioPointId, nextToteStorableId, fin
             "agent": data.schema.agent,
             "bot_direction": data.schema.bot_direction,
             "io_point": data.schema.io_point,
-            "storable_direction": data.schema.storable_direction,
+            "storable_direction": data.multiSchema[key].storable_direction,
             "ndeep": data.multiSchema[key].ndeep,
             "tote_height": data.multiSchema[key].tote_height,
             "tote_id": data.multiSchema[key].tote_id,

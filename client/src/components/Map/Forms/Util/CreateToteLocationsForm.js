@@ -15,7 +15,6 @@ class BaseForm extends Component {
       io_point: { type: "string", title: "Tote Id", value: "" },
       agent: { type: "string", title: "Tote Id", value: "" },
       bot_direction: { type: "string", title: "Tote Id", value: "" },
-      storable_direction: { type: "string", title: "Tote Id", value: "" },
     },
     multiSchema: {
       0: {
@@ -24,7 +23,9 @@ class BaseForm extends Component {
         tote_type: { type: "string", title: "Tote Type", value: "Type_1" },
         tote_height: { type: "string", title: "Tote Height", value: "" },
         ndeep: { type: "string", title: "ndeep", value: "single" },
-        edit: true
+        storable_direction: { type: "string", title: "Tote Id", value: "" },
+        edit: true,
+        error: ''
       }
     },
     lastKey: 0
@@ -37,10 +38,10 @@ class BaseForm extends Component {
       let initialMultiSchema = {};
       let initialStorableDirection = '';
       if(botDirection==="north"||botDirection==="south"){
-        initialStorableDirection = [{value: 'west', label: 'West'}]
+        initialStorableDirection = {value: 'west', label: 'West'}
       }
       else if(botDirection==="east"||botDirection==="west"){
-        initialStorableDirection = [{value: 'north', label: 'North'}]
+        initialStorableDirection = {value: 'north', label: 'North'}
       }
       let i = 0;
       for(let key in existingTotesInIoPoint){
@@ -52,7 +53,9 @@ class BaseForm extends Component {
           tote_type: { type: "string", title: "Tote Type", value: "Type_1" },
           tote_height: { type: "string", title: "Tote Height", value: tote.tote_height.value },
           ndeep: { type: "string", title: "ndeep", value: tote.ndeep.value },
-          edit: true
+          storable_direction: { type: "string", title: "Tote Id", value: initialStorableDirection},
+          edit: true,
+          error: ''
         }
         i++;
       }
@@ -64,7 +67,6 @@ class BaseForm extends Component {
           io_point: { type: "string", title: "Tote Id", value: ioPointBarcode },
           agent: { type: "string", title: "Tote Id", value: "HAI-TTP-A42D" },
           bot_direction: { type: "string", title: "Tote Id", value: botDirection.charAt(0).toUpperCase() + botDirection.slice(1) },
-          storable_direction: { type: "string", title: "Tote Id", value: initialStorableDirection},
         }
       });
     }
@@ -92,33 +94,24 @@ class BaseForm extends Component {
     var error = false;
     var message = "";
     if(!error){
+      let multiSchema = this.state.multiSchema;
       for (let key in this.state.multiSchema){
-        if(this.state.schema.storable_direction.value.length===0){
+        if(this.state.multiSchema[key].tote_height.value===''||this.state.multiSchema[key].tote_height.value<=0||this.state.multiSchema[key].tote_height.value>10000){
           error = true;
-          message = "Storable direction cannot be empty"; 
-          break;
-        }
-        if(this.state.multiSchema[key].tote_height.value===''||this.state.multiSchema[key].tote_height.value<0){
-          error = true;
-          message = "Tote height cannot be empty"; 
-          break;
-        }
-        if(this.state.multiSchema[key].tote_height.value>10000){
-          error = true;
-          message = "Tote height should be less than 10m"; 
-          break;
-        }
-        if(this.state.multiSchema[key].ndeep.value===''){
-          error = true;
-          message = "Ndeep value cannot be empty"; 
-          break;
-        }
-        if(this.state.multiSchema[key].edit===true){
-          error = true;
-          message = "You have unsaved changes. Please confirm them."; 
-          break;
+          multiSchema[key].error = "Tote height cannot be empty and should be less than 10m"; 
         }
       };
+      if(!error){
+        for (let key in this.state.multiSchema){
+          if(this.state.multiSchema[key].edit===true){
+            error = true;
+            multiSchema[key].error = "You have unsaved changes. Please confirm them."; 
+          }
+        };
+      }
+      this.setState({
+        multiSchema: multiSchema
+      });
     }
     if (!error) {
       let data = {
@@ -127,11 +120,12 @@ class BaseForm extends Component {
       }
       onSubmit(data, barcode, ioPointId, nextToteStorableId, finalSetOfTotes);
       this.toggle();
-    } else {
-      alert(message);
-    }
+    } 
+    // else {
+    //   alert(message);
+    // }
   };
-  addNewRow = (nextToteStorableId, existingTotes) => {
+  addNewRow = (nextToteStorableId, existingTotes, botDirection) => {
     var multiSchema = { ...this.state.multiSchema };
     let nextId = 0;
     if(Object.keys(multiSchema).length!==0){
@@ -148,25 +142,35 @@ class BaseForm extends Component {
       nextToteStorableId = Math.max(tote.tote_id.value, nextToteStorableId);
     }
     nextToteStorableId = nextToteStorableId + 1;
+    let initialStorableDirection = '';
+    if (botDirection === "north" || botDirection === "south") {
+      initialStorableDirection = { value: 'west', label: 'West' }
+    }
+    else if (botDirection === "east" || botDirection === "west") {
+      initialStorableDirection = { value: 'north', label: 'North' }
+    }
     multiSchema[nextId] = {
       tote_id: { type: "string", title: "Tote Id", value: nextId },
       tote_location: { type: "string", title: "Tote Location", value: 'TOT_'+String(nextId).padStart(7, '0') },
       tote_type: { type: "string", title: "Tote Type", value: "Type_1" },
       tote_height: { type: "string", title: "Tote Height", value: "" },
-      ndeep: { type: "string", title: "ndeep", value: "single" },
-      edit: true
+      ndeep: { type: "string", title: "ndeep", value: {value: 'single', label: 'Single'}},
+      storable_direction: { type: "string", title: "Tote Id", value: initialStorableDirection},
+      edit: true,
+      error: ''
     };
     this.setState({ multiSchema: multiSchema });
   }
-  changeSchemaHandler = (field, value) => {
-    var schema = { ...this.state.schema };
-    if (field == "storable_direction") schema.storable_direction.value = value;
-    this.setState({ schema: schema });
-  };
   changeMultiSchemaHandler = (key, field, value) => {
     var multiSchema = { ...this.state.multiSchema };
-    if (field == "tote_height") multiSchema[key].tote_height.value = value;
+    if (field == "tote_height") {
+      multiSchema[key].tote_height.value = value;
+      if(value>0 && value<=10000){
+        multiSchema[key].error = ''
+      }
+    }
     if (field == "ndeep") multiSchema[key].ndeep.value = value;
+    if (field == "storable_direction") multiSchema[key].storable_direction.value = value;
     this.setState({ multiSchema: multiSchema });
   };
   deleteRow = (key) => {
@@ -177,6 +181,7 @@ class BaseForm extends Component {
   editClick = (key) => {
     var multiSchema = { ...this.state.multiSchema };
     multiSchema[key].edit = !multiSchema[key].edit;
+    multiSchema[key].error = '';
     this.setState({ multiSchema: multiSchema });
   };
   reAssignKeys = (multiSchema) => {
@@ -222,12 +227,12 @@ class BaseForm extends Component {
                       value={_this.state.multiSchema[key].tote_location.value} 
                     />
                   </div>
-                  <div className="col-3 col-lg-3 col-sm-3 col-md-3">
+                  <div className="col-2 col-lg-2 col-sm-2 col-md-2">
                     <input className="form-control" type="text" key={"tote_type" + index}
                       value={_this.state.multiSchema[key].tote_type.value}
                     />
                   </div>
-                  <div className="col-3 col-lg-3 col-sm-3 col-md-3">
+                  <div className="col-2 col-lg-2 col-sm-2 col-md-2">
                     <input className="form-control" type="number" key={"tote_height" + index} 
                       min="1" max="10000"
                       placeholder={"Enter..."} 
@@ -238,12 +243,23 @@ class BaseForm extends Component {
                   </div>
                   <div className="col-3 col-lg-3 col-sm-3 col-md-3">
                     <Select
+                      defaultValue={ndeepOptions[0]}
                       value={_this.state.multiSchema[key].ndeep.value}
                       onChange={(selected) => _this.changeMultiSchemaHandler(key, "ndeep", selected)}
                       options={ndeepOptions}
                       isDisabled={!_this.state.multiSchema[key].edit}
                     />
                   </div>
+                  <div className="col-2 col-lg-2 col-sm-2 col-md-2">
+                    <Select
+                      defaultValue={storableDirectionsOptions[0]}
+                      value={_this.state.multiSchema[key].storable_direction.value}
+                      onChange={(selected) => _this.changeMultiSchemaHandler(key, "storable_direction", selected)}
+                      options={storableDirectionsOptions}
+                      isDisabled={!_this.state.multiSchema[key].edit}
+                    />
+                  </div>
+                  {_this.state.multiSchema[key].error!=='' && <span style={{color:"red",marginLeft:'20px'}}>{_this.state.multiSchema[key].error}</span>}
                 </div>
               </div>
             </div>
@@ -278,51 +294,39 @@ class BaseForm extends Component {
             <legend id="root__title">{schema.title}</legend>
             <hr />
             <div className="row">
-              <div className="col-lg-11 col-md-11 col-sm-11 col-11">
+              <div className="col-lg-12 col-md-12 col-sm-12 col-12">
                 <div className="form-group field">
                   <div className="row">
-                    <div className="col-3 col-lg-3 col-sm-3 col-md-3">
+                    <div className="col-4 col-lg-4 col-sm-4 col-md-4">
                       IO Point
                     </div>
-                    <div className="col-3 col-lg-3 col-sm-3 col-md-3">
+                    <div className="col-4 col-lg-4 col-sm-4 col-md-4">
                       Agent
                     </div>
-                    <div className="col-3 col-lg-3 col-sm-3 col-md-3">
+                    <div className="col-4 col-lg-4 col-sm-4 col-md-4">
                       Bot Direction
-                    </div>
-                    <div className="col-3 col-lg-3 col-sm-3 col-md-3">
-                      Storable Direction
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             <div className="row">
-              <div className="col-lg-11 col-md-11 col-sm-11 col-11">
+              <div className="col-lg-12 col-md-12 col-sm-12 col-12">
                 <div className="form-group field">
                   <div className="row">
-                    <div className="col-3 col-lg-3 col-sm-3 col-md-3">
+                    <div className="col-4 col-lg-4 col-sm-4 col-md-4">
                       <input className="form-control" type="text" 
                         value={this.state.schema.io_point.value}  
                       />
                     </div>
-                    <div className="col-3 col-lg-3 col-sm-3 col-md-3">
+                    <div className="col-4 col-lg-4 col-sm-4 col-md-4">
                       <input className="form-control" type="text" 
                         value={this.state.schema.agent.value}  
                       />
                     </div>
-                    <div className="col-3 col-lg-3 col-sm-3 col-md-3">
+                    <div className="col-4 col-lg-4 col-sm-4 col-md-4">
                       <input className="form-control" type="text" 
                         value={this.state.schema.bot_direction.value} 
-                      />
-                    </div>
-                    <div className="col-3 col-lg-3 col-sm-3 col-md-3">
-                      <Select
-                        isMulti={true}
-                        defaultValue={storableDirectionsOptions[0]}
-                        value={_this.state.schema.storable_direction.value}
-                        onChange={(selected) => _this.changeSchemaHandler("storable_direction", selected)}
-                        options={storableDirectionsOptions}
                       />
                     </div>
                   </div>
@@ -338,21 +342,24 @@ class BaseForm extends Component {
                     <div className="col-3 col-lg-3 col-sm-3 col-md-3">
                       Tote Location
                     </div>
-                    <div className="col-3 col-lg-3 col-sm-3 col-md-3">
+                    <div className="col-2 col-lg-2 col-sm-2 col-md-2">
                       Tote Type
                     </div>
-                    <div className="col-4 col-lg-3 col-sm-3 col-md-3">
+                    <div className="col-2 col-lg-2 col-sm-2 col-md-2">
                       Tote Height(mm)
                     </div>
                     <div className="col-3 col-lg-3 col-sm-3 col-md-3">
                       n-deep
+                    </div>
+                    <div className="col-2 col-lg-2 col-sm-2 col-md-2">
+                      Storable Direction
                     </div>
                   </div>
                 </div>
               </div>
             </div>}
             {multiRows}
-            <button type="button" onClick={() => this.addNewRow(nextToteStorableId, existingTotes)} className="btn btn-outline-secondary mr-1">
+            <button type="button" onClick={() => this.addNewRow(nextToteStorableId, existingTotes, botDirection)} className="btn btn-outline-secondary mr-1">
               Add Tote Location
             </button>
             <br/><br/><br/>

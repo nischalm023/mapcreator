@@ -32,6 +32,7 @@ export const DEFAULT_Y_SCALE =
   TILE_SPRITE_HEIGHT;
 
 export var BARCODE_DIGIT_OFFSET = 5; // in y
+export var IO_POINT_HEIGHT = 16;
 export var BARCODE_DIGIT_HEIGHT = 20;
 export var BARCODE_DIGIT_WIDTH = 23;
 export var ADJACENCYDISTANCE = 2000;
@@ -82,6 +83,9 @@ export var ACTIVE_CONVEYOR = "active.png";
 export var END_CONVEYOR = "end.png";
 export var EXIT_CONVEYOR = "exit.png";
 export var ENTRY_CONVEYOR = "entry.png";
+// export var IO_POINTS = "io_point.png"
+// export var IO_POINTS = "io_point_img.png"
+export var IO_POINTS = "iopoint.png"
 
 
 // graph directionality edge sprites

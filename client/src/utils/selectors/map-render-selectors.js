@@ -72,7 +72,6 @@ export const getMainTileSpriteData = createSelector(
     if ( barcode.conveyor_selected_status === 5 && !zoneViewMode && !sectorViewMode) tileSprite = constants.ACTIVE_CONVEYOR;
     if ( barcode.remove_conveyor_tile === 1 && !zoneViewMode && !sectorViewMode) tileSprite = constants.ODS_EXCLUDED;
     if ( barcode.conveyor_selected_status === 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.NORMAL;
-    
     return {
       name: tileSprite,
       x: boundingBox.left,
@@ -225,17 +224,33 @@ export const getAllSpritesData = createSelector(
   tileToWorldCoordinate,
   getTileSpriteScale,
   state => state.selection.directionViewMode,
+  barcode_state => barcode_state.normalizedMap.entities.barcode,
+  (_state,props)=> props.tileId,
   (
     mainSpriteData,
     barcodeDigitSpritesData,
     directionalitySpritesData,
     { x: centreX, y: centreY },
     { xScale, yScale },
-    directionViewMode
+    directionViewMode,
+    barcode_state,
+    props,
   ) => {
+    let name = constants.BARCODE_CENTRE_SPRITE
+    let io_point={}
+    if(barcode_state[props].isIoPoint){
+      io_point={
+        name : constants.IO_POINTS,
+        x : centreX-constants.IO_POINT_HEIGHT*xScale,
+        y : centreY-constants.IO_POINT_HEIGHT*yScale,
+        xScale,
+        yScale
+      }
+    }
     const baseData = {
       main: mainSpriteData,
       ...barcodeDigitSpritesData,
+      io_point:io_point,
       // the centre x sprite
       centre: {
         name: constants.BARCODE_CENTRE_SPRITE,
@@ -243,9 +258,8 @@ export const getAllSpritesData = createSelector(
         y: centreY,
         xScale,
         yScale
-      },
+      }
     };
-
     if (directionViewMode) return { ...baseData, ...directionalitySpritesData };
     return baseData;
   }

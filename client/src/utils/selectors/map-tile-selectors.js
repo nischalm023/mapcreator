@@ -82,6 +82,7 @@ export const tileNameWithoutEntityDataSelector = createSelector(
       tileSprite = constants.ODS_EXCLUDED;
     if (barcode.conveyor_selected_status === 0 && !zoneViewMode && !sectorViewMode)
       tileSprite = constants.NORMAL;
+    
     return tileSprite;
   }
 );
