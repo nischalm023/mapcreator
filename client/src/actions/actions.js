@@ -677,7 +677,6 @@ export const downloadMap = (singleFloor = false) => (dispatch, getState) => {
   var { normalizedMap } = getState();
   // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   setSectorsBarcodeMapping(dispatch, getState);
-  var validation = validatePpsPoint(normalizedMap.entities)
   if(Object.keys(normalizedMap.entities.pps).length !== 0){
     var empty_pps_list = validatePpsPoint(normalizedMap.entities) 
     if(empty_pps_list.length !== 0){
@@ -708,6 +707,12 @@ export const copyJSONToClipboard = (fieldName, singleFloor = false) => (
   var { normalizedMap } = getState();
   // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   const exportedJson = exportMap(normalizedMap, singleFloor);
+  if(Object.keys(normalizedMap.entities.pps).length !== 0){
+    var empty_pps_list = validatePpsPoint(normalizedMap.entities) 
+    if(empty_pps_list.length !== 0){
+      return dispatch(setErrorMessage(`barcodes with pps_id ${empty_pps_list} should be modified`));
+    }
+  }
   if (exportedJson[fieldName]) {
     copy(JSON.stringify(exportedJson[fieldName]));
   } else dispatch(setErrorMessage("Invalid JSON file name"));
