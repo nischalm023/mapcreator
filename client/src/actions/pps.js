@@ -7,13 +7,24 @@ import _ from "lodash";
 import {implicitBarcodeToCoordinate} from "utils/util";
 
 // exported for testing
-export const createNewPPSes = ({ eligible_type,pick_direction, type }, state) => {
+export const createNewPPSes = ({ eligible_type,pick_direction, type,pick_position,coordinate }, state) => {
   const {
     selection: { mapTiles }
   } = state;
   var eligible_type_value = eligible_type.split("_")
+  var pps_point_dict = {}
   var ppses = Object.keys(mapTiles).map(tileId => {
     const barcode = coordinateKeyToBarcodeSelector(state, { tileId });
+  if(eligible_type_value[0] === 'rtp'){
+    pps_point_dict = {
+      "position_id" : barcode,
+      "coordinate" : tileId,
+      "type" : type
+   }
+ }
+  else {
+    pps_point_dict = {}
+  }
     return {
 
       coordinate: tileId,
@@ -25,7 +36,9 @@ export const createNewPPSes = ({ eligible_type,pick_direction, type }, state) =>
       pick_direction,
       put_docking_positions: [],
       allowed_modes: ["put", "pick", "audit"],
-      type
+      pps_point_dict: pps_point_dict,
+      type,
+      version: 2
     };
   });
   var ids = getIdsForNewEntities(state, {

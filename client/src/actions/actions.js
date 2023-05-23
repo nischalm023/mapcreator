@@ -43,7 +43,7 @@ import {
 } from "utils/api";
 import { implicitBarcodeToCoordinate } from "../utils/util";
 import { locateBarcode } from "../actions/barcode";
-import _ from "lodash";
+import _, { isEmpty } from "lodash";
 
 
 // always good idea to return promises from async action creators
@@ -663,10 +663,27 @@ export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
     .catch(onError);
 };
 
+const validatePpsPoint = (entities) => {
+  var pps_dict = entities.pps
+  var empty_pps_list = []
+  for(let i in pps_dict){
+    if(isEmpty(pps_dict[i].pps_point_dict)){
+      empty_pps_list.push(pps_dict[i].pps_id)
+    }
+  }
+  return empty_pps_list
+}
 export const downloadMap = (singleFloor = false) => (dispatch, getState) => {
   var { normalizedMap } = getState();
   // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   setSectorsBarcodeMapping(dispatch, getState);
+  var validation = validatePpsPoint(normalizedMap.entities)
+  if(Object.keys(normalizedMap.entities.pps).length !== 0){
+    var empty_pps_list = validatePpsPoint(normalizedMap.entities) 
+    if(empty_pps_list.length !== 0){
+      return dispatch(setErrorMessage(`barcodes with pps_id ${empty_pps_list} should be modified`));
+    }
+  }
   const exportedJson = exportMap(normalizedMap, singleFloor);
   var zip = new JSZip();
   Object.keys(exportedJson).forEach((fileName) => {
