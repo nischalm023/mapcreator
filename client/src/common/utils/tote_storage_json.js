@@ -24,13 +24,6 @@ function getCoordinates(value,barcode){
     }
     return coordinates
 }
-const getDirections = (value)=>{
-    var directions = []
-    value.storable_direction.value.map((data)=>{
-        directions.push(orientationFunction(data.value))
-    })
-    return directions
-}
 const getIOPointData = (value,barcode)=>{
     var toteStorage_io_dict = {}
     var coordinate_data = getCoordinates(value,barcode)
@@ -41,11 +34,10 @@ const getIOPointData = (value,barcode)=>{
 }
 const FormToteStorageJson = (value,barcode)=>{
     var toteStorage_dict = {}
-    var directions = getDirections(value)
     toteStorage_dict["location"] = value.tote_location.value
     var io_data = getIOPointData(value,barcode)
     toteStorage_dict["io_point"] = io_data
-    toteStorage_dict["storage_direction "] = directions
+    toteStorage_dict["storage_direction "] = orientationFunction(value.storable_direction.value)
     if(value.ndeep.value.value === "single"){
         toteStorage_dict["ndeep"] = 0
     }

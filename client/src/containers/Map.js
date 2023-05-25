@@ -5,6 +5,8 @@ import { connect } from "react-redux";
 import { fetchMap, saveMap, downloadMap, updateAutocadMap} from "actions/actions";
 import importMap from "common/utils/import-map";
 import { modifyNeighbours } from "actions/barcode";
+import { Modal } from 'reactstrap';
+import "./ConfirmationModal.css"
 import {
   setSuccessMessage,
   clearSuccessMessage,
@@ -26,7 +28,8 @@ import SampleRacksJson from "components/Map/SampleRacksJson";
 import UploadMapDetailsToGsb from "components/Map/Forms/UploadMapDetailsToGsb";
 import { runSanity , showHighlight } from "actions/actions";
 import { runHaiMapConversionScriptToMap} from "utils/api";
-import _ from "lodash";
+import _, { floor } from "lodash";
+import { dispatch } from "d3";
 const pendo = window.pendo;
 
 class Map extends Component {
@@ -34,7 +37,10 @@ class Map extends Component {
     barcodeView: {
       show: false,
       tileId: null
-    }
+    },
+    modalShow : false,
+    floor : false,
+    emptyIOList : []
   };
   componentDidMount() {
     const {
@@ -45,6 +51,72 @@ class Map extends Component {
     } = this.props;
     dispatch(fetchMap(id));
   };
+
+  validateIOPoint = (entities) => {
+    var IO_dict = entities.ioPoints
+    var tote_storables_dict = entities.toteStorables
+    var empty_IO_list = []
+    let all_IO_arr = []
+    let tote_linked_IO_arr = []
+    for(let key in IO_dict){
+      all_IO_arr.push(IO_dict[key].barcode)
+    }
+    for(let key in tote_storables_dict){
+      tote_linked_IO_arr.push(Object.keys(tote_storables_dict[key].barcode)[0])
+    }
+    let empty_IO_list_IOpoint_id = all_IO_arr.filter(io_point => !tote_linked_IO_arr.includes(io_point))
+    for(let i=0 ;i<empty_IO_list_IOpoint_id.length;i++){
+      for(let j in entities.barcode){
+        if(empty_IO_list_IOpoint_id[i] === entities.barcode[j].coordinate){
+          empty_IO_list.push(entities.barcode[j].barcode)
+        }
+      }
+    }
+    return empty_IO_list
+  }
+  handleDownloadClick(nMap,floor = null){
+    const {dispatch} = this.props;
+    let empty_IO_list = this.validateIOPoint(nMap.entities)
+    this.setState({
+      emptyIOList : empty_IO_list
+    })
+    if(floor){
+      this.setState({
+        floor : true
+      })
+    }
+    else{
+      this.setState({
+        floor : false
+      })
+    }
+    if(empty_IO_list.length!==0){
+      this.setState({
+        modalShow : true
+      })
+    }
+    else{
+      if(this.state.floor){
+        dispatch(downloadMap(true))
+      }
+      else{
+        dispatch(downloadMap())
+      }
+    }
+  }
+
+  handleConfirmationOKClick(){
+    const {dispatch} = this.props;
+    this.setState({
+      modalShow : false
+    })
+    if(this.state.floor){
+      dispatch(downloadMap(true))
+    }
+    else{
+      dispatch(downloadMap())
+    }
+  }
 
   componentDidUpdate(prevProps) {
     if(prevProps.nMap.entities.mapObj != this.props.nMap.entities.mapObj && Object.keys(this.props.nMap.entities.mapObj)[0] != 1) {
@@ -200,7 +272,8 @@ class Map extends Component {
                   type="button"
                   bcolor="orange"
                   onClick={() => {
-                    dispatch(downloadMap());
+                    // dispatch(downloadMap());
+                    this.handleDownloadClick(nMap)
                   }}
                 >
                   Download
@@ -218,7 +291,7 @@ class Map extends Component {
                   className="btn btn-outline-secondary"
                   type="button"
                   onClick={() => {
-                    dispatch(downloadMap(true));
+                    this.handleDownloadClick(nMap,true)                  
                   }}
                 >
                   Download as Single Floor
@@ -266,6 +339,22 @@ class Map extends Component {
             }
           />
         </div>
+        <Modal isOpen={this.state.modalShow} toggle = {() => {this.setState({modalShow: !this.state.modalShow})}} className = "confirmation-modal">
+                <span>There are no tote storables linked to IO points for barcodes  {this.state.emptyIOList[0]} {this.state.emptyIOList.length > 1 ? `and ${this.state.emptyIOList.length-1} other(s) ` : ''}. Do you still want to download?</span>
+                <br></br>
+                <div>
+                  <button onClick={() => {this.handleConfirmationOKClick()}} className="btn btn-outline-primary mr-1">
+                    OK
+                    </button>
+                  <button className="btn btn-outline-danger" onClick={() => {
+                    this.setState({
+                      modalShow: false
+                    })
+                  }}
+                  >Cancel
+                  </button>
+                </div>
+            </Modal>
       </div>
     );
   }
