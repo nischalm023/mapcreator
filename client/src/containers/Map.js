@@ -28,8 +28,7 @@ import SampleRacksJson from "components/Map/SampleRacksJson";
 import UploadMapDetailsToGsb from "components/Map/Forms/UploadMapDetailsToGsb";
 import { runSanity , showHighlight } from "actions/actions";
 import { runHaiMapConversionScriptToMap} from "utils/api";
-import _, { floor } from "lodash";
-import { dispatch } from "d3";
+import _ from "lodash";
 const pendo = window.pendo;
 
 class Map extends Component {
@@ -272,7 +271,6 @@ class Map extends Component {
                   type="button"
                   bcolor="orange"
                   onClick={() => {
-                    // dispatch(downloadMap());
                     this.handleDownloadClick(nMap)
                   }}
                 >
