@@ -92,15 +92,18 @@ export const addIOPoint = (io_point_id, barcodes, bot_direction, agent) => (disp
     dispatch(clearTiles);
     let message = '';
     if(nonEligibleBarcodes.length>0 && eligibleBarcodes.length>0){
-        message = `IO point(s) for barcode(s) ${eligibleBarcodes[0]} ${eligibleBarcodes.length > 1 ? `and ${eligibleBarcodes.length} others` : ''}is/are created/updated.\n\nIO point(s) for barcodes ${nonEligibleBarcodes}\nis/are linked to tote storables!\nHence these IO point(s) cannot be updated.`
+        message = `IO point(s) for barcode(s) ${eligibleBarcodes[0]} ${eligibleBarcodes.length > 1 ? 
+            `and ${eligibleBarcodes.length} others` : ''}has/have been created/updated.\n\n<span style="color: red;">IO point(s) for barcodes ${nonEligibleBarcodes}\nis/are linked to tote storables and will not be updated!</span>`
         dispatch(setSuccessMessage(message));
     }
     else if(nonEligibleBarcodes.length>0){
-        message = `IO point(s) for barcode(s) ${nonEligibleBarcodes}\nis/are linked to tote storables!\nHence these IO point(s) cannot be updated.`
+        message = `IO point(s) for barcode(s) ${nonEligibleBarcodes}\nis/are linked to tote storables!
+        \nHence these IO point(s) has/have not been updated.`
         dispatch(setErrorMessage(message));
     }
     else if(eligibleBarcodes.length>0){
-        message = `IO point(s) for barcode(s) ${eligibleBarcodes[0]} ${eligibleBarcodes.length > 1 ? `and ${eligibleBarcodes.length-1} other(s) ` : ''} is/are created/updated.`
+        message = `IO point(s) for barcode(s) ${eligibleBarcodes[0]} ${eligibleBarcodes.length > 1 ? 
+            `and ${eligibleBarcodes.length-1} other(s) ` : ''} has/have been created/updated.`
         dispatch(setSuccessMessage(message));
     }
     return Promise.resolve();
@@ -168,15 +171,18 @@ export const removeIOPoint = (io_point_id, barcodes, bot_direction, agent) => (d
     dispatch(clearTiles);
     let message = '';
     if(nonEligibleBarcodes.length>0 && eligibleBarcodes.length>0){
-        message = `IO point(s) for barcode(s) ${eligibleBarcodes[0]} ${eligibleBarcodes.length > 1 ? `and ${eligibleBarcodes.length} others ` : ''}is/are removed.\n\nIO point(s) for barcodes ${nonEligibleBarcodes}\nis/are linked to tote storables!\nHence these IO point(s) cannot be removed.`
+        message = `IO point(s) for barcode(s) ${eligibleBarcodes[0]} ${eligibleBarcodes.length > 1 ?
+            `and ${eligibleBarcodes.length} others ` : ''}has/have been deleted.\n\n<span style="color: red;">IO point(s) for barcodes ${nonEligibleBarcodes}\nis/are linked to tote storables and will not be deleted!\nPlease delete the linked tote storables first.</span>`
         dispatch(setSuccessMessage(message));
     }
     else if(nonEligibleBarcodes.length>0){
-        message = `IO point(s) for barcode(s) ${nonEligibleBarcodes}\nis/are linked to tote storables!\nHence these IO point(s) cannot be removed.`
+        message = `IO point(s) for barcode(s) ${nonEligibleBarcodes}\nis/are linked to tote storables!
+        \nHence these IO point(s) has/have not been deleted.\nPlease delete the linked tote storables first.`
         dispatch(setErrorMessage(message));
     }
     else if(eligibleBarcodes.length>0){
-        message = `IO point(s) for barcode(s) ${eligibleBarcodes[0]} ${eligibleBarcodes.length > 1 ? `and ${eligibleBarcodes.length-1} other(s) ` : ''} is/are removed.`
+        message = `IO point(s) for barcode(s) ${eligibleBarcodes[0]} ${eligibleBarcodes.length > 1 ? 
+            `and ${eligibleBarcodes.length-1} other(s) ` : ''} has/have been deleted.`
         dispatch(setSuccessMessage(message));
     }
     return Promise.resolve();

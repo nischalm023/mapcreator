@@ -7,7 +7,7 @@ import "./uploadMaptoGsb.css";
 
 
 const schema = {
-    title: "Assign/Manage IO Points",
+    title: "Assign/Manage Storable IO Points",
     type: "object",
     required: ["bot_direction", "agent"],
     properties: {
@@ -51,7 +51,7 @@ class AssignIOPoints extends Component {
             uiSchema={uiSchema}
             onSubmit={handleSubmit}
             onRemove={handleRemove}
-            buttonText={"Assign/Manage IO Points"}
+            buttonText={"Assign/Manage Storable IO Points"}
             barcodes={barcodes}
             nextIOPointId={nextIOPointId}
             dispatch={dispatch}

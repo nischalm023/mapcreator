@@ -13,9 +13,14 @@ var SweetAlertSuccess = ({ message, onConfirm, title = "Success" }) => (
     title={title}
     onConfirm={onConfirm}
   >
-    <pre>
+    {/* <pre>
       <code>{message == null ? "" : `${message}`}</code>
-    </pre>
+    </pre> */}
+    {message != null && (
+      <pre>
+        <code dangerouslySetInnerHTML={{ __html: message }}></code>
+      </pre>
+    )}
   </SweetAlert>
 );
 
