@@ -56,7 +56,6 @@ export const addPPSes = formData => (dispatch, getState) => {
   const state = getState();
   const { currentFloor } = state;
   const ppses = createNewPPSes(formData, state);
-  console.log("pps==========",ppses)
   dispatch({
     type: "ADD-MULTIPLE-PPS",
     value: ppses

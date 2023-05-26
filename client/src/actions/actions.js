@@ -675,7 +675,6 @@ const validatePpsPoint = (entities) => {
 }
 export const downloadMap = (singleFloor = false) => (dispatch, getState) => {
   var { normalizedMap } = getState();
-  // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   setSectorsBarcodeMapping(dispatch, getState);
   if(Object.keys(normalizedMap.entities.pps).length !== 0){
     var empty_pps_list = validatePpsPoint(normalizedMap.entities) 

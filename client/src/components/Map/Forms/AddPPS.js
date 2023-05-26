@@ -7,43 +7,6 @@ import { addPPSes } from "actions/pps";
 import { directionSchema } from "utils/forms";
 import ButtonForm from "./Util/ButtonForm";
 
-// const EligibleTypeSchema = {
-//   type: "string",
-//   title: "Eligible Type",
-//   default: "RTP",
-//   enum: ["rtp", "ttp", "rtp_ttp"],
-//   enumNames: ["RTP", "TTP", "TTP+RTP"]
-// };
-
-// const ppsTypeSchema = {
-//   type: "string",
-//   title: "PPS Type",
-//   default: "manual",
-//   enum: ["ppp_manual", "ara", "manual"],
-//   enumNames: ["PPP (manual)", "ARA", "Manual"]
-// };
-
-// const schema = {
-//   title: "Add PPS",
-//   type: "object",
-//   required: ["pick_direction", "type", "eligible_system"],
-//   properties: {
-//     pick_direction: { ...directionSchema, title: "Pick Direction" },
-//     type: ppsTypeSchema,
-//     eligible_system:EligibleTypeSchema
-//   }
-// };
-
-// const AddPPS = ({ onSubmit, disabled }) => (
-//   <BaseJsonForm
-//     disabled={disabled}
-//     schema={schema}
-//     onSubmit={onSubmit}
-//     buttonText={"Assign PPS"}
-//     style={{ marginLeft:"20%", textAlign:"-webkit-center", color:"orange"}}
-//   />
-// );
-
 class AddPPS extends Component {
     state = {
         error: undefined,
@@ -138,14 +101,8 @@ class AddPPS extends Component {
     }
 }
 
-// //only connecting to minimal state since don't know if data will be copied in props...
 export default connect(
   state => ({
     disabled: Object.keys(state.selection.mapTiles).length === 0 || state.selection.conveyorMode === true
   }),
-  // dispatch => ({
-  //   onSubmit: ({ formData }) => {
-  //     dispatch(addPPSes(formData));
-  //   }
-  // })
 )(AddPPS);
