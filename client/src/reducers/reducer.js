@@ -45,6 +45,7 @@ export const entitiesReducer = combineReducers({
   toteStorables: reduceReducers(baseTotestorableReducer, totestorableReducer),
   barcode: reduceReducers(barcodeReducer, baseBarcodeReducer),
   DownloadconveyorTile: reduceReducers(baseConveyorReducer, conveyorReducer),
+  DownloadToteStorage: reduceReducers(baseTotestorableReducer, totestorableReducer),
   floor: floorReducer,
   map: mapReducer,
   zone: zoneReducer,
