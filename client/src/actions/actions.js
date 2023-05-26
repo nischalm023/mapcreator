@@ -710,7 +710,7 @@ export const copyJSONToClipboard = (fieldName, singleFloor = false) => (
   if(Object.keys(normalizedMap.entities.pps).length !== 0){
     var empty_pps_list = validatePpsPoint(normalizedMap.entities) 
     if(empty_pps_list.length !== 0){
-      return dispatch(setErrorMessage(`barcodes with pps_id ${empty_pps_list} should be modified`));
+      return dispatch(setErrorMessage(`PPS IDs ${empty_pps_list} are of the type TTP / RTP + TTP and do not have any associated conveyor active points. Please associate active points or change the PPS eligible agents`));
     }
   }
   if (exportedJson[fieldName]) {
