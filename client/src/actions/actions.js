@@ -667,7 +667,7 @@ const validatePpsPoint = (entities) => {
   var pps_dict = entities.pps
   var empty_pps_list = []
   for(let i in pps_dict){
-    if(isEmpty(pps_dict[i].pps_point_dict)){
+    if(pps_dict[i].pps_point.length === 0){
       empty_pps_list.push(pps_dict[i].pps_id)
     }
   }

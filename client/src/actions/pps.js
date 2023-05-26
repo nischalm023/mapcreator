@@ -15,15 +15,17 @@ export const createNewPPSes = ({ eligible_type,pick_direction, type,pick_positio
   var pps_point_dict = {}
   var ppses = Object.keys(mapTiles).map(tileId => {
     const barcode = coordinateKeyToBarcodeSelector(state, { tileId });
+    var pps_point = []
   if(eligible_type_value[0] === 'rtp'){
     pps_point_dict = {
-      "position_id" : barcode,
+      "position_id" : 1,
       "coordinate" : tileId,
       "type" : type
    }
+   pps_point.push(pps_point_dict)
  }
   else {
-    pps_point_dict = {}
+    pps_point = []
   }
     return {
 
@@ -36,7 +38,7 @@ export const createNewPPSes = ({ eligible_type,pick_direction, type,pick_positio
       pick_direction,
       put_docking_positions: [],
       allowed_modes: ["put", "pick", "audit"],
-      pps_point_dict: pps_point_dict,
+      pps_point: pps_point,
       type,
       version: 2
     };
