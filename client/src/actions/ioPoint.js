@@ -93,7 +93,7 @@ export const addIOPoint = (io_point_id, barcodes, bot_direction, agent) => (disp
     let message = '';
     if(nonEligibleBarcodes.length>0 && eligibleBarcodes.length>0){
         message = `IO point(s) for barcode(s) ${eligibleBarcodes[0]} ${eligibleBarcodes.length > 1 ? 
-            `and ${eligibleBarcodes.length} others` : ''}has/have been created/updated.\n\n<span style="color: red;">IO point(s) for barcodes ${nonEligibleBarcodes}\nis/are linked to tote storables and will not be updated!</span>`
+            `and ${eligibleBarcodes.length-1} others` : ''}has/have been created/updated.\n\n<span style="color: red;">IO point(s) for barcodes ${nonEligibleBarcodes}\nis/are linked to tote storables and will not be updated!</span>`
         dispatch(setSuccessMessage(message));
     }
     else if(nonEligibleBarcodes.length>0){
@@ -172,7 +172,7 @@ export const removeIOPoint = (io_point_id, barcodes, bot_direction, agent) => (d
     let message = '';
     if(nonEligibleBarcodes.length>0 && eligibleBarcodes.length>0){
         message = `IO point(s) for barcode(s) ${eligibleBarcodes[0]} ${eligibleBarcodes.length > 1 ?
-            `and ${eligibleBarcodes.length} others ` : ''}has/have been deleted.\n\n<span style="color: red;">IO point(s) for barcodes ${nonEligibleBarcodes}\nis/are linked to tote storables and will not be deleted!\nPlease delete the linked tote storables first.</span>`
+            `and ${eligibleBarcodes.length-1} others ` : ''}has/have been deleted.\n\n<span style="color: red;">IO point(s) for barcodes ${nonEligibleBarcodes}\nis/are linked to tote storables and will not be deleted!\nPlease delete the linked tote storables first.</span>`
         dispatch(setSuccessMessage(message));
     }
     else if(nonEligibleBarcodes.length>0){
