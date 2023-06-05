@@ -27,6 +27,9 @@ const getStepConveyorData = (value, barcode) =>{
         else if(checkPoint(value["conveyor_active"], value["selected_tile"][i])){
             var step_data = ConveyorStepData(i+1,"conveyor_pps_point",value["selected_tile"][i],barcode)
         }
+        else if(checkPoint(value["conveyor_end"], value["selected_tile"][i])){
+            var step_data = ConveyorStepData(i+1,"conveyor_end",value["selected_tile"][i],barcode)
+        }
         else{
             var step_data = ConveyorStepData(i+1,"conveyor_track",value["selected_tile"][i],barcode)
         }

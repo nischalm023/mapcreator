@@ -65,7 +65,7 @@ class AddPPS extends Component {
                               <option value="ttp_rtp">TTP+RTP</option>
                             </select>
                           <br/>
-                          {eligible_type == "ttp" && 
+                          {(eligible_type == "ttp" || eligible_type == "ttp_rtp") && 
                           <div>
                             <label for="type">PPS Type</label>
                               <select onClick={(e)=>this.setState({ pps_type: e.target.value })} className="form-control" id="type" name="pps-type">
@@ -74,7 +74,7 @@ class AddPPS extends Component {
                           <br/>
                           </div>
                           }
-                          {eligible_type != "ttp" && 
+                          {(eligible_type != "ttp" && eligible_type != "ttp_rtp") && 
                           <div>
                           <label for="type">PPS Type</label>
                             <select onClick={(e)=>this.setState({ pps_type: e.target.value })} className="form-control" id="type" name="pps-type">
