@@ -117,7 +117,7 @@ const addTTPTransitBarcode = formData => (dispatch, getState) => {
   //   const { error } = isValidFormData;
   //   return dispatch(setErrorMessage(error));
   // }
-  var [updatedBarcodes, transitBarcode] = getUpdatedAndTTPTransitBarcodes(
+  var [updatedBarcodes, transitBarcode,error] = getUpdatedAndTTPTransitBarcodes(
     dispatch,
     state,
     formData
@@ -125,19 +125,22 @@ const addTTPTransitBarcode = formData => (dispatch, getState) => {
   // TODO: should do add barcode and add barcode to floor in a single action.
   // i.e. handle "ADD-MULTIPLE-BARCODE" in floor reducer itself.
   // add to barcodes
-  dispatch({
+  if(!error){
+    dispatch({
     type: "ADD-MULTIPLE-BARCODE",
     value: [...updatedBarcodes, transitBarcode]
-  });
-  // add to floor
-  dispatch(
-    addEntitiesToFloor({
-      currentFloor: state.currentFloor,
-      floorKey: "map_values",
-      entities: [transitBarcode],
-      idField: "coordinate"
-    })
-  );
+    });
+    // add to floor
+    dispatch(
+      addEntitiesToFloor({
+        currentFloor: state.currentFloor,
+        floorKey: "map_values",
+        entities: [transitBarcode],
+        idField: "coordinate"
+      })
+    );
+  }
+  
   // clear selection
   dispatch(clearTiles);
   return Promise.resolve();
@@ -197,9 +200,13 @@ const addNewBarcode = formData => (dispatch, getState) => {
   var barcodeCornerCoordinate = calculate_corner_world_cordinate(nbSizeInfo,[newBarcodeWorldCoord["x"],newBarcodeWorldCoord["y"]])
   
   if(barcodeFormat == TTP_BARCODE_FORMAT){
-    var ttp_barcode_value = setCoexistenceBarcodeLabel(dispatch,barcode,direction,
+    var [ttp_barcode_value,error] = setCoexistenceBarcodeLabel(dispatch,barcode,direction,
       [newBarcodeWorldCoord["x"],newBarcodeWorldCoord["y"]],arbitrary_origin_value,vda_offset,
       state.barcodeDistance,currentFloor)
+    if(error){
+      return dispatch(setErrorMessage(ttp_barcode_value)
+      );
+    }
   }
   const newBarcode = createNewBarcode({
     coordinate: nbTileId,
@@ -265,9 +272,12 @@ const addNewMultipleBarcode = formData => (dispatch, getState) => {
     var barocde_value = getValidEmptyDirTileIdList(barcode_cordinate.barcodes,nbTileId)
     var barcodeCornerCoordinate = calculate_corner_world_cordinate(nbSizeInfo,[newBarcodeWorldCoord["x"],newBarcodeWorldCoord["y"]])
     if(barcodeFormat == TTP_BARCODE_FORMAT){
-      var ttp_barcode_value = setCoexistenceBarcodeLabel(dispatch,barcode,direction,
+      var [ttp_barcode_value,error] = setCoexistenceBarcodeLabel(dispatch,barcode,direction,
         [newBarcodeWorldCoord["x"],newBarcodeWorldCoord["y"]],arbitrary_origin_value,vda_offset,
         state.barcodeDistance,currentFloor)
+      if(error){
+        return dispatch(setErrorMessage("Barcode can added,TTP Barcode offset is negitive"));
+       }
     }
     const newBarcode = createNewBarcode({
       coordinate: nbTileId,

@@ -14,6 +14,7 @@ import {
   getNewCoordinate
 } from "utils/selectors";
 import _ from "lodash";
+import { setErrorMessage } from "./message";
 import {DEFAULT_BARCODE_FORMAT,TTP_BARCODE_FORMAT } from "../constants";
 import {calculate_corner_world_cordinate} from "./actions";
 // TODO: correct place for this function
@@ -417,6 +418,13 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
   const transitBarcodeCoordinate = getTransitCoordinate(state);
 
   const transitBarcodeWorldCoordinate = `[${transitBarcodeWorldCoord["x"]},${transitBarcodeWorldCoord["y"]}]`
+  if(barcodeFormat == TTP_BARCODE_FORMAT){
+    var [ttp_barcode_value,error] = setCoexistenceBarcodeLabel(dispatch,barcode,direction,
+      [transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]],arbitrary_origin_value,vda_offset,
+      state.barcodeDistance,currentFloor)
+    return [ttp_barcode_value,error]
+  }
+
   // SizeInfo
   var sizeInfo = _.cloneDeep(refBarcodeInfo.size_info);
   const nTileId = getNeighbourBarcodeIncludingDisconnectedInDirection(
@@ -513,11 +521,7 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
       }
     }
   }
-  if(barcodeFormat == TTP_BARCODE_FORMAT){
-    var ttp_barcode_value = setCoexistenceBarcodeLabel(dispatch,barcode,direction,
-      [transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]],arbitrary_origin_value,vda_offset,
-      state.barcodeDistance,currentFloor)
-  }
+  
   var unit = {
     store_status: 0,
     zone: refBarcodeInfo.zone,
@@ -532,7 +536,7 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
     world_coordinate_reference_neighbour:tileId,
     corner_world_cooordinate: cornerWorldCooordinate
   };
-  return unit;
+  return [unit,false];
 };
 
 // Barcode Exists: B_1-9, Barcode Doesn't Exists: N0, Transit Barcode: TB
@@ -558,11 +562,16 @@ export const getUpdatedAndTTPTransitBarcodes = (dispatch,state, formData) => {
   const barcodes = getBarcodes(state);
   const newState = _.cloneDeep(barcodes);
   var { direction } = formData;
-  var transitBarcodeInfo = getTransitBarcodeInfo(dispatch, state, formData);
-  const updatedBarcodes = getUpdatedBarcodes(
-    transitBarcodeInfo,
-    newState,
-    direction
-  );
-  return [updatedBarcodes, transitBarcodeInfo];
+  var [transitBarcodeInfo,error] = getTransitBarcodeInfo(dispatch, state, formData);
+  if(error){
+    dispatch(setErrorMessage(transitBarcodeInfo))
+    return['', '',error]
+  }else{
+    const updatedBarcodes = getUpdatedBarcodes(
+      transitBarcodeInfo,
+      newState,
+      direction
+    );
+    return [updatedBarcodes, transitBarcodeInfo,error];
+  }
 };

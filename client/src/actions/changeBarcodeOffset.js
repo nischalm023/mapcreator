@@ -6,8 +6,10 @@ export const validateBarcodesDistance = (barcodeDict,updated_vda_offset,current_
   var vda_coordinate_list = []
     for (var barcode in barcodeDict) {
       var barcodeInfo = barcodeDict[barcode];
-      var convert = JSON.parse(barcodeInfo["vda_world_coordinate"])
-      vda_coordinate_list.push(convert)
+      if(barcodeInfo.hasOwnProperty("vda_world_coordinate")){
+        var convert = JSON.parse(barcodeInfo["vda_world_coordinate"])
+        vda_coordinate_list.push(convert)
+      }
     }
     // [high_x,high_y]
     const highest_y = vda_coordinate_list.reduce((a, b) => a[1] > b[1] ? a : b);

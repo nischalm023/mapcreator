@@ -72,11 +72,14 @@ export const setCoexistenceBarcodeLabel = (dispatch,barcode,direction,world_cord
   }
   var ttp_barcode_value = calculateVdaBarcode(world_cordinate,offset_value,barcodeOffset)
   var vda_offset_value = `[${barcodeOffset[0]},${barcodeOffset[1]}]`
+  if(barcodeOffset[0]<0 || barcodeOffset[1]<0){
+    return ["This barcode can not be added because its exceed the current grid limit please increase the map offset in order to accomodate this barcode",true]
+  }
   dispatch({
     type: "BARCODE-FLOOR-OFFSET-VALUE",
     value: {"barcodeOffset":vda_offset_value,currentFloor}
   });
-  return ttp_barcode_value
+  return [ttp_barcode_value,false]
 }
 
 export const getBarcodeOffsetAndFormat = (state) => {
