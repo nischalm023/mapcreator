@@ -676,12 +676,12 @@ const validatePpsPoint = (entities) => {
 export const downloadMap = (singleFloor = false) => (dispatch, getState) => {
   var { normalizedMap } = getState();
   setSectorsBarcodeMapping(dispatch, getState);
-  if(Object.keys(normalizedMap.entities.pps).length !== 0){
-    var empty_pps_list = validatePpsPoint(normalizedMap.entities) 
-    if(empty_pps_list.length !== 0){
-      return dispatch(setErrorMessage(`PPS IDs ${empty_pps_list} are of the type TTP / RTP + TTP and do not have any associated conveyor active points. Please associate active points or change the PPS eligible agents`));
-    }
-  }
+  //if(Object.keys(normalizedMap.entities.pps).length !== 0){
+  //  var empty_pps_list = validatePpsPoint(normalizedMap.entities) 
+  //  if(empty_pps_list.length !== 0){
+  //    return dispatch(setErrorMessage(`PPS IDs ${empty_pps_list} are of the type TTP / RTP + TTP and do not have any associated conveyor active points. Please associate active points or change the PPS eligible agents`));
+  //  }
+  //}
   const exportedJson = exportMap(normalizedMap, singleFloor);
   var zip = new JSZip();
   Object.keys(exportedJson).forEach((fileName) => {
