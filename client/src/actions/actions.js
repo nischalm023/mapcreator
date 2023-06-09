@@ -706,12 +706,12 @@ export const copyJSONToClipboard = (fieldName, singleFloor = false) => (
   var { normalizedMap } = getState();
   // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   const exportedJson = exportMap(normalizedMap, singleFloor);
-  if(Object.keys(normalizedMap.entities.pps).length !== 0){
-    var empty_pps_list = validatePpsPoint(normalizedMap.entities) 
-    if(empty_pps_list.length !== 0){
-      return dispatch(setErrorMessage(`PPS IDs ${empty_pps_list} are of the type TTP / RTP + TTP and do not have any associated conveyor active points. Please associate active points or change the PPS eligible agents`));
-    }
-  }
+  // if(Object.keys(normalizedMap.entities.pps).length !== 0){
+  //   var empty_pps_list = validatePpsPoint(normalizedMap.entities) 
+  //   if(empty_pps_list.length !== 0){
+  //     return dispatch(setErrorMessage(`PPS IDs ${empty_pps_list} are of the type TTP / RTP + TTP and do not have any associated conveyor active points. Please associate active points or change the PPS eligible agents`));
+  //   }
+  // }
   if (exportedJson[fieldName]) {
     copy(JSON.stringify(exportedJson[fieldName]));
   } else dispatch(setErrorMessage("Invalid JSON file name"));
