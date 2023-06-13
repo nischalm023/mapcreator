@@ -3,7 +3,7 @@ import { setSuccessMessage, setErrorMessage } from "./../actions/message";
 import _ from "lodash";
 
 // 1. Add ioPoint data in state
-// 2. set is_conveyor_selected state in ioPoint barcode
+// 2. set isIoPoint state in ioPoint barcode
 export const addIOPoint = (io_point_id, barcodes, bot_direction, agent) => (dispatch, getState) => {
     const state = getState();
     const { currentFloor } = state;
@@ -198,7 +198,7 @@ export const createStorable = (data, barcode, ioPointId, nextToteStorableId, fin
             "io_point_id": ioPointId,
             "next_tote_storable_id": data.multiSchema[key].tote_id.value,
             "agent": data.schema.agent,
-            "bot_direction": data.schema.bot_direction,
+            "bot_direction": data.multiSchema[key].bot_direction,
             "io_point": data.schema.io_point,
             "storable_direction": data.multiSchema[key].storable_direction,
             "ndeep": data.multiSchema[key].ndeep,

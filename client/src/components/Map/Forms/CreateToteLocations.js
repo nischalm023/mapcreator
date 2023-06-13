@@ -6,22 +6,14 @@ import "./uploadMaptoGsb.css";
 
 
 const schema = () => {
-    // const sectorEnum = Object.keys(sectorDict);
-    // const defaultSector = sectorEnum[0];
     return {
         title: "Create/Manage Tote Locations",
         type: "object",
-        // required: ["rack_id", "sectors"],
-        // properties: {
-        //     rack_id: { type: "string", title: "Rack Type", value: "" },
-        //     sectors: { type: "array", title: "Sectors", value: "", sectors: sectorEnum, default: defaultSector }
-        // },
-        // sectorMxUPreferences: sectorMxUPreferences
     };
 };
 
 
-const CreateToteLocations = ({ onSubmit, disabled, barcode, nextToteStorableId, ioPointBarcode, ioPointId, agent, botDirection ,storableDirections, existingTotes}) => (
+const CreateToteLocations = ({ onSubmit, disabled, barcode, nextToteStorableId, ioPointBarcode, ioPointId, agent, botDirection, existingTotes}) => (
     <CreateToteLocationsForm
         schema={schema()}
         disabled={disabled}
@@ -33,7 +25,6 @@ const CreateToteLocations = ({ onSubmit, disabled, barcode, nextToteStorableId, 
         ioPointId={ioPointId}
         agent={agent}
         botDirection={botDirection}
-        storableDirections={storableDirections}
         existingTotes={existingTotes}
     />
 );
@@ -48,7 +39,6 @@ export default connect(
         let ioPointId = null;
         let agent = null;
         let botDirection = null;
-        let storableDirections = null;
         let existingTotes = {};
         if(selectedBarcode && selectedBarcode.isIoPoint){
             ioPointBarcode = selectedBarcode.barcode;
@@ -56,13 +46,7 @@ export default connect(
             let ioPointObj = Object.values(ioPoints).find(obj => obj.barcode === selectedTile[0]);
             ioPointId = ioPointObj.io_point_id;
             agent = ioPointObj.agent;
-            botDirection = ioPointObj.bot_direction;
-            if(botDirection=="north" || botDirection=="south"){
-                storableDirections = ["west", "east"];
-            }
-            else if(botDirection=="west" || botDirection=="east"){
-                storableDirections = ["north", "south"];
-            }
+            botDirection = ioPointObj.bot_direction; // botDirection: ["north", "south"]
             existingTotes = state.normalizedMap.entities.toteStorables;
             // for(let key in state.normalizedMap.entities.toteStorables){
             //     let toteStorable = state.normalizedMap.entities.toteStorables[key];
@@ -83,7 +67,6 @@ export default connect(
             ioPointId: ioPointId,
             agent: agent,
             botDirection: botDirection,
-            storableDirections: storableDirections,
             existingTotes: existingTotes,
         }
     },

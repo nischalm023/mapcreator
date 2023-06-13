@@ -12,11 +12,14 @@ const schema = {
     required: ["bot_direction", "agent"],
     properties: {
         bot_direction: {
-            type: "string",
+            type: "array",
             title: "Bot Direction",
-            default: "north",
-            enum: ["north", "west", "south", "east"],
-            enumNames: ["North", "West", "South", "East"]
+            items: {
+                type: "string",
+                enum: ["north", "west", "south", "east"],
+                enumNames: ["North", "West", "South", "East"],
+            },
+            uniqueItems: true,
         },
         agent: {
             type: "string",
@@ -27,9 +30,14 @@ const schema = {
         },
     }
 };
-
 const uiSchema = {
-    agent: { "ui:readonly": true }
+    agent: { "ui:readonly": true },
+    bot_direction: {
+        "ui:widget": "checkboxes",
+        "ui:options": {
+            inline: true,
+        },
+    },
 };
 
 const handleSubmit = (form, barcodes, nextIOPointId, dispatch) => {

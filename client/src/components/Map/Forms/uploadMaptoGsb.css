@@ -3,6 +3,16 @@
     color: white;
 }
 .tote-location-modal{
-    width: 870px;
+    width: 1100px;
     max-width: 100%;
+}
+.manage-conveyor-modal{
+    width: 780px;
+    max-width: 100%;
+}
+.checkbox-inline{
+    padding-right: 20px;
+}
+label.checkbox-inline span span {
+    padding-left: 5px;
 }

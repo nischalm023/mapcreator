@@ -28,7 +28,7 @@ const getIOPointData = (value,barcode)=>{
     var toteStorage_io_dict = {}
     var coordinate_data = getCoordinates(value,barcode)
     toteStorage_io_dict["coordinate"] = coordinate_data
-    var orientation = orientationFunction(value.bot_direction.value)
+    var orientation = orientationFunction(value.bot_direction.value.value)
     toteStorage_io_dict["bot_orientation"] = orientation
     return toteStorage_io_dict
 }
