@@ -15,8 +15,20 @@ class AddPPS extends Component {
         pick_direction:0,
         pps_type:"manual"
     };
-    toggle = () => this.setState({ show: !this.state.show });
-    onClick = (e) => this.setState({ eligible_type: e.target.value })
+    toggle = () => {
+      if(!this.state.show){
+        this.setState({ 
+          error: undefined,
+          eligible_type:"rtp",
+          pick_direction:0,
+          pps_type:"manual" 
+        });
+      }
+      this.setState({ show: !this.state.show });
+    }
+    onClickk = (e) => {
+      this.setState({ eligible_type: e.target.value })
+    }
     handleSubmit = (event,dispatch) => {
         event.preventDefault();
         let eligible_type = this.state.eligible_type;
