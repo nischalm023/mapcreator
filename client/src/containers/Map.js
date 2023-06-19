@@ -79,23 +79,13 @@ class Map extends Component {
     this.setState({
       emptyIOList : empty_IO_list
     })
-    if(floor){
-      this.setState({
-        floor : true
-      })
-    }
-    else{
-      this.setState({
-        floor : false
-      })
-    }
     if(empty_IO_list.length!==0){
       this.setState({
         modalShow : true
       })
     }
     else{
-      if(this.state.floor){
+      if(floor){
         dispatch(downloadMap(true))
       }
       else{
