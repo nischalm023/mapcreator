@@ -296,16 +296,19 @@ const AdjustBottomTransitPosition = (gridView,transit_corner_world_coordinate,tr
           value['size_info'][direction_mapping("left")] = transit_size_info[direction_mapping("right")]
           var corner_coordinate = calculate_corner_world_cordinate(value["size_info"],JSON.parse(value["world_coordinate"]))
           value['corner_world_cooordinate'] = corner_coordinate
-          shift_transit_corner_coord[corner_direction_mapping("se")]=corner_coordinate[corner_direction_mapping("sw")]
-          shift_size_info[direction] =  corner_coordinate[corner_direction_mapping("sw")][1]- transit_world_cordinate[1]
-
+          if(JSON.parse(value["world_coordinate"])[0] != transit_world_cordinate[0]){
+            shift_transit_corner_coord[corner_direction_mapping("se")]=corner_coordinate[corner_direction_mapping("sw")]
+            shift_size_info[direction] =  corner_coordinate[corner_direction_mapping("sw")][1]- transit_world_cordinate[1]
+          }
         }
         if(overlap_vertical_south_west(value['corner_world_cooordinate'][corner_direction_mapping("ne")],transit_corner_world_coordinate[corner_direction_mapping("sw")],transit_corner_world_coordinate[corner_direction_mapping("se")],value['corner_world_cooordinate'][corner_direction_mapping("se")])){
           value['size_info'][direction_mapping("right")] =  transit_size_info[direction_mapping("left")]
           var corner_coordinate = calculate_corner_world_cordinate(value["size_info"],JSON.parse(value["world_coordinate"]))
           value['corner_world_cooordinate'] = corner_coordinate
-          shift_transit_corner_coord[corner_direction_mapping("sw")]=corner_coordinate[corner_direction_mapping("se")]
-          shift_size_info[direction] = corner_coordinate[corner_direction_mapping("se")][1] -  transit_world_cordinate[1]
+          if(JSON.parse(value["world_coordinate"])[0] != transit_world_cordinate[0]){
+            shift_transit_corner_coord[corner_direction_mapping("sw")]=corner_coordinate[corner_direction_mapping("se")]
+            shift_size_info[direction] = corner_coordinate[corner_direction_mapping("se")][1] -  transit_world_cordinate[1]
+          }
         }
     }
     return [shift_transit_corner_coord,shift_size_info]
