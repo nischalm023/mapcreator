@@ -442,6 +442,7 @@ export var createFloorFromCoordinateData = ({
         zone: "defzone",
         sector: "undefined",
         barcode,
+        default_barcode:barcode,
         botid: "null",
         neighbours: [[1, 1, 1], [1, 1, 1], [1, 1, 1], [1, 1, 1]],
         coordinate: `${column},${row}`,

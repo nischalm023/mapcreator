@@ -84,9 +84,11 @@ export default ({
   // convert coordinate to numbers before adding!
   map["floors"] = mapJson.map(({ floor_id, map_values }) => ({
     floor_id,
-    map_values: map_values.map(({ coordinate, ...rest }) => ({
+    map_values: map_values.map(({ coordinate,barcode, ...rest }) => ({
       ...rest,
       coordinate: parseCoordinateString(coordinate),
+      default_barcode:barcode,
+      barcode:barcode
     })),
     chargers: [],
     fireEmergencies: [],

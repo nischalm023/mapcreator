@@ -37,6 +37,7 @@ export default (withWorldCoordinate, singleFloor = false) => {
     floor_id,
     map_values:map_values.map((barcode) => {
         delete barcode.corner_world_cooordinate
+        delete barcode.default_barcode
         return barcode
     }),
   }));

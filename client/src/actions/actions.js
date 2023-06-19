@@ -305,7 +305,6 @@ const setTtpBarcodeFormat = (dispatch,getState) => {
 
 export const fetchMap = (mapId) => (dispatch, getState) => {
   dispatch(clearMap);
-  console.log("maaaaaa",parseInt(mapId))
   return getMap(parseInt(mapId))
     .then(handleErrors)
     .then((res) => res.json())
@@ -1181,7 +1180,8 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap) => {
       barcodeInfo["adjacency"] = mappping_coord_with_adjacent_neighbour_dict[barcode]["adjacency"];
       barcodeInfo["neighbours"] = mappedNeighbour(mappping_coord_with_adjacent_neighbour_dict[barcode]["neighbours"],currentFloorBarcodeDict[barcode]["neighbours"]);
       if(barcodeFormat==DEFAULT_BARCODE_FORMAT){
-        barcodeInfo["barcode"] = ConvertTTPFormatBarcodeIntoDefaultFormat(barcode,barcodeInfo)
+        // barcodeInfo["barcode"] = ConvertTTPFormatBarcodeIntoDefaultFormat(barcode,barcodeInfo)
+        barcodeInfo["barcode"] = barcodeInfo["default_barcode"]
       }else{
         var GM_barcode = calculateVdaBarcode(JSON.parse(barcodeInfo["world_coordinate"]),offset_value,JSON.parse(barcodeOffset))
         barcodeInfo["barcode"] = GM_barcode
