@@ -664,23 +664,27 @@ export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
 
 const validatePpsPoint = (entities) => {
   var pps_dict = entities.pps
-  var empty_pps_list = []
+  var nonactive_pps_list = []
   for(let i in pps_dict){
-    if(pps_dict[i].pps_point.length === 0){
-      empty_pps_list.push(pps_dict[i].pps_id)
+    if(pps_dict[i].pps_points && pps_dict[i].pps_points.length === 0){
+      nonactive_pps_list.push(pps_dict[i].pps_id)
+    }
+    if(pps_dict[i].pps_points && pps_dict[i].pps_points.length === 1 && pps_dict[i].eligible_system.length === 2){
+      nonactive_pps_list.push(pps_dict[i].pps_id)
     }
   }
-  return empty_pps_list
+  console.log("nonactive_pps_list",nonactive_pps_list)
+  return nonactive_pps_list
 }
 export const downloadMap = (singleFloor = false) => (dispatch, getState) => {
   var { normalizedMap } = getState();
   setSectorsBarcodeMapping(dispatch, getState);
-  //if(Object.keys(normalizedMap.entities.pps).length !== 0){
-  //  var empty_pps_list = validatePpsPoint(normalizedMap.entities) 
-  //  if(empty_pps_list.length !== 0){
-  //    return dispatch(setErrorMessage(`PPS IDs ${empty_pps_list} are of the type TTP / RTP + TTP and do not have any associated conveyor active points. Please associate active points or change the PPS eligible agents`));
-  //  }
-  //}
+  if(Object.keys(normalizedMap.entities.pps).length !== 0){
+   var nonactive_pps_list = validatePpsPoint(normalizedMap.entities) 
+   if(nonactive_pps_list.length !== 0){
+     return dispatch(setErrorMessage(`PPS IDs ${nonactive_pps_list} are of the type TTP / RTP + TTP and do not have any associated conveyor active points. Please associate active points or change the PPS eligible agents`));
+   }
+  }
   const exportedJson = exportMap(normalizedMap, singleFloor);
   var zip = new JSZip();
   Object.keys(exportedJson).forEach((fileName) => {
@@ -705,12 +709,12 @@ export const copyJSONToClipboard = (fieldName, singleFloor = false) => (
   var { normalizedMap } = getState();
   // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   const exportedJson = exportMap(normalizedMap, singleFloor);
-  // if(Object.keys(normalizedMap.entities.pps).length !== 0){
-  //   var empty_pps_list = validatePpsPoint(normalizedMap.entities) 
-  //   if(empty_pps_list.length !== 0){
-  //     return dispatch(setErrorMessage(`PPS IDs ${empty_pps_list} are of the type TTP / RTP + TTP and do not have any associated conveyor active points. Please associate active points or change the PPS eligible agents`));
-  //   }
-  // }
+  if(Object.keys(normalizedMap.entities.pps).length !== 0){
+    var nonactive_pps_list = validatePpsPoint(normalizedMap.entities) 
+    if(nonactive_pps_list.length !== 0){
+      return dispatch(setErrorMessage(`PPS IDs ${nonactive_pps_list} are of the type TTP / RTP + TTP and do not have any associated conveyor active points. Please associate active points or change the PPS eligible agents`));
+    }
+  }
   if (exportedJson[fieldName]) {
     copy(JSON.stringify(exportedJson[fieldName]));
   } else dispatch(setErrorMessage("Invalid JSON file name"));

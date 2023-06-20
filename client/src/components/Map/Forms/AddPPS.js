@@ -63,7 +63,7 @@ class AddPPS extends Component {
                         <legend>Add PPS</legend>
                         <div className="form-group">
                           <label for="direction">Pick Direction*</label>
-                            <select onClick={(e)=>this.setState({ pick_direction: e.target.value })} className="form-control" id="direction" name="pick-direction">
+                            <select onChange={(e)=>this.setState({ pick_direction: e.target.value })} className="form-control" id="direction" name="pick-direction">
                               <option value="0">Top</option>
                               <option value="1">Right</option>
                               <option value="2">Bottom</option>
@@ -71,7 +71,7 @@ class AddPPS extends Component {
                             </select>
                           <br/>
                           <label for="type">Eligible Agent</label>
-                            <select onClick={(e)=>this.onClick(e)} className="form-control" id="eligible_system" name="eligible_system">
+                            <select onChange={(e)=>this.onClickk(e)} className="form-control" id="eligible_system" name="eligible_system">
                               <option value="rtp">RTP</option>
                               <option value="ttp">TTP</option>
                               <option value="ttp_rtp">TTP+RTP</option>
@@ -80,7 +80,7 @@ class AddPPS extends Component {
                           {(eligible_type == "ttp" || eligible_type == "ttp_rtp") && 
                           <div>
                             <label for="type">PPS Type</label>
-                              <select onClick={(e)=>this.setState({ pps_type: e.target.value })} className="form-control" id="type" name="pps-type">
+                              <select onChange={(e)=>this.setState({ pps_type: e.target.value })} className="form-control" id="type" name="pps-type">
                                 <option value="manual">Manual</option>
                               </select>
                           <br/>
@@ -89,7 +89,7 @@ class AddPPS extends Component {
                           {(eligible_type != "ttp" && eligible_type != "ttp_rtp") && 
                           <div>
                           <label for="type">PPS Type</label>
-                            <select onClick={(e)=>this.setState({ pps_type: e.target.value })} className="form-control" id="type" name="pps-type">
+                            <select onChange={(e)=>this.setState({ pps_type: e.target.value })} className="form-control" id="type" name="pps-type">
                               <option value="manual">Manual</option>
                               <option value="ara">ARA</option>
                               <option value="ppp_manual">PPP (manual)</option>
@@ -115,6 +115,6 @@ class AddPPS extends Component {
 
 export default connect(
   state => ({
-    disabled: Object.keys(state.selection.mapTiles).length === 0 || state.selection.conveyorMode === true
+    disabled: Object.keys(state.selection.mapTiles).length === 0
   }),
 )(AddPPS);
