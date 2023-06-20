@@ -1180,7 +1180,7 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap) => {
       barcodeInfo["adjacency"] = mappping_coord_with_adjacent_neighbour_dict[barcode]["adjacency"];
       barcodeInfo["neighbours"] = mappedNeighbour(mappping_coord_with_adjacent_neighbour_dict[barcode]["neighbours"],currentFloorBarcodeDict[barcode]["neighbours"]);
       if(barcodeFormat==DEFAULT_BARCODE_FORMAT){
-        if(value.hasOwnProperty("default_barcode")){
+        if(barcodeInfo.hasOwnProperty("default_barcode")){
           barcodeInfo["barcode"] = barcodeInfo["default_barcode"]
         }else{
           barcodeInfo["barcode"] = ConvertTTPFormatBarcodeIntoDefaultFormat(barcode,barcodeInfo)
