@@ -208,8 +208,12 @@ export default (state = {}, action) => {
       var newBarcodeDict = {}
       if(barcode_value===constants.DEFAULT_BARCODE_FORMAT){
         Object.entries(barcodesDict).forEach(([key, value]) => {
-          // var new_barcode = ConvertTTPFormatBarcodeIntoDefaultFormat(key,value)
-          value["barcode"] = value["default_barcode"]
+          if(value.hasOwnProperty("default_barcode")){
+            value["barcode"] = value["default_barcode"]
+          }else{
+            var new_barcode = ConvertTTPFormatBarcodeIntoDefaultFormat(key,value)
+            value["barcode"] = new_barcode
+          }
           newBarcodeDict[key] = value
         })
         return { ...state, ...newBarcodeDict}
