@@ -17,7 +17,7 @@ const ChangeBarcodeFormat = ({ onClick, current_floor,floor_value }) => {
         <label className="col-form-label pr-2">Change Barcode Format:</label>
         <select
           className="form-control"
-          onClick={onClick}
+          onChange={onClick}
           defaultValue={barcode_format}
         >
       <option value={constants.DEFAULT_BARCODE_FORMAT} >Default Format</option>

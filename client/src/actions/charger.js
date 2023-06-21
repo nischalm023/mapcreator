@@ -210,6 +210,10 @@ export const addChargers = formData => (dispatch, getState) => {
     type: "ADD-MULTIPLE-BARCODE",
     value: newBarcodes
   });
+  dispatch({
+      type:"ADD-COORDINATE-BARCODE-MAPPING",
+      value:{"coordinate":specialTileIds[0],"barcode":implicitCoordinateKeyToBarcode(specialTileIds[0])}
+    })
   // add entities to floor (charger)
   dispatch(
     addEntitiesToFloor({

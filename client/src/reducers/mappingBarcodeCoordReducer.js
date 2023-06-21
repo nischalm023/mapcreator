@@ -8,6 +8,13 @@ export default (state = {}, action) => {
       });
       return { ...state, ...mappingBarcodeCoord };
     }
+    case "ADD-COORDINATE-BARCODE-MAPPING": {
+      var  new_barcode  = action.value.barcode;
+      var coordinate_key = action.value.coordinate;
+      var new_mappingBarcodeCoord = {};
+      new_mappingBarcodeCoord[new_barcode]=coordinate_key
+      return { ...state, ...new_mappingBarcodeCoord };
+    }
   }
   return state;
 };

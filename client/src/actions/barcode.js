@@ -96,6 +96,10 @@ const addTransitBarcode = formData => (dispatch, getState) => {
     type: "ADD-MULTIPLE-BARCODE",
     value: [...updatedBarcodes, transitBarcode]
   });
+  dispatch({
+      type:"ADD-COORDINATE-BARCODE-MAPPING",
+      value:{"coordinate":transitBarcode["coordinate"],"barcode":transitBarcode["barcode"]}
+    })
   // add to floor
   dispatch(
     addEntitiesToFloor({
@@ -130,6 +134,10 @@ const addTTPTransitBarcode = formData => (dispatch, getState) => {
     type: "ADD-MULTIPLE-BARCODE",
     value: [...updatedBarcodes, transitBarcode]
     });
+    dispatch({
+      type:"ADD-COORDINATE-BARCODE-MAPPING",
+      value:{"coordinate":transitBarcode["coordinate"],"barcode":transitBarcode["barcode"]}
+    })
     // add to floor
     dispatch(
       addEntitiesToFloor({
@@ -222,6 +230,10 @@ const addNewBarcode = formData => (dispatch, getState) => {
     type: "ADD-MULTIPLE-BARCODE",
     value: [...oldBarcodes, newBarcode]
   });
+  dispatch({
+      type:"ADD-COORDINATE-BARCODE-MAPPING",
+      value:{"coordinate":nbTileId,"barcode":(barcodeFormat == TTP_BARCODE_FORMAT)?ttp_barcode_value:barcode_value}
+    })
   // add to floor
   dispatch(
     addEntitiesToFloor({
@@ -294,6 +306,10 @@ const addNewMultipleBarcode = formData => (dispatch, getState) => {
       type: "ADD-MULTIPLE-BARCODE",
       value: [...oldBarcodes, newBarcode]
     });
+    dispatch({
+      type:"ADD-COORDINATE-BARCODE-MAPPING",
+      value:{"coordinate":nbTileId,"barcode":(barcodeFormat == TTP_BARCODE_FORMAT)?ttp_barcode_value:implicitCoordinateKeyToBarcode(barocde_value)}
+    })
     // add to floor
     dispatch(
       addEntitiesToFloor({
