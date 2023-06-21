@@ -31,6 +31,8 @@ import exportMap from "common/utils/export-map";
 import { SPRITESHEET_PATH,DEFAULT_BARCODE_FORMAT,TTP_BARCODE_FORMAT } from "../constants";
 import { fitToViewport, setViewportClamp } from "./viewport";
 import { getLinearWorldCordXY ,mappedNeighbour} from "./AddAdjacency";
+
+import { convertNestedListToList} from "./conveyor";
 import { setErrorMessage, setSuccessMessage } from "./message";
 import {
   getMap,
@@ -645,6 +647,7 @@ export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
   var { normalizedMap} = getState();
   var  withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap)
   var withAdjacencyWorldCoordinate = addWorldCoordinateAndAdjacency(withWorldCoordinate)
+  var checkChargerNeighbour = updateAndCheckChargerNeighbour(dispatch,getState)
   var convertBarcodeEntities = ConvertEntitiesInBarcodeFormat(dispatch,getState)
   var { normalizedMap, barcodeFormat } = getState();
   setSectorsBarcodeMapping(dispatch, getState);
@@ -1102,6 +1105,7 @@ export const addWorldCoordinateToMap = (normalizedMap) => {
   var entities = normalizedMap.entities;
   const oldBarcodeDict = entities.barcode;
   const floorInfo = entities.floor;
+  const chargersDict = entities.charger
   var newbarcodeDict = {};
   for (var floorId in floorInfo) {
     var currentFloorBarcodeDict = {};
@@ -1136,6 +1140,7 @@ export const addWorldCoordinateToMap = (normalizedMap) => {
 export const addWorldCoordinateAdjacencyToMap = (normalizedMap) => {
   var entities = normalizedMap.entities;
   const oldBarcodeDict = entities.barcode;
+  const chargersDict = entities.charger;
   const floorInfo = entities.floor;
   var newbarcodeDict = {};
   for (var floorId in floorInfo) {
@@ -1154,6 +1159,7 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap) => {
     for (var key in tileIdToWorldCoordinateMap) {
         worldcord_mapping.push([key, tileIdToWorldCoordinateMap[key]]);
     }
+
     // sort world cordinate for adjacency
     worldcord_mapping.sort(
        function(a, b) {          
@@ -1195,8 +1201,10 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap) => {
       }
       currentFloorBarcodeDict[barcode] = barcodeInfo;
     }
+
     newbarcodeDict = { ...newbarcodeDict, ...currentFloorBarcodeDict };
   }
+  console.log(">>>>>",JSON.stringify(newbarcodeDict))
   entities.barcode = newbarcodeDict;
   normalizedMap.entities = entities;
   return normalizedMap;
@@ -1225,6 +1233,38 @@ export const positionPoint = ( position, elevator_id ) => ({
     position
   }
 });
+
+export const updateAndCheckChargerNeighbour = (dispatch,getState) =>{
+  const { normalizedMap } = getState();
+  var entities = normalizedMap.entities;
+  var chargerDict = entities.charger
+  var barcode_dict = entities.barcode;
+
+  for (const [key, value] of Object.entries(chargerDict)) {
+  var charger_coordinate = barcode_dict[value["coordinate"]]
+  var charger_adjacency_list = convertNestedListToList(charger_coordinate["adjacency"])
+  var charger_direction = value["charger_direction"]
+  for (var dir = 0; dir < 4; dir++) {
+    if (dir !== charger_direction && charger_adjacency_list[dir]) {
+        barcode_dict[value["coordinate"]]["neighbours"][dir] = [1,0,0]
+        barcode_dict[charger_adjacency_list[dir]]['neighbours'][(dir + 2) % 4]= [1,0,0]
+    }else if (dir == charger_direction && charger_adjacency_list[dir]){
+      barcode_dict[value["coordinate"]]["neighbours"][dir] = [1,1,0]
+    }
+  }
+  var reinit_coordinate = charger_adjacency_list[charger_direction]
+  var reinit_coordinate_adjacency = convertNestedListToList(barcode_dict[charger_adjacency_list[charger_direction]]["adjacency"])
+  for (var dir = 0; dir < 4; dir++) {
+    if (dir === charger_direction  && charger_adjacency_list[dir]) {
+        barcode_dict[reinit_coordinate]["neighbours"][dir] = [1,1,0]
+        barcode_dict[reinit_coordinate_adjacency[dir]]["neighbours"][(charger_direction + 2) % 4] = [1,1,0]
+        
+    }else if (dir === (charger_direction + 2) % 4 && charger_adjacency_list[dir]){
+      barcode_dict[reinit_coordinate]["neighbours"][(charger_direction + 2) % 4] = [1,1,0]
+    }
+  }
+}
+}
 
 export const ConvertEntitiesInBarcodeFormat = (dispatch,getState) => {
 
