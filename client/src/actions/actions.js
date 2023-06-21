@@ -31,7 +31,6 @@ import exportMap from "common/utils/export-map";
 import { SPRITESHEET_PATH,DEFAULT_BARCODE_FORMAT,TTP_BARCODE_FORMAT } from "../constants";
 import { fitToViewport, setViewportClamp } from "./viewport";
 import { getLinearWorldCordXY ,mappedNeighbour} from "./AddAdjacency";
-
 import { convertNestedListToList} from "./conveyor";
 import { setErrorMessage, setSuccessMessage } from "./message";
 import {
@@ -1140,7 +1139,6 @@ export const addWorldCoordinateToMap = (normalizedMap) => {
 export const addWorldCoordinateAdjacencyToMap = (normalizedMap) => {
   var entities = normalizedMap.entities;
   const oldBarcodeDict = entities.barcode;
-  const chargersDict = entities.charger;
   const floorInfo = entities.floor;
   var newbarcodeDict = {};
   for (var floorId in floorInfo) {
@@ -1204,7 +1202,6 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap) => {
 
     newbarcodeDict = { ...newbarcodeDict, ...currentFloorBarcodeDict };
   }
-  console.log(">>>>>",JSON.stringify(newbarcodeDict))
   entities.barcode = newbarcodeDict;
   normalizedMap.entities = entities;
   return normalizedMap;
