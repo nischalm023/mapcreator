@@ -22,6 +22,36 @@ app.use(express.urlencoded({ limit: "50mb" }));
 
 app.get("/api/test", (req, res) => res.json("test api response"));
 
+app.get("/api/backtracking",
+  wrap(async(request,response) => {
+  const attributes = ["id"];
+  var maps = await Map.findAll({
+        attributes,
+      })
+  var mapsJson = maps.map(map => map.toJSON());
+  for (var i = 0; i < mapsJson.length; i++) {
+    var map =  await Map.findByPk(mapsJson[i]["id"]);
+      var map_data = map.toJSON()
+      if(map_data["map"] && map_data["map"].hasOwnProperty("floors")){
+        var floor_list = map_data["map"]["floors"]
+        for (var j = 0; j < floor_list.length; j++) {
+          var map_values = floor_list[j]["map_values"]
+          for (var k = 0; k < map_values.length; k++) {
+            if(!map_values[k].hasOwnProperty("default_barocde")){
+              if(/^(\d+\.\d+)$/.test(map_values[k]["barcode"])){
+                map_values[k]["default_barcode"]= map_values[k]["barcode"]
+              }
+            }
+          }
+        }
+    await map.update({ map: map_data["map"]});    
+    }
+  }
+  console.log("done")
+  })
+);
+
+
 // should only return the id of the map
 app.post(
   "/api/createMap",
