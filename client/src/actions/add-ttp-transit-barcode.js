@@ -407,7 +407,6 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
   const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
   const barcodes = getBarcodes(state);
   const refBarcodeInfo = barcodes[tileId];
-  const barcodeSpacing = state.barcodeSpacing
   const oldNeighbour = getNeighbourBarcodeIncludingDisconnectedInDirection(
     tileId,
     barcodes,
@@ -425,8 +424,11 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
     var [ttp_barcode_value,error] = setCoexistenceBarcodeLabel(dispatch,barcode,direction,
       [transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]],arbitrary_origin_value,vda_offset,
       state.barcodeDistance,currentFloor)
-    return [ttp_barcode_value,error]
-  }
+      if(error){
+        return dispatch(setErrorMessage(ttp_barcode_value)
+        );
+      }  
+    }
 
   // SizeInfo
   var sizeInfo = _.cloneDeep(refBarcodeInfo.size_info);
@@ -457,6 +459,7 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
       }
     }
   }else{
+    const barcodeSpacing = refBarcodeInfo.size_info[direction] + oldNeighbour.size_info[(direction + 2) % 4]
     if(distance<sizeInfo[direction]){
       // sizeInfo[direction] = parseInt((2 * refBarcodeInfo.size_info[direction] - distance) / 2);
       if(direction===2||direction===3){
@@ -481,7 +484,6 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
       oldNeighbour.size_info[(direction + 2) % 4] = barcodeSpacing - (sizeInfo[(direction + 2) % 4]+refBarcodeInfo.size_info[direction]+ sizeInfo[direction])
   }
   }
-  // oldNeighbour.size_info[(direction + 2) % 4] = barcodeSpacing - (sizeInfo[(direction + 2) % 4]+refBarcodeInfo.size_info[direction]+ sizeInfo[direction])
  
 
   var cornerWorldCooordinate = calculate_corner_world_cordinate(sizeInfo,[transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]])

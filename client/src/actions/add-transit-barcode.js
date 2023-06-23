@@ -167,7 +167,6 @@ const getTransitBarcodeInfo = (state, formData) => {
   const refBarcodeWorldCoord = tileToWorldCoordinate(state, { tileId });
   const barcodes = getBarcodes(state);
   const refBarcodeInfo = barcodes[tileId];
-  const barcodeSpacing = state.barcodeSpacing
   console.log("state",state)
   const oldNeighbour = getNeighbourBarcodeIncludingDisconnectedInDirection(
     tileId,
@@ -182,6 +181,8 @@ const getTransitBarcodeInfo = (state, formData) => {
   const transitBarcodeCoordinate = getTransitCoordinate(state);
   // SizeInfo
   const sizeInfo = _.cloneDeep(refBarcodeInfo.size_info);
+  var barcodeSpacing
+  barcodeSpacing = refBarcodeInfo.size_info[direction] + oldNeighbour.size_info[(direction + 2) % 4]
   sizeInfo[direction] = parseInt((2 * refBarcodeInfo.size_info[direction] - distance) / 2);
   if(direction===2||direction===3){
     sizeInfo[(direction + 2) % 4] = parseInt(distance / 2);
