@@ -396,7 +396,7 @@ const viewportReducer = (
   }
   return state;
 };
-const barcodeSpacingReducer = (state = null, action) => {
+const barcodeSpacingReducer = (state = 1500, action) => {
   switch (action.type) {
     case "CHANGE-BARCODE-SPACING":
       return action.value;
