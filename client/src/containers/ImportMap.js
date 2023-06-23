@@ -43,6 +43,13 @@ class ImportMap extends Component {
     let gsbAgentId = params.get('gsb_agent_id');
     let gsbFunctionalAreaId = params.get('functional_area_id');
     let uid = params.get('uid');
+    for(let i=0;i<imported.floors.length;i++){
+      for(let j=0;j<imported.floors[i].map_values.length;j++){
+        if(imported.floors[i].map_values[j].isIoPoint){
+          delete imported.floors[i].map_values[j].isIoPoint 
+        }
+      }
+    }
     createMap(imported, name, gsb, uid, 'import', gsbSolutionId, gsbAgentId, gsbFunctionalAreaId)
       .then(handleErrors)
       .then(res => res.json())
