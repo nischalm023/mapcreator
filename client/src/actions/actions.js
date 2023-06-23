@@ -812,12 +812,38 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
 
   var data = new FormData();
   let mapData;
+  console.log(",,,,,,,,,,,,,,,,",JSON.stringify(exportedJson["map"]))
   Object.keys(exportedJson).forEach((keyName) => {
       if (keyName !== "sector") {
         if (keyName === "sectorBarcodeMapping"){
           data.append('files', new File([new Blob([JSON.stringify(exportedJson[keyName])], { type: 'application/json' })], 'sector.json', {type: "application/json"}));
         } else if (keyName === "map") {
-          mapData = exportedJson[keyName].length == 1 ? exportedJson[keyName][0]['map_values'] : exportedJson[keyName];
+            let gsbExportedJson = exportedJson[keyName].map(({ floor_id, map_values }) => {
+            var barcode_val = map_values[0]["barcode"]
+              if(/^(\d{10})$/.test(barcode_val)){ 
+                var vda_data = ""
+                for(var i = 0; i < map_values.length; i++) {
+                    if(map_values[i].world_coordinate_reference_neighbour=="0,0"){
+                      var vda_data = {"barcode":map_values[i]["barcode"],"vda5050_coordinate":map_values[i]["vda_world_coordinate"]}
+                      break
+                    }
+                }
+                if(vda_data ===""){
+                 var vda_data = {"barcode":barcode_val,"vda5050_coordinate":map_values[0]["vda_world_coordinate"]}
+                }
+                return({
+                  floor_id,
+                  map_values:map_values,
+                  vda5050_reference:vda_data
+                })
+              }else{
+                return({
+                  floor_id,
+                  map_values:map_values,
+                })
+              }
+          })
+          mapData = gsbExportedJson;
           data.append('files', new File([new Blob([JSON.stringify(mapData)], { type: 'application/json' })], 'map.json', {type: "application/json"}));
         } else {
           data.append('files', new File([new Blob([JSON.stringify(exportedJson[keyName])], { type: 'application/json' })], `${keyName}.json`, {type: "application/json"}));
