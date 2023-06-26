@@ -812,7 +812,6 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
 
   var data = new FormData();
   let mapData;
-  console.log(",,,,,,,,,,,,,,,,",JSON.stringify(exportedJson["map"]))
   Object.keys(exportedJson).forEach((keyName) => {
       if (keyName !== "sector") {
         if (keyName === "sectorBarcodeMapping"){

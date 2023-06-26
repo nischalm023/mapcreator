@@ -75,8 +75,8 @@ export default (withWorldCoordinate, singleFloor = false) => {
   })
 
   // make single floor if required
-  if (singleFloor && ret.map.length == 1) {
-    ret.map = ret.map[0].map_values;
+  if (singleFloor) {
+    ret.map = ret.map[0];
   }
   // merge things from all floors into respective files
   // don't forget dock_point.json and queue_data.json even though not used
