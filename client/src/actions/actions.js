@@ -866,6 +866,17 @@ export const requestValidation = (id, email, map_updated_time) => (
   const exportedJson = exportMap(normalizedMap, false);
   var payload = formatMapWithDataSuffix(id, exportedJson, map_updated_time);
   payload["email"] = email;
+  const params = new URLSearchParams(window.location.search);
+  const agentId = params.get('gsb_agent_id') ? params.get('gsb_agent_id') : null;
+  let build_version = "";
+  if(agentId==="1"){
+    build_version = "rc-130_rtp";
+    payload["build_version"] = build_version;
+  }
+  else if(agentId==="2" || agentId==="5"){
+    build_version = "rc-130_ttp";
+    payload["build_version"] = build_version;
+  }
   // map validation request on Map Validator
   return requestValidationApi(payload)
     .then(handleErrors)
