@@ -74,7 +74,9 @@ export const dummyState = {
     queueMode: false,
     zoneViewMode: false,
     sectorViewMode: false,
-    directionViewMode: false
+    directionViewMode: false,
+    iopointMode: true,
+    totestorageMode: true,
   },
   selectedArea: null,
   viewport: {

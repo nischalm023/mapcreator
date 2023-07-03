@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import ButtonForm from "./ButtonForm";
 import Select from "react-select";
-
+import {existingStorableLocation} from "../CreateToteLocations";
 
 let ndeepOptions = [
   {value: "single", label: "Single"},
@@ -78,7 +78,7 @@ class BaseForm extends Component {
     }
     this.setState({ show: !this.state.show, formData: {} });
   }
-  onSubmitHandler = (onSubmit, barcode, ioPointId, nextToteStorableId) => {
+  onSubmitHandler = (onSubmit, barcode, ioPointId, nextToteStorableId,existing_location_list,floor_barcodes) => {
     let finalSetOfTotes = {};
     for (let key in this.state.multiSchema) {
       let tote = this.state.multiSchema[key];
@@ -105,6 +105,24 @@ class BaseForm extends Component {
           if(this.state.multiSchema[key].edit===true){
             error = true;
             multiSchema[key].error = "You have unsaved changes. Please confirm them."; 
+          }
+        };
+      }
+      this.setState({
+        multiSchema: multiSchema
+      });
+    }
+    if(!error){
+      let multiSchema = this.state.multiSchema;
+      if(!error){
+        for (let key in this.state.multiSchema){
+          var bot_direction =  this.state.multiSchema[key]["bot_direction"]["value"]["value"]
+          var storable_direction = this.state.multiSchema[key]["storable_direction"]["value"]["value"]
+          var io_point_worldcoordinate = JSON.parse(floor_barcodes[Object.keys(barcode)[0]]["world_coordinate"])
+          var [x,y] = existingStorableLocation(bot_direction,storable_direction,io_point_worldcoordinate[0],io_point_worldcoordinate[1])
+          if(existing_location_list.includes(`[${x},${y}]`)){
+            error = true;
+            multiSchema[key].error = "Tote storable at this location already exists. Please check.";
           }
         };
       }
@@ -260,9 +278,10 @@ class BaseForm extends Component {
       agent,
       botDirection,
       existingTotes,
+      existing_location_list,
+      floor_barcodes,
       ...rest
     } = this.props;
-
     var multiRows = [];
     var _this = this;
     if(_this.state.multiSchema){
@@ -413,7 +432,7 @@ class BaseForm extends Component {
                       n-deep
                     </div>
                     <div className="col-2 col-lg-2 col-sm-2 col-md-2">
-                      Bot Direction
+                      Bot Orientation
                     </div>
                     <div className="col-2 col-lg-2 col-sm-2 col-md-2">
                       Storable Direction
@@ -430,7 +449,7 @@ class BaseForm extends Component {
           </div>
           <div>
             <button type="button" onClick={() => {
-              this.onSubmitHandler(onSubmit, barcode, ioPointId, nextToteStorableId);
+              this.onSubmitHandler(onSubmit, barcode, ioPointId, nextToteStorableId,existing_location_list,floor_barcodes);
             }}
               className="btn btn-outline-primary mr-1">
               Submit

@@ -54,3 +54,9 @@
 .conveyor-buttons .btn-group { 
   display: block !important;
 }
+.IO-checkbox{
+  border: 1px solid #c5c5c5;
+  border-radius: 4px;
+  padding: 10px;
+  margin: 0 10px; 
+}

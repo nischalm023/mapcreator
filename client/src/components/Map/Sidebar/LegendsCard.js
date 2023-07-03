@@ -7,6 +7,7 @@ import entryConveyor from "sprites/entry.png";
 import exitConveyor from "sprites/exit.png";
 import endConveyor from "sprites/end.png";
 import activeConveyor from "sprites/active.png";
+import toteStorable from "sprites/totestorables.png"
 import * as constants from "../../../constants";
 const title = "Legends";
 const LegendsMap = constants.LEGENDSMAP;
@@ -35,6 +36,9 @@ const LegendsCard = () => (
             </div>}
             {e.icon5 && <div>
               <img src={exitConveyor} style={{height: 26, marginTop: 2}} />
+            </div>}
+            {e.icon6 && <div>
+              <img src={toteStorable} style={{height: 26, marginTop: 2}} />
             </div>}
             <div className="col-10">{e.name}</div>
           </div>

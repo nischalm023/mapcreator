@@ -146,5 +146,44 @@ const TTPCheckbox = ({ val, onChange }) => (
   </label>
 );
 
+const IOPointCheckbox = ({ val, onChange }) => (
+  <label
+    style={{
+      display:"flex",
+      justifyContent:"space-between",
+      padding:"20px 20px 10px 20px",
+      marginBottom:"0px"
+    }}
+  >
+    Tote Storable - IO Points:
+    <input
+      name="queuemode"
+      type="checkbox"
+      checked={val}
+      onChange={onChange}
+    />
+  </label>
+);
 
-export { MultiQueueCheckbox, QueueCheckbox, ZoneViewCheckbox, SectorViewCheckbox, DirectionViewCheckbox , TTPCheckbox};
+const ToteStorageCheckbox = ({ val, onChange }) => (
+  <label
+    style={{
+      display:"flex",
+      justifyContent:"space-between",
+      padding: "10px 20px 20px 20px",
+      marginBottom:"0px"
+
+    }}
+  >
+    Tote Storables:
+    <input
+      name="queuemode"
+      type="checkbox"
+      checked={val}
+      onChange={onChange}
+    />
+  </label>
+);
+
+
+export { MultiQueueCheckbox, QueueCheckbox, ZoneViewCheckbox, SectorViewCheckbox, DirectionViewCheckbox , TTPCheckbox, IOPointCheckbox,ToteStorageCheckbox};

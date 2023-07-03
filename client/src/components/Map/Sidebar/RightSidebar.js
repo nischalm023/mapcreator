@@ -53,7 +53,9 @@ import {
   SectorViewCheckbox,
   DirectionViewCheckbox,
   ConveyorCheckbox,
-  TTPCheckbox
+  TTPCheckbox,
+  IOPointCheckbox,
+  ToteStorageCheckbox
 } from "./Checkboxes";
 
 class RightSidebar extends Component {
@@ -72,7 +74,7 @@ class RightSidebar extends Component {
   };
 
   render() {
-    const { queueMode, multiQueueMode, zoneViewMode, sectorViewMode, directionViewMode, TTPMode, dispatch } = this.props;
+    const { queueMode, multiQueueMode, zoneViewMode, sectorViewMode, directionViewMode, TTPMode,dispatch } = this.props;
     const { open } = this.state;
     
     return (
@@ -178,6 +180,7 @@ class RightSidebar extends Component {
               </div>
             </div>
           </div>
+          <br></br>
           <div className="row">
             <div className="col">
               <TTPCheckbox

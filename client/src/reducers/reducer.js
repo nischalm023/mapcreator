@@ -186,6 +186,22 @@ const TTPModeReducer = (state = false, action) => {
   return state;
 };
 
+const IOPointReducer = (state = true, action) => {
+  switch (action.type) {
+    case "TOGGLE-IO-POINT-MODE":
+      return !state;
+  }
+  return state;
+};
+
+const ToteStorageReducer = (state = true, action) => {
+  switch (action.type) {
+    case "TOGGLE-TOTE-STORAGE-MODE":
+      return !state;
+  }
+  return state;
+};
+
 const multiQueueModeReducer = (state = false, action) => {
   switch (action.type) {
     case "TOGGLE-MULTI-QUEUE-MODE":
@@ -227,6 +243,8 @@ export const baseSelectionReducer = combineReducers({
   zoneViewMode: zoneViewModeReducer,
   sectorViewMode: sectorViewModeReducer,
   directionViewMode: directionViewModeReducer,
+  iopointMode: IOPointReducer,
+  totestorageMode: ToteStorageReducer,
   
   metaKey: (e = false) => e,
   shiftKey: (e = false) => e
@@ -250,7 +268,9 @@ export const selectionReducer = (
     multiQueueMode: false,
     zoneViewMode: false,
     sectorViewMode: false,
-    directionViewMode: false
+    directionViewMode: false,
+    iopointMode: true,
+    totestorageMode:true
   },
   action
 ) => {

@@ -35,6 +35,7 @@ export const getMainTileSpriteData = createSelector(
   state => state.selection.zoneViewMode,
   state => state.selection.sectorViewMode,
   state => state.normalizedMap.entities.odsExcluded || {},
+
   (barcode, boundingBox, { xScale, yScale }, zoneViewMode, sectorViewMode, odsExcluded) => {
     var tileSprite = constants.NORMAL;
     // don't show storables in zone view mode; otherwise their darker color messes with the tint
@@ -64,6 +65,8 @@ export const getMainTileSpriteData = createSelector(
       // remove_conveyor_tile = 1 (remove selected conveyor tile)
       // conveyor_selected_status = 0 (selected conveyor tile for normal color)
     // }
+    if ( barcode.success_overlap_barcode_status === 1 && !zoneViewMode && !sectorViewMode) tileSprite = constants.QUEUE;
+    if ( barcode.unsuccess_overlap_barcode_status === 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.ODS_EXCLUDED;
     if ( barcode.highlight_status > 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.HIGHLIGHT;
     if ( barcode.grid_attribute === "conveyor_track" && !zoneViewMode && !sectorViewMode) tileSprite = constants.SELECT_CONVEYOR;
     if ( barcode.grid_attribute === "conveyor_entry" && !zoneViewMode && !sectorViewMode) tileSprite = constants.ENTRY_CONVEYOR;
@@ -71,9 +74,6 @@ export const getMainTileSpriteData = createSelector(
     if ( barcode.grid_attribute === "conveyor_end" && !zoneViewMode && !sectorViewMode) tileSprite = constants.END_CONVEYOR;
     if ( barcode.grid_attribute === "conveyor_pps_point" && !zoneViewMode && !sectorViewMode) tileSprite = constants.ACTIVE_CONVEYOR;
     if ( barcode.remove_conveyor_tile === 1 && !zoneViewMode && !sectorViewMode) tileSprite = constants.ODS_EXCLUDED;
-    if ( barcode.success_overlap_barcode_status === 1 && !zoneViewMode && !sectorViewMode) tileSprite = constants.QUEUE;
-    if ( barcode.unsuccess_overlap_barcode_status === 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.ODS_EXCLUDED;
-    //if ( barcode.conveyor_selected_status === 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.NORMAL;
     return {
       name: tileSprite,
       x: boundingBox.left,
@@ -219,6 +219,52 @@ export const getDirectionalitySpritesData = createSelector(
   }
 );
 
+const renderStorable = (bot_direction,storable_direction,io_point_x,io_point_y,xScale,yScale) =>{
+    if(bot_direction=="north"){
+        if(storable_direction == "east"){
+            var x = io_point_x + (constants.STORABLE_OFFSET_X * constants.BARCODE_CLICKABLE_AREA_RATIO)
+            var y = io_point_y - (constants.STORABLE_OFFSET_Y * constants.BARCODE_CLICKABLE_AREA_RATIO) - (constants.STORABLE_POINT_HEIGHT)/2*yScale
+        }else{
+            var x = io_point_x - (constants.STORABLE_OFFSET_X * constants.BARCODE_CLICKABLE_AREA_RATIO) - constants.STORABLE_POINT_HEIGHT*xScale
+            var y = io_point_y - (constants.STORABLE_OFFSET_Y * constants.BARCODE_CLICKABLE_AREA_RATIO) - (constants.STORABLE_POINT_HEIGHT)/2*yScale
+        }
+    }
+    if(bot_direction=="south"){
+        if(storable_direction == "east"){
+            var x = io_point_x + (constants.STORABLE_OFFSET_X * constants.BARCODE_CLICKABLE_AREA_RATIO)
+            var y = io_point_y + (constants.STORABLE_OFFSET_Y * constants.BARCODE_CLICKABLE_AREA_RATIO) - (constants.STORABLE_POINT_HEIGHT)/2*yScale
+        }else{
+            var x = io_point_x - (constants.STORABLE_OFFSET_X * constants.BARCODE_CLICKABLE_AREA_RATIO) - constants.STORABLE_POINT_HEIGHT*xScale
+            var y = io_point_y + (constants.STORABLE_OFFSET_Y * constants.BARCODE_CLICKABLE_AREA_RATIO) - (constants.STORABLE_POINT_HEIGHT)/2*yScale
+        }
+    }
+    if(bot_direction=="west"){
+        if(storable_direction == "north"){
+            var x = io_point_x - (constants.STORABLE_OFFSET_Y * constants.BARCODE_CLICKABLE_AREA_RATIO) - (constants.STORABLE_POINT_HEIGHT)/2*xScale
+            var y = io_point_y - (constants.STORABLE_OFFSET_X * constants.BARCODE_CLICKABLE_AREA_RATIO) - constants.STORABLE_POINT_HEIGHT*yScale
+        }else{
+            var x = io_point_x - (constants.STORABLE_OFFSET_Y * constants.BARCODE_CLICKABLE_AREA_RATIO) - (constants.STORABLE_POINT_HEIGHT)/2*xScale
+            var y = io_point_y + (constants.STORABLE_OFFSET_X * constants.BARCODE_CLICKABLE_AREA_RATIO)
+        }
+    }
+    if(bot_direction=="east"){
+        if(storable_direction == "north"){
+            var x = io_point_x + (constants.STORABLE_OFFSET_Y * constants.BARCODE_CLICKABLE_AREA_RATIO) - (constants.STORABLE_POINT_HEIGHT)/2*xScale
+            var y = io_point_y - (constants.STORABLE_OFFSET_X * constants.BARCODE_CLICKABLE_AREA_RATIO) - constants.STORABLE_POINT_HEIGHT*yScale
+        }else{
+            var x = io_point_x + (constants.STORABLE_OFFSET_Y * constants.BARCODE_CLICKABLE_AREA_RATIO) - (constants.STORABLE_POINT_HEIGHT)/2*xScale
+            var y = io_point_y + (constants.STORABLE_OFFSET_X * constants.BARCODE_CLICKABLE_AREA_RATIO) 
+        }
+    }
+    return {"name":constants.TOTE_STORABLE,"x":x,"y":y,xScale,yScale}
+}
+
+export const getStorableTileSpriteScale = (xWidth,yHeight) => {
+  const xScale = (xWidth/1500)*constants.STORABLE_X_SCALE
+  const yScale = (yHeight/1500) * constants.STORABLE_Y_SCALE;
+  return [xScale, yScale]
+}
+
 export const getAllSpritesData = createSelector(
   getMainTileSpriteData,
   getBarcodeDigitSpritesData,
@@ -226,6 +272,9 @@ export const getAllSpritesData = createSelector(
   tileToWorldCoordinate,
   getTileSpriteScale,
   state => state.selection.directionViewMode,
+  storable_state => storable_state.normalizedMap.entities.toteStorables,
+  state => state.selection.totestorageMode,
+  state => state.selection.iopointMode,
   barcode_state => barcode_state.normalizedMap.entities.barcode,
   (_state,props)=> props.tileId,
   (
@@ -235,12 +284,41 @@ export const getAllSpritesData = createSelector(
     { x: centreX, y: centreY },
     { xScale, yScale },
     directionViewMode,
+    storable_state,
+    totestorageMode,
+    iopointMode,
     barcode_state,
     props,
   ) => {
     let name = constants.BARCODE_CENTRE_SPRITE
     let io_point={}
+    var storable_list = []
+    if(barcode_state[props]["coordinate"]=="432,9"){
+      console.log("xScale,yScale================",xScale,yScale)
+    }
     if(barcode_state[props].isIoPoint){
+      if(storable_state && totestorageMode){
+        var storable_list = []
+        for (const [key, value] of Object.entries(storable_state)) {
+            if(Object.keys(value["barcode"])[0] === barcode_state[props]["coordinate"]){
+              var bot_direction = value["bot_direction"]["value"]["value"]
+              var storable_direction = value["storable_direction"]["value"]["value"]
+              var io_point_x = centreX
+              var io_point_y = centreY
+              if(bot_direction === "north" || bot_direction === "south"){
+                var [xStorableScale,yStorableScale] = getStorableTileSpriteScale(constants.STORABLE_DEFAULT_WIDTH,constants.STORABLE_DEFAULT_HEIGHT)
+              }
+              if(bot_direction === "east" || bot_direction === "west"){
+                var [xStorableScale,yStorableScale] = getStorableTileSpriteScale(constants.STORABLE_DEFAULT_HEIGHT,constants.STORABLE_DEFAULT_WIDTH)
+              }
+              
+              // console.log("xStorableScale,yStorableScale============",xStorableScale,yStorableScale)
+              var storable_dict = renderStorable(bot_direction,storable_direction,io_point_x,io_point_y,xStorableScale,yStorableScale)
+              storable_list.push(storable_dict)
+            }
+        }
+      }
+      if(iopointMode)
       io_point={
         name : constants.IO_POINTS,
         x : centreX-constants.IO_POINT_HEIGHT*xScale,
@@ -253,6 +331,7 @@ export const getAllSpritesData = createSelector(
       main: mainSpriteData,
       ...barcodeDigitSpritesData,
       io_point:io_point,
+      storable:storable_list,
       // the centre x sprite
       centre: {
         name: constants.BARCODE_CENTRE_SPRITE,

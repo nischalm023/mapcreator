@@ -242,7 +242,6 @@ export const getPpsQueueMap = (state) => {
       var qb_coordinate = currentFloorBarcodeToCoordinateKeySelector(state, {
         barcode: queue_barcode,
       });
-
       if (qb_coordinate != coordinate) {
         ret[qb_coordinate] = constants.QUEUE;
       }

@@ -196,7 +196,7 @@ class Map extends Component {
     if(this.state.importMap["autocad"]){
           var response = runHaiMapConversionScriptToMap(this.state.importMap["autocad"]).then(
           response=>{
-            const { nMap,dispatch,errorMessage,successMessage,queueMode,zoneViewMode,sectorViewMode,directionViewMode } = this.props;
+            const { nMap,dispatch,errorMessage,successMessage,queueMode,zoneViewMode,sectorViewMode,directionViewMode,iopointMode, totestorageMode } = this.props;
             if(response.status == "404"){
               dispatch(setErrorMessage(response["content"]))
             }
@@ -226,7 +226,9 @@ class Map extends Component {
       TTPMode,
       zoneViewMode,
       sectorViewMode,
-      directionViewMode
+      directionViewMode,
+      iopointMode,
+      totestorageMode
     } = this.props;
     // mapId may be different from params since it may not have been fetched yet...
     const mapId = nMap ? Object.entries(nMap.entities.mapObj)[0][1].id : 0;
@@ -297,6 +299,8 @@ class Map extends Component {
               zoneViewMode={zoneViewMode}
               sectorViewMode={sectorViewMode}
               directionViewMode={directionViewMode}
+              iopointMode={iopointMode}
+              totestorageMode={totestorageMode}
             />}
             <form onSubmit={this.onSubmit}>
               <div className={checked_version === "true" ? "d-none" : "form-row"}>
@@ -477,5 +481,7 @@ export default connect(state => ({
   errorMessage: state.errorMessage,
   zoneViewMode: state.selection.zoneViewMode,
   sectorViewMode: state.selection.sectorViewMode,
-  directionViewMode: state.selection.directionViewMode
+  directionViewMode: state.selection.directionViewMode,
+  iopointMode: state.selection.iopointMode,
+  totestorageMode: state.selection.totestorageMode
 }))(Map);

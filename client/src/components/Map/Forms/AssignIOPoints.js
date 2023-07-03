@@ -13,7 +13,7 @@ const schema = {
     properties: {
         bot_direction: {
             type: "array",
-            title: "Bot Direction",
+            title: "Bot Orientation",
             items: {
                 type: "string",
                 enum: ["north", "west", "south", "east"],

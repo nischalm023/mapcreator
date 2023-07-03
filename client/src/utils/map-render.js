@@ -14,23 +14,42 @@ import * as PIXI from "pixi.js";
 
 // some exports are for testing
 
+
 export var createOrUpdateAllSprites = (container, state, tileId) => {
   var spriteData = getAllSpritesData(state, { tileId });
   var tint = tileTintSelector(state, { tileId });
   container.spriteMap[tileId] = {};
   Object.entries(spriteData).forEach(([key, value]) => {
-    const { name, x, y, rotation, xScale, yScale } = value;
-    var sprite = new PIXI.Sprite(
-      PIXI.loader.resources["mySpritesheet"].textures[name]
-    );
-    if (xScale) sprite.scale.x = xScale;
-    if (yScale) sprite.scale.y = yScale;
-    container.addChild(sprite);
-    container.spriteMap[tileId][key] = sprite;
-    sprite.x = x;
-    sprite.y = y;
-    sprite.tint = tint;
-    if (rotation) sprite.rotation = rotation;
+    if(key=="storable" && value.length>0){
+      for (var i = 0; i < value.length; i++) {
+        const { name, x, y, rotation, xScale, yScale } = value[i];
+        var sprite = new PIXI.Sprite(
+          PIXI.loader.resources["mySpritesheet"].textures[name]
+        );
+        if (xScale) sprite.scale.x = xScale;
+        if (yScale) sprite.scale.y = yScale;
+        container.addChild(sprite);
+        container.spriteMap[tileId][key] = sprite;
+        sprite.x = x;
+        sprite.y = y;
+        sprite.tint = tint;
+        if (rotation) sprite.rotation = rotation;
+      }
+    }
+    else{
+      const { name, x, y, rotation, xScale, yScale } = value;
+      var sprite = new PIXI.Sprite(
+        PIXI.loader.resources["mySpritesheet"].textures[name]
+      );
+      if (xScale) sprite.scale.x = xScale;
+      if (yScale) sprite.scale.y = yScale;
+      container.addChild(sprite);
+      container.spriteMap[tileId][key] = sprite;
+      sprite.x = x;
+      sprite.y = y;
+      sprite.tint = tint;
+      if (rotation) sprite.rotation = rotation;
+      }
   });
 };
 
@@ -48,7 +67,8 @@ export var tileIdsUpdate = (container, state, prevState) => {
     prevState.selection.zoneViewMode === state.selection.zoneViewMode &&
     prevState.selection.directionViewMode ===
       state.selection.directionViewMode &&
-    getZoneToColorMap(prevState) === getZoneToColorMap(state)
+    getZoneToColorMap(prevState) === getZoneToColorMap(state) &&
+    Object.keys(state.normalizedMap.entities.toteStorables).length===0
   )
     return; // nothing to do.
   // remove childrend and set spritemap to empty... actually pretty efficient.
