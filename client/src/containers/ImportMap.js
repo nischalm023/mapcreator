@@ -49,32 +49,32 @@ class ImportMap extends Component {
         if(imported.floors[i].map_values[j].isIoPoint){
           delete imported.floors[i].map_values[j].isIoPoint
           }
-        if(imported.floors[i].map_values[j].grid_attribute){
-          imported.floors[i].map_values[j].grid_attribute = ''
-        }
+//        if(imported.floors[i].map_values[j].grid_attribute){
+//          imported.floors[i].map_values[j].grid_attribute = ''
+//        }
       }
       //Delete PPS Point for non RTP PPS since conveyor json is not uploaded
-      console.log(">>>>>>>>>>>>>>>>>>>>string",JSON.stringify(imported.floors[i].ppses))
-      for(let j=0;j<imported.floors[i].ppses.length;j++){
-        if(imported.floors[i].ppses[j]){
-            for(let k=0;k<imported.floors[i].ppses[j].pps_points.length;k++){
-                if(imported.floors[i].ppses[j].pps_points[k] && imported.floors[i].ppses[j].pps_points[k].type !== "rtp"){
-                    delete imported.floors[i].ppses[j].pps_points[k]
-                }
-            }
-            imported.floors[i].ppses[j].pps_points = imported.floors[i].ppses[j].pps_points.filter(elm => elm);
-            // //Delete PPS Point key since no pps point present
-            // var isPpsPointPresent = false;
-            // for(let k=0;k<imported.floors[i].ppses[j].pps_points.length;k++){
-            //     if(imported.floors[i].ppses[j].pps_points[k] && imported.floors[i].ppses[j].pps_points[k] !== null){
-            //         isPpsPointPresent = true;
-            //     }
-            // }
-            // if(!isPpsPointPresent){
-            //     delete imported.floors[i].ppses[j].pps_points
-            // }
-        }
-      }
+//      console.log(">>>>>>>>>>>>>>>>>>>>string",JSON.stringify(imported.floors[i].ppses))
+//      for(let j=0;j<imported.floors[i].ppses.length;j++){
+//        if(imported.floors[i].ppses[j]){
+//            for(let k=0;k<imported.floors[i].ppses[j].pps_points.length;k++){
+//                if(imported.floors[i].ppses[j].pps_points[k] && imported.floors[i].ppses[j].pps_points[k].type !== "rtp"){
+//                    delete imported.floors[i].ppses[j].pps_points[k]
+//                }
+//            }
+//            imported.floors[i].ppses[j].pps_points = imported.floors[i].ppses[j].pps_points.filter(elm => elm);
+//            // //Delete PPS Point key since no pps point present
+//            // var isPpsPointPresent = false;
+//            // for(let k=0;k<imported.floors[i].ppses[j].pps_points.length;k++){
+//            //     if(imported.floors[i].ppses[j].pps_points[k] && imported.floors[i].ppses[j].pps_points[k] !== null){
+//            //         isPpsPointPresent = true;
+//            //     }
+//            // }
+//            // if(!isPpsPointPresent){
+//            //     delete imported.floors[i].ppses[j].pps_points
+//            // }
+//        }
+//      }
     }
     createMap(imported, name, gsb, uid, 'import', gsbSolutionId, gsbAgentId, gsbFunctionalAreaId)
       .then(handleErrors)
