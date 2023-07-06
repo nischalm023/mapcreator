@@ -6,8 +6,13 @@
     width: 1100px;
     max-width: 100%;
 }
+
+.select-conveyor-modal{
+    width: 550px;
+    max-width: 100%;
+}
 .manage-conveyor-modal{
-    width: 780px;
+    width: 900px;
     max-width: 100%;
 }
 .checkbox-inline{

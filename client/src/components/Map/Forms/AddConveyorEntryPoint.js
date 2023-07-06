@@ -133,11 +133,8 @@ class AddEntryPoint extends Component {
           <ButtonForm
             show={show}
             disabled={disabled}
-            // toggle={()=>this.toggle(bot_direction,selected_tile,conveyorTile,conveyor_id, 
-            //   floor_barcodes,direction)}
             toggle={()=>this.toggle(selected_tile,conveyorTile,conveyor_id, 
               floor_barcodes,direction,io_point)}
-            // bot_direction={bot_direction}
             buttonText="Select Conveyor Entry Point"
             >
             <form onSubmit={(e)=>this.handleSubmit(e,dispatch,conveyor_id,direction,entry_point)}>

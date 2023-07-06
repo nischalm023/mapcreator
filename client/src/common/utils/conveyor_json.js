@@ -30,19 +30,44 @@ const getStepConveyorData = (value, barcode) =>{
     var conveyor_step = []
     for (var i = 0; i < value["selected_tile"].length; i++) {
         if(checkPoint(value["conveyor_entry"], value["selected_tile"][i])){
-            var step_data = ConveyorStepData(i+1,"conveyor_entry",value["selected_tile"][i],barcode)
+            if(value.hasOwnProperty("conveyor_step_id")){
+                var step_id = value["conveyor_step_id"][value["selected_tile"][i].toString()]
+            }else{
+                var step_id = (i+1).toString()
+            }
+            var step_data = ConveyorStepData(step_id,"conveyor_entry",value["selected_tile"][i],barcode)
         }
         else if(checkPoint(value["conveyor_exit"], value["selected_tile"][i])){
-            var step_data = ConveyorStepData(i+1,"conveyor_exit",value["selected_tile"][i],barcode)
+            if(value.hasOwnProperty("conveyor_step_id")){
+                var step_id = value["conveyor_step_id"][value["selected_tile"][i].toString()]
+            }else{
+                var step_id = (i+1).toString()
+            }
+            var step_data = ConveyorStepData(step_id,"conveyor_exit",value["selected_tile"][i],barcode)
         }
         else if(activeCheckPoint(value["conveyor_active"], value["selected_tile"][i])){
-            var step_data = ConveyorStepData(i+1,"conveyor_pps_point",value["selected_tile"][i],barcode)
+            if(value.hasOwnProperty("conveyor_step_id")){
+                var step_id = value["conveyor_step_id"][value["selected_tile"][i].toString()]
+            }else{
+                var step_id = (i+1).toString()
+            }
+            var step_data = ConveyorStepData(step_id,"conveyor_pps_point",value["selected_tile"][i],barcode)
         }
         else if(checkPoint(value["conveyor_end"], value["selected_tile"][i])){
-            var step_data = ConveyorStepData(i+1,"conveyor_end",value["selected_tile"][i],barcode)
+            if(value.hasOwnProperty("conveyor_step_id")){
+                var step_id = value["conveyor_step_id"][value["selected_tile"][i].toString()]
+            }else{
+                var step_id = (i+1).toString()
+            }
+            var step_data = ConveyorStepData(step_id,"conveyor_end",value["selected_tile"][i],barcode)
         }
         else{
-            var step_data = ConveyorStepData(i+1,"conveyor_track",value["selected_tile"][i],barcode)
+            if(value.hasOwnProperty("conveyor_step_id")){
+                var step_id = value["conveyor_step_id"][value["selected_tile"][i].toString()]
+            }else{
+                var step_id = (i+1).toString()
+            }
+            var step_data = ConveyorStepData(step_id,"conveyor_track",value["selected_tile"][i],barcode)
         }
        conveyor_step.push(step_data) 
     }
@@ -71,7 +96,6 @@ const FormConveyorJson = (value, barcode) =>{
 export default (normalizedMap) => {
   var conveyor_data = normalizedMap.entities.conveyorTile
   var barcode = normalizedMap.entities.barcode
-  
   var conveyor_json = []
   for (const [key, value] of Object.entries(conveyor_data)) {
     var converted_dict_value = FormConveyorJson(value, barcode)

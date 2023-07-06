@@ -1,70 +1,30 @@
-import React, { Component } from "react";
+import React from "react";
+import SelectConveyorSystemForm from "./Util/SelectConveyorSystemForm";
 import { connect } from "react-redux";
-import { FormikedInput } from "components/InlineTextInput";
-import ButtonForm from "./Util/ButtonForm";
-import { addConveyorId,convertNestedListToList } from "actions/conveyor";
-import { withFormik, Field } from "formik";
-import { number, object, string, array } from "yup";
-import SelectConveyorSystem from "components/Map/Forms/SelectConveyorSystem";
-import { yupPosIntSchema } from "utils/forms";
+import { convertNestedListToList,addConveyorId } from "actions/conveyor";
 import { getBarcodes } from "../../../utils/selectors";
-import {getNeighbouringCoordinateKeys, getNeighbourTiles } from "utils/util";
+import {getNeighbouringCoordinateKeys } from "utils/util";
 
-
-const InnerForm = ({ handleSubmit, isSubmitting, values }) => {
-  return (
-    <form onSubmit={handleSubmit}>
-      <Field
-        name="conveyor_id"
-        component={props => <FormikedInput {...props} readOnly={true} />}
-        label="Conveyor Id"
-        type="text"
-      />
-      <Field
-        name="conveyor_entry_height"
-        component={FormikedInput}
-        label="Conveyor Entry Height"
-        type="number"
-      />
-      <Field
-        name="conveyor_exit_height"
-        component={FormikedInput}
-        label="Conveyor Exit Height"
-        type="number"
-      />
-
-      <button type="submit" disabled={isSubmitting} className="btn btn-primary">
-        Submit
-      </button>
-    </form>
-  );
+const schema = () => {
+    return {
+        title: "Select Conveyor System",
+        type: "object",
+    };
 };
 
-const Form = withFormik({
-  mapPropsToValues: ({ nextConveyorId }) => ({
-    conveyor_id: nextConveyorId,
-    conveyor_entry_height: "",
-    conveyor_exit_height: "",
-  }),
-  validationSchema: () => {
-    return object().shape({
-      conveyor_entry_height: number()
-        .required("Required")
-        .integer("Should be integer")
-        .min(1, "Conveyor entry height cannot be zero or negative."),
-      conveyor_exit_height: number()
-        .required("Required")
-        .integer("Should be integer")
-        .min(1, "Conveyor entry height cannot be zero or negative."),
-    });
-  },
-  
-  handleSubmit: (formValues, { props }) => {
-    const { onSuccess, dispatch } = props;
-    dispatch(addConveyorId(formValues));
-    onSuccess();
-  }
-})(InnerForm);
+const ConveyorCheckboxMode = ({ onSubmit, disabled, nextConveyorId,map_tile_value,floor_barcodes}) => (
+    <SelectConveyorSystemForm
+        schema={schema()}
+        disabled={disabled}
+        nextConveyorId={nextConveyorId}
+        selected_tile={map_tile_value}
+        onSubmit={onSubmit}
+        floor_barcodes={floor_barcodes}
+        buttonText={"Add Conveyor System"}
+    />
+);
+
+
 
 const shouldBeDisabled = (tileIds,barcodesDict,conveyorTile) => {
   if (tileIds.length < 3){
@@ -92,54 +52,35 @@ const shouldBeDisabled = (tileIds,barcodesDict,conveyorTile) => {
 
   return false;
   };
-
-class ConveyorCheckboxMode extends Component {
-  state = {
-    error: undefined,
-    show: false,
-    handle_submit: false
-  };
-  toggle = () => this.setState({ show: !this.state.show });
-  onSuccessSubmit = () => {
-    this.setState({ handle_submit:true,show: !this.state.show});
-  }
-  render() {
-    const { error, show, handle_submit} = this.state;
-    const { nextConveyorId, dispatch,selectedMapTiles,current_floor, floor_value,barcodes,conveyorTile } = this.props;
-    var current_floor_value = floor_value[current_floor]
-    var floor_barcodes = {};
-    const barcodeKeys = current_floor_value.map_values;
-    barcodeKeys.forEach((barcodeKey) => {
-      floor_barcodes[barcodeKey] = barcodes[barcodeKey];
-    });
-    const disabled = shouldBeDisabled(selectedMapTiles,floor_barcodes,conveyorTile);
-    return (
-      <div>
-        <ButtonForm
-          show={show}
-          disabled={disabled}
-          toggle={this.toggle}
-          tooltipData={{ id: "add-conveyor", title: "Add Conveyor System" }}
-          buttonText="Add Conveyor System"
-          bcolor = "orange"
-        >
-          <Form
-            onSuccess={() => this.onSuccessSubmit()}
-            nextConveyorId={nextConveyorId}
-            dispatch={dispatch}
-          />
-        </ButtonForm>
-      </div>
-    );
-  }
-}
-
-export default connect(state => ({
-  nextConveyorId:
-    Math.max(...(state.normalizedMap.entities.map.dummy.conveyors || []), 0) + 1,
-  selectedMapTiles:Object.keys(state.selection.mapTiles),
-  barcodes: getBarcodes(state),
-  current_floor: state.currentFloor,
-  floor_value:state.normalizedMap.entities.floor,
-  conveyorTile:state.normalizedMap.entities.conveyorTile
-}))(ConveyorCheckboxMode);
+ 
+export default connect(
+    state => {
+        var barcodes = getBarcodes(state)
+        var current_floor = state.currentFloor
+        var floor_value = state.normalizedMap.entities.floor
+        var conveyorTiles = state.normalizedMap.entities.conveyorTile
+        var current_floor_value = floor_value[current_floor]
+        var floor_barcodes = {};
+        const barcodeKeys = current_floor_value.map_values;
+        barcodeKeys.forEach((barcodeKey) => {
+          floor_barcodes[barcodeKey] = barcodes[barcodeKey];
+        });
+        var selectedMapTiles = state.selection.mapTiles
+        var map_tile_value = Object.keys(selectedMapTiles)
+        var disabled = shouldBeDisabled(map_tile_value,floor_barcodes,conveyorTiles)
+        return {
+            disabled: disabled,
+            nextConveyorId:
+            Math.max(...(state.normalizedMap.entities.map.dummy.conveyors || []), 0) + 1,
+            map_tile_value:map_tile_value,
+            floor_barcodes:floor_barcodes
+        }
+    },
+    dispatch => ({
+        onSubmit: (formData) => {
+            console.log("formdata--------------",formData)
+            dispatch(addConveyorId(formData))
+            }
+        }
+    )
+)(ConveyorCheckboxMode);

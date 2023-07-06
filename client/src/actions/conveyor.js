@@ -8,7 +8,8 @@ import SweetAlertError from "components/SweetAlertError";
 export const addConveyorId = ({
   conveyor_id,
   conveyor_entry_height,
-  conveyor_exit_height
+  conveyor_exit_height,
+  conveyor_step_id,
 }) => (dispatch, getState) => {
   const state = getState();
   const {
@@ -27,7 +28,8 @@ export const addConveyorId = ({
     "conveyor_entry_height":conveyor_entry_height,
     "conveyor_exit_height":conveyor_exit_height,
     "selected_tile":[],
-    "conveyor_active":[]
+    "conveyor_active":[],
+    "conveyor_step_id":conveyor_step_id
 
   }
   dispatch({
@@ -43,7 +45,7 @@ export const addConveyorId = ({
         value: ConveyorSelectData ,
     });
   dispatch(clearTiles);
-  return true
+  return Promise.resolve();
 };
 
 export const convertNestedListToList = (obj) =>{
@@ -787,7 +789,12 @@ export const updateConveyor = (formData) => (dispatch, getState) => {
        ConveyorData.entry_point_direction = parseInt(formData.schema.entry_point_info.entry_direction);
        ConveyorData.conveyor_io_entry = `[${mappingBarcodeCoord[formData.schema.entry_point_info.entry_io_point_coordinate]}]`
      }  
-  
+  if(ConveyorData.hasOwnProperty("conveyor_step_id")){
+    var form_step_data = formData.schema.conveyor_step_id_info
+    for(var i=0;i<form_step_data.length;i++){
+      ConveyorData.conveyor_step_id[form_step_data[i]["step_barcode"]] = form_step_data[i]["step_id"]
+    }
+  }
   if(originalConveyorId===formData.schema.conveyor_id_info.conveyor_id){
     // update all other fields other than id
     dispatch({
