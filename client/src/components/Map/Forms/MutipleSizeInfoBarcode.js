@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import { manageMultipleSizeInfoData } from "actions/manageMultipleSizeInfoBarcode";
 
 const schema = {
-  title: "Manage Storable Size Info",
+  title: "Multi Barcode Size Info Edit",
   type: "object",
   properties: {
     North: { type: "integer", title: "North" },
@@ -16,7 +16,7 @@ const schema = {
 };
 
 const manageMultipleSizeInfoBarcodeData = ({ onSubmit ,disabled }) => (
-  <BaseJsonForm schema={schema} disabled={disabled} onSubmit={onSubmit} buttonText={"Multi Barcodes Size Info Edit"} />
+  <BaseJsonForm schema={schema} disabled={disabled} onSubmit={onSubmit} buttonText={"Multi Barcode Size Info Edit"} />
 );
 
 // only connecting to minimal state since don't know if data will be copied in props...

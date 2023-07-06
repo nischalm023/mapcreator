@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import { manageStorableSizeData } from "actions/manageStorableSizeInfo";
 
 const schema = {
-  title: "Manage Storable Size Info",
+  title: "RTP Storables Size Info Edit",
   type: "object",
   properties: {
     North: { type: "integer", title: "North" },
