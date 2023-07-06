@@ -1,3 +1,5 @@
+import { clearTiles } from "./actions";
+
 export const manageStorableSizeData = formData => (dispatch, getState) => {
   const state = getState();
   const {
@@ -22,5 +24,6 @@ export const manageStorableSizeData = formData => (dispatch, getState) => {
     type: "VIEW-OVERLAP-BAROCDES",
     value: barcode
   });
+  dispatch(clearTiles);
   return Promise.resolve();
 };

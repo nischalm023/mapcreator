@@ -12,7 +12,7 @@ const PathButton = ({ onClick, disabled }) => (
       onClick();
     }}
   >
-    Manage TTP Overlap
+    Resolve Barcode Overlaps
   </button>
 );
 

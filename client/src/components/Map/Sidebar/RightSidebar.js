@@ -44,6 +44,7 @@ import ConveyorDownload from "components/Map/Forms/ConveyorDownload";
 import ManageTtpOverlap from "components/Map/Forms/ManageTtpOverlap";
 import ViewOverlapBarcodes from "components/Map/Forms/ViewOverlapBarcodes";
 import ManageStorableSizeInfo from "components/Map/Forms/ManageStorableSizeInfo";
+import manageMultipleSizeInfoBarcodeData from "components/Map/Forms/MutipleSizeInfoBarcode";
 
 import {
   QueueCheckbox,
@@ -120,6 +121,7 @@ class RightSidebar extends Component {
               CreateToteLocations,
               ManageTtpOverlap,
               ManageStorableSizeInfo,
+              manageMultipleSizeInfoBarcodeData,
               ViewOverlapBarcodes
             ].map((Elm, idx) => (
               <div

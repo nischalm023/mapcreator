@@ -2,7 +2,7 @@
 import React from "react";
 import BaseJsonForm from "./Util/BaseJsonForm";
 import { connect } from "react-redux";
-import { manageStorableSizeData } from "actions/manageStorableSizeInfo";
+import { manageMultipleSizeInfoData } from "actions/manageMultipleSizeInfoBarcode";
 
 const schema = {
   title: "Manage Storable Size Info",
@@ -15,18 +15,18 @@ const schema = {
   }
 };
 
-const manageStorableSize = ({ onSubmit ,disabled }) => (
-  <BaseJsonForm schema={schema} disabled={disabled} onSubmit={onSubmit} buttonText={"RTP Storables Size Info Edit"} />
+const manageMultipleSizeInfoBarcodeData = ({ onSubmit ,disabled }) => (
+  <BaseJsonForm schema={schema} disabled={disabled} onSubmit={onSubmit} buttonText={"Multi Barcodes Size Info Edit"} />
 );
 
 // only connecting to minimal state since don't know if data will be copied in props...
 export default connect(
   state => ({
-    disabled: state.selection.conveyorMode === true
+    disabled: Object.keys(state.selection.mapTiles).length === 0
   }),
   dispatch => ({
     onSubmit: ({ formData }) => {
-      dispatch(manageStorableSizeData(formData));
+      dispatch(manageMultipleSizeInfoData(formData));
     }
   })
-)(manageStorableSize);
+)(manageMultipleSizeInfoBarcodeData);
