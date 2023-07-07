@@ -771,7 +771,9 @@ export const copyJSONToClipboard = (fieldName, singleFloor = false) => (
   // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   const exportedJson = exportMap(normalizedMap, singleFloor);
   if(Object.keys(normalizedMap.entities.conveyorTile).length !== 0){
-    var failed_list, failed_conveyors_info = validateConveyorEntity(normalizedMap.entities.conveyorTile) 
+    var result = validateConveyorEntity(normalizedMap.entities.conveyorTile) 
+    var failed_list = result[0]
+    var failed_conveyors_info = result[1]
     if(failed_list.length !== 0){
       let errorMessage = '';
       Object.keys(failed_conveyors_info).map(key => {
