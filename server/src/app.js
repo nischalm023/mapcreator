@@ -359,7 +359,7 @@ app.post('/api/exportDataToGsb', upload.array('files'), async (req, res) => {
     });
     if (response.status === 200) {
       await map.update({isGsb: true});
-      return res.json({ message: 'Successfully export map details to GSB' });
+      return res.json({ message: 'Successfully exported map details to GSB' });
     } else {
       return res.status(500).json({ message: 'Failed to send'})
     }

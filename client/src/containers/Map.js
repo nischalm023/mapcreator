@@ -267,7 +267,7 @@ class Map extends Component {
                       className="btn btn-outline-secondary mr-1 exportToGsb"
                       style={{textAlign:"-webkit-center", color:"orange"}}
                       >
-                      Back to save Map
+                      Back to Map List
                     </button>
                     </LinkContainer>
                   </a>:""}
