@@ -24,11 +24,12 @@ export const createNewPPSes = ({ eligible_type,pick_direction, type,pick_positio
         }
       }
     }
+    var allowed_modes = ["put", "pick", "audit"]
     var pps_points = []
     if(eligible_type === 'rtp'){
       pps_point_dict = {
         "position_id" : 1,
-        "coordinate" : tileId,
+        "coordinate" : `[${tileId}]`,
         "type" : "rtp"
       }
       pps_points.push(pps_point_dict)
@@ -37,27 +38,29 @@ export const createNewPPSes = ({ eligible_type,pick_direction, type,pick_positio
       if(conveyor_coordinate !== undefined){
         pps_active_point_dict = {
           "position_id" : 1,
-          "coordinate" : conveyor_coordinate,
+          "coordinate" : `[${conveyor_coordinate}]`,
           "type" : eligible_type
         }
         pps_points.push(pps_active_point_dict)
       }
+      var allowed_modes = ["put", "pick"]
     }
     if(eligible_type === 'ttp_rtp'){
       pps_point_dict = {
         "position_id" : 1,
-        "coordinate" : tileId,
+        "coordinate" : `[${tileId}]`,
         "type" : "rtp"
       }
       pps_points.push(pps_point_dict)
       if(conveyor_coordinate !== undefined){
         pps_active_point_dict = {
           "position_id" : 2,
-          "coordinate" : conveyor_coordinate,
+          "coordinate" : `[${conveyor_coordinate}]`,
           "type" : "ttp"
         }
         pps_points.push(pps_active_point_dict)
       }
+      var allowed_modes = ["put", "pick"]
     }
     return {
 
@@ -69,7 +72,7 @@ export const createNewPPSes = ({ eligible_type,pick_direction, type,pick_positio
       pick_position: barcode,
       pick_direction,
       put_docking_positions: [],
-      allowed_modes: ["put", "pick", "audit"],
+      allowed_modes: allowed_modes,
       pps_points: pps_points,
       type,
       version: 2

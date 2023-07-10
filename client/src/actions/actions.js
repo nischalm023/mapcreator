@@ -1407,6 +1407,19 @@ export const ConvertEntitiesInBarcodeFormat = (dispatch,getState) => {
     Object.keys(ppsDict).forEach(function(pps_id) {
     ppsDict[pps_id]["location"] = BarcodeDict[ppsDict[pps_id]["coordinate"]]["barcode"]
     ppsDict[pps_id]["pick_position"] = BarcodeDict[ppsDict[pps_id]["coordinate"]]["barcode"]
+    if(ppsDict[pps_id]["eligible_system"] !== undefined){
+      var eligible_type_value = ppsDict[pps_id]["eligible_system"].join("_")
+      if(eligible_type_value=="ttp_rtp" || eligible_type_value=="ttp"){
+        ppsDict[pps_id]["allowed_modes"] = ["put", "pick"]
+      }
+    }
+    if(ppsDict[pps_id]["pps_points"] !== undefined){
+      for (var i = 0; i < ppsDict[pps_id]["pps_points"].length; i++) {
+        if(!/^\[/.test(ppsDict[pps_id]["pps_points"][i]["coordinate"])){
+          ppsDict[pps_id]["pps_points"][i]["coordinate"]=`[${ppsDict[pps_id]["pps_points"][i]["coordinate"]}]` 
+          }
+        }
+      }
     })
   }
   if(chargerDict !=undefined && Object.keys(chargerDict).length !== 0){

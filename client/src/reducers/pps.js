@@ -21,7 +21,7 @@ const manageNewPpsData = (pps_detail,active_point) => {
       for (var i = 0; i < pps_detail.eligible_system.length; i++) {
             var pps_point_dict = {}
             pps_point_dict["position_id"] = i+1,
-            pps_point_dict["coordinate"] = pps_detail.eligible_system[i]=="ttp"?active_point:pps_detail.coordinate,
+            pps_point_dict["coordinate"] = pps_detail.eligible_system[i]=="ttp"?`[${active_point}]`:`[${pps_detail.coordinate}]`,
             pps_point_dict["type"] = pps_detail.eligible_system[i]
             pps_point_list.push(pps_point_dict)
         }
@@ -30,7 +30,7 @@ const manageNewPpsData = (pps_detail,active_point) => {
     }else{
       var pps_point_dict = {}
       pps_point_dict["position_id"] = pps_detail.pps_points.length+1,
-      pps_point_dict["coordinate"] = active_point,
+      pps_point_dict["coordinate"] = `[${active_point}]`,
       pps_point_dict["type"] = "ttp"
       pps_detail.pps_points.push(pps_point_dict)
       return pps_detail
@@ -102,14 +102,14 @@ export default (state = {}, action) => {
           for (var i = 0; i < eligible_system.length; i++) {
               var pps_point_dict = {}
               pps_point_dict["position_id"] = i+1,
-              pps_point_dict["coordinate"] = eligible_system[i]=="ttp"?conveyor_active_point[0]:pps_coordinate,
+              pps_point_dict["coordinate"] = eligible_system[i]=="ttp"?`[${conveyor_active_point[0]}]`:`[${pps_coordinate}]`,
               pps_point_dict["type"] = eligible_system[i]
               pps_points.push(pps_point_dict)
           }
       }else{
           var pps_point_dict = {}
           pps_point_dict["position_id"] = pps_points.length+1,
-          pps_point_dict["coordinate"] = conveyor_active_point[0],
+          pps_point_dict["coordinate"] = `[${conveyor_active_point[0]}]`,
           pps_point_dict["type"] = "ttp"
           pps_points.push(pps_point_dict)
       }
