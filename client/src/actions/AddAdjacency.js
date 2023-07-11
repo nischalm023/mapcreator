@@ -31,7 +31,7 @@ const getNorthAdjacencyAndNeighbour = (y_list,x,y,WorldCoordinateToTileIdMapping
     if(y_list[0] == y){
         return [null,[0,0,0]]
     }
-    if(Math.abs(Math.abs(y_list[north_index]) - Math.abs(y_list[north_index-1]))>ADJACENCYDISTANCE){
+    if(Math.abs(y_list[north_index] - y_list[north_index-1])>ADJACENCYDISTANCE){
         return [null,[0,0,0]]
     }else{
         var north_adjacent_coord = getCoordFromWorldCord(WorldCoordinateToTileIdMapping,[x,y_list[north_index-1]])
@@ -44,7 +44,7 @@ const getSouthAdjacencyAndNeighbour = (y_list,x,y,WorldCoordinateToTileIdMapping
     if(y_list[y_list.length-1] == y){
         return [null,[0,0,0]]
     }
-    if(Math.abs(Math.abs(y_list[south_index+1]) - Math.abs(y_list[south_index]))>ADJACENCYDISTANCE){
+    if(Math.abs(y_list[south_index+1] - y_list[south_index])>ADJACENCYDISTANCE){
         return [null,[0,0,0]]
     }else{
         var south_adjacent_coord = getCoordFromWorldCord(WorldCoordinateToTileIdMapping,[x,y_list[south_index+1]])
@@ -58,7 +58,7 @@ const getEastAdjacencyAndNeighbour = (x_list,y,x,WorldCoordinateToTileIdMapping)
     if(x_list[0] == x){
         return [null,[0,0,0]]
     }
-    if(Math.abs(Math.abs(x_list[east_index-1]) - Math.abs(x_list[east_index]))>ADJACENCYDISTANCE){
+    if(Math.abs(x_list[east_index-1] - x_list[east_index])>ADJACENCYDISTANCE){
         return [null,[0,0,0]]
     }else{
         var east_adjacent_coord = getCoordFromWorldCord(WorldCoordinateToTileIdMapping,[x_list[east_index-1],y])
@@ -72,7 +72,7 @@ const getWestAdjacencyAndNeighbour = (x_list,y,x,WorldCoordinateToTileIdMapping)
     if(x_list[x_list.length-1] == x){
         return [null,[0,0,0]]
     }
-    if(Math.abs(Math.abs(x_list[west_index+1]) - Math.abs(x_list[west_index]))>ADJACENCYDISTANCE){
+    if(Math.abs(x_list[west_index+1] - x_list[west_index])>ADJACENCYDISTANCE){
         return [null,[0,0,0]]
     }else{
         var west_adjacent_coord = getCoordFromWorldCord(WorldCoordinateToTileIdMapping,[x_list[west_index+1],y])
