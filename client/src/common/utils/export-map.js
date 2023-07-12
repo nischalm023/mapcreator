@@ -1,12 +1,19 @@
 // exports mapcreator's represention of map (map.json schema) to multiple output
 // json files (map.json, pps.json, fire_emergency.json etc.)
 import { denormalizeMap } from "utils/normalizr";
-import conveyor_json from "common/utils/conveyor_json";
+import conveyor_json_v2 from "common/utils/conveyor_json_v2";
+import conveyor_json_v1 from "common/utils/conveyor_json_v1";
 import toteStorage_json from "common/utils/tote_storage_json";
+import * as constants from "../../constants";
 
-export default (withWorldCoordinate, singleFloor = false) => {
+export default (withWorldCoordinate, singleFloor = false,converyor_version="") => {
   if(Object.keys(withWorldCoordinate.entities.conveyorTile).length > 0){
-    var conveyorJson = conveyor_json(withWorldCoordinate);
+    if(converyor_version === constants.DEFAULT_CONVEYOR_VERSION){
+      var conveyorJson = conveyor_json_v2(withWorldCoordinate);
+    }else{
+      var conveyorJson = conveyor_json_v1(withWorldCoordinate);
+    }
+    
     withWorldCoordinate.entities.DownloadconveyorTile = conveyorJson
   }
   var toteStorageJson = toteStorage_json(withWorldCoordinate);
@@ -40,6 +47,12 @@ export default (withWorldCoordinate, singleFloor = false) => {
         delete barcode.default_barcode
         if (barcode.conveyor_selected_status !== undefined){
             delete barcode.conveyor_selected_status
+        }
+        if (barcode.hasOwnProperty("conveyorEntryIO")){
+            delete barcode.conveyorEntryIO
+        }
+        if (barcode.hasOwnProperty("conveyorExitIO")){
+            delete barcode.conveyorExitIO
         }
         if (barcode.remove_conveyor_tile !== undefined){
             delete barcode.remove_conveyor_tile

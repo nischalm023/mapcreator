@@ -54,6 +54,7 @@ export const dummyState = {
         }
       ],
       conveyors: [],
+      connectedConveyor:[],
       ioPointsIds:[],
       toteStorablesIds:[],
       downloadConveyor:[],

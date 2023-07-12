@@ -38,17 +38,17 @@ const shouldBeDisabled = (tileIds,barcodesDict,conveyorTile) => {
         } 
       }
   }
-  for (var i = 1; i < tileIds.length; i++) {
-    var curTileId = tileIds[i];
-    var prevTileId = tileIds[i - 1];
-    // make sure prev barcode has current barcode as neighbour
-    if (
-      getNeighbouringCoordinateKeys(prevTileId, barcodesDict).find(
-        coordinateKey => coordinateKey == curTileId
-      ) === undefined
-    )
-      return true
-  }
+  // for (var i = 1; i < tileIds.length; i++) {
+  //   var curTileId = tileIds[i];
+  //   var prevTileId = tileIds[i - 1];
+  //   // make sure prev barcode has current barcode as neighbour
+  //   if (
+  //     getNeighbouringCoordinateKeys(prevTileId, barcodesDict).find(
+  //       coordinateKey => coordinateKey == curTileId
+  //     ) === undefined
+  //   )
+  //     return true
+  // }
 
   return false;
   };
@@ -78,7 +78,6 @@ export default connect(
     },
     dispatch => ({
         onSubmit: (formData) => {
-            console.log("formdata--------------",formData)
             dispatch(addConveyorId(formData))
             }
         }

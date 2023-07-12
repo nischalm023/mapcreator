@@ -1,8 +1,8 @@
 import React, { Component } from "react";
-import "./App.css";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 // import bootstrap?
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
 import SavedMaps from "./containers/SavedMaps";
 import Home from "./containers/Home";
 import Guidelines from "./containers/Guidelines";

@@ -34,8 +34,9 @@ const ChangeBarcodeFormat = ({ onClick, current_floor,floor_value,dispatch }) =>
     return(
     <form className="form-inline">
       <div className="form-group">
-        <label className="col-form-label pr-2">Change Barcode Format:</label>
+        <label className="col-form-label pr-1">Change Barcode Format:</label>
         <select
+          style = {{width:"280px",padding:"0px"}}
           className="form-control"
           onChange={onClick}
           defaultValue={barcode_format}
@@ -47,8 +48,8 @@ const ChangeBarcodeFormat = ({ onClick, current_floor,floor_value,dispatch }) =>
       </div>
       {barcode_format =="ttp_format" && 
           <div className="form-group pl-2">
-            <label className="col-form-label pr-2">Barcode Offset (mm)</label>
-            <input type="text" id ="offset_val" value={barcode_offset} readOnly></input> 
+            <label className="col-form-label pr-1">Barcode Offset (mm)</label>
+            <input style={{width:"155px",padding:"0px 20px"}} type="text" id ="offset_val" value={barcode_offset} readOnly></input> 
             <div className="pl-2">
               <ChangeBarcodeOffset/>
             </div>

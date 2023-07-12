@@ -8,20 +8,20 @@ export default (state = {}, action) => {
       };
     }
     case "SELECTED-CONVEYOR-ENTRY-POINT": {
-      const { conveyor_id, conveyor_entry, conveyor_io_entry,entry_point_direction,bot_orientation_entry } = action.value;
+      const { conveyor_id, conveyor_entry, conveyor_io_entry,entry_point_direction,bot_orientation_entry,conveyor_entry_height } = action.value;
       if(state && state.hasOwnProperty(conveyor_id) && Object.keys(state).length!==0){
         return {
           ...state,
-          [conveyor_id]: { ...state[conveyor_id], conveyor_entry, conveyor_io_entry,entry_point_direction,bot_orientation_entry }
+          [conveyor_id]: { ...state[conveyor_id], conveyor_entry, conveyor_io_entry,entry_point_direction,bot_orientation_entry,conveyor_entry_height }
         };
       }
     }
     case "SELECTED-CONVEYOR-EXIT-POINT": {
-      const { conveyor_id, conveyor_exit, conveyor_io_exit ,exit_point_direction,bot_orientation_exit} = action.value;
+      const { conveyor_id, conveyor_exit, conveyor_io_exit ,exit_point_direction,bot_orientation_exit,conveyor_exit_height} = action.value;
       if(state && state.hasOwnProperty(conveyor_id) && Object.keys(state).length!==0){
         return {
           ...state,
-          [conveyor_id]: { ...state[conveyor_id], conveyor_exit, conveyor_io_exit,exit_point_direction,bot_orientation_exit }
+          [conveyor_id]: { ...state[conveyor_id], conveyor_exit, conveyor_io_exit,exit_point_direction,bot_orientation_exit,conveyor_exit_height }
         };
       }
     }

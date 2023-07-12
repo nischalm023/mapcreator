@@ -22,6 +22,7 @@ const queueData = new schema.Entity(
 );
 const conveyorTile = new schema.Entity("conveyorTile", {}, { idAttribute: "conveyor_id" });
 const ioPoints = new schema.Entity("ioPoints", {}, { idAttribute: "io_point_id" });
+const ConnectedconveyorTile = new schema.Entity("ConnectedconveyorTile", {}, { idAttribute: "connected_conveyor_id" });
 const toteStorables = new schema.Entity("toteStorables", {}, { idAttribute: "next_tote_storable_id" });
 const charger = new schema.Entity("charger", {}, { idAttribute: "charger_id" });
 const pps = new schema.Entity("pps", {}, { idAttribute: "pps_id" });
@@ -64,6 +65,7 @@ const mapSchema = new schema.Entity("map", {
   queueDatas: [queueData],
   floors: [floor],
   conveyors:[conveyorTile],
+  connectedConveyor:[ConnectedconveyorTile],
   ioPointsIds: [ioPoints],
   toteStorablesIds: [toteStorables],
 });
@@ -87,7 +89,7 @@ export var denormalizeMap = normalizedMap => {
   var denormalizedMapObj = denormalize(
     normalizedMap.result,
     mapObjSchema,
-    normalizedMap.entities
+    normalizedMap.entities,
   );
   // remove id from map
   delete denormalizedMapObj.map.id;

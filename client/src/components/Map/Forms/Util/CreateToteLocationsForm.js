@@ -53,7 +53,7 @@ class BaseForm extends Component {
         initialStorableDirection = tote.storable_direction.value;
         initialMultiSchema[i] = {
           tote_id: { type: "string", title: "Tote Id", value: tote.tote_id.value },
-          tote_location: { type: "string", title: "Tote Location", value: 'TLOC_' + String(tote.tote_id.value).padStart(7, '0') },
+          tote_location: { type: "string", title: "Tote Location", value: 'TOT_' + String(tote.tote_id.value).padStart(7, '0') },
           tote_type: { type: "string", title: "Tote Type", value: "Type_1" },
           tote_height: { type: "string", title: "Tote Height", value: tote.tote_height.value },
           ndeep: { type: "string", title: "ndeep", value: tote.ndeep.value },
@@ -169,7 +169,7 @@ class BaseForm extends Component {
     }
     multiSchema[nextId] = {
       tote_id: { type: "string", title: "Tote Id", value: nextId },
-      tote_location: { type: "string", title: "Tote Location", value: 'TLOC_'+String(nextId).padStart(7, '0') },
+      tote_location: { type: "string", title: "Tote Location", value: 'TOT_'+String(nextId).padStart(7, '0') },
       tote_type: { type: "string", title: "Tote Type", value: "Type_1" },
       tote_height: { type: "string", title: "Tote Height", value: "" },
       ndeep: { type: "string", title: "ndeep", value: {value: 'single', label: 'Single'}},
@@ -184,9 +184,6 @@ class BaseForm extends Component {
   }
   changeMultiSchemaHandler = (key, field, value) => {
     var multiSchema = { ...this.state.multiSchema };
-    Object.keys(multiSchema).forEach(function (key, index) {
-      multiSchema[key].error = ''
-    })
     if (field == "tote_height") {
       multiSchema[key].tote_height.value = value;
       if(value>0 && value<=10000){
@@ -309,7 +306,7 @@ class BaseForm extends Component {
               <div className="form-group field">
                 <div className="row">
                   <div className="col-2 col-lg-2 col-sm-2 col-md-2">
-                    <input className="form-control" style={{width:"140px"}} type="text" key={"tote_location" + index} 
+                    <input className="form-control" type="text" key={"tote_location" + index} 
                       value={_this.state.multiSchema[key].tote_location.value} 
                     />
                   </div>
@@ -420,6 +417,7 @@ class BaseForm extends Component {
                 </div>
               </div>
             </div>
+            <br/>
             {Object.keys(this.state.multiSchema).length!==0 &&
             <div className="row">
               <div className="col-lg-11 col-md-11 col-sm-11 col-11">
@@ -435,7 +433,7 @@ class BaseForm extends Component {
                       Tote Height(mm)
                     </div>
                     <div className="col-2 col-lg-2 col-sm-2 col-md-2">
-                      Depth
+                      n-deep
                     </div>
                     <div className="col-2 col-lg-2 col-sm-2 col-md-2">
                       Bot Orientation
@@ -451,7 +449,7 @@ class BaseForm extends Component {
             <button style={{marginTop:"10px"}} type="button" onClick={() => this.addNewRow(nextToteStorableId, botDirection,all_storable_id)} className="btn btn-outline-secondary mr-1">
               Add Tote Location
             </button>
-            <br/><br/>
+            <br/><br/><br/>
           </div>
           <div>
             <button type="button" onClick={() => {

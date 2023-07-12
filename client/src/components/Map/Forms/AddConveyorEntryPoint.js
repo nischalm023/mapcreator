@@ -7,6 +7,7 @@ import {
   getIoPoint
 } from "actions/conveyor";
 import { connect } from "react-redux";
+import {getNeighbouringCoordinateKeys, getNeighbourTiles } from "utils/util";
 import { getBarcodes } from "../../../utils/selectors";
 import ButtonForm from "./Util/ButtonForm";
 
@@ -36,9 +37,45 @@ const checkExistPointConveyorBelt = (conveyorTile,map_tile_value) => {
   return false
 };
 
-const checkPointLieOnEdgeInConveyorBelt = (conveyorTile,tileId) => {
+const checkPointAlreadyExist = (conveyorTile,io_point) => {
+  for (const [key, value] of Object.entries(conveyorTile)) {
+    if(value.hasOwnProperty("conveyor_io_exit")){
+      var io_point_exist = JSON.parse(value["conveyor_io_exit"])
+      if(io_point_exist.toString() === io_point){
+        return true
+      }
+    }
+    if(value.hasOwnProperty("conveyor_io_entry")){
+      var io_point_entry = JSON.parse(value["conveyor_io_entry"])
+      if(io_point_entry.toString() === io_point){
+        return true
+      }
+    }
+  }
+  return false
+};
+
+
+const checkIOPointNotLieOnConveyorBelt = (conveyorTile,io_point) => {
+  for (const [key, value] of Object.entries(conveyorTile)) {
+    var selected_tile = convertNestedListToList(value["selected_tile"])
+    if(selected_tile.includes(io_point)){
+      return true
+    }
+  }
+  return false
+};
+
+const checkPointLieOnEdgeInConveyorBelt = (conveyorTile,tileId,barcodes) => {
   var selected_tile = convertNestedListToList(conveyorTile)
-  if(selected_tile[0] === tileId || selected_tile[selected_tile.length - 1] === tileId){
+  if (barcodes[tileId].hasOwnProperty('adjacency')) {
+          var nbTileId = convertNestedListToList(barcodes[tileId]["adjacency"])
+        }
+        else {
+          var nbTileId = getNeighbourTiles(tileId)
+        }
+  const filteredArray = selected_tile.filter(value => nbTileId.includes(value));
+  if(filteredArray.length===1){
     return false
   }
   return true
@@ -49,10 +86,12 @@ const shouldBeDisabled = (map_tile_value, barcodes, conveyorTile) => {
   if(map_tile_value.length==2){
      var [conveyor_id,entry_point,io_point,point_exist] =checkPointLieOnConveyorBelt(conveyorTile,map_tile_value)
      if(conveyor_id!=''){
+      var io_point_not_lie_on_conveyor_belt = checkIOPointNotLieOnConveyorBelt(conveyorTile,io_point)
       var one_entry_point_exist = checkPointAlreadyExistOnConveyorBelt(conveyorTile[conveyor_id])
-      var edge_point_exist = checkPointLieOnEdgeInConveyorBelt(conveyorTile[conveyor_id]["selected_tile"],entry_point)
+      var io_point_exist = checkPointAlreadyExist(conveyorTile,io_point)
+      // var edge_point_exist = checkPointLieOnEdgeInConveyorBelt(conveyorTile[conveyor_id]["selected_tile"],entry_point,barcodes)
       var check_exit_point = checkExistPointConveyorBelt(conveyorTile[conveyor_id],entry_point)
-      if(!point_exist && !one_entry_point_exist && !edge_point_exist && !check_exit_point){
+      if(!io_point_exist && !io_point_not_lie_on_conveyor_belt && !point_exist && !one_entry_point_exist && !check_exit_point){
         return [conveyor_id,entry_point,io_point,false]
       }
      }
@@ -71,6 +110,7 @@ class AddEntryPoint extends Component {
     conveyor_id:"",
     show: false,
     entry_io_point:"",
+    entry_height:"",
     bot_direction_options: {North: 0, East: 1, South: 2, West: 3}
   };
   handleSubmit = (event,dispatch,conveyor_id,direction,entry_point) => {
@@ -80,7 +120,8 @@ class AddEntryPoint extends Component {
             direction:parseInt(this.state.direction),
             entry_io_point:this.state.entry_io_point,
             conveyor_id: conveyor_id,
-            conveyor_entry:entry_point
+            conveyor_entry:entry_point,
+            entry_height:parseInt(this.state.entry_height)
         };
         this.toggle()
         dispatch(selectEntryConveyor(formData));
@@ -124,7 +165,7 @@ class AddEntryPoint extends Component {
           }
 
   render() {
-    const { error, entryDone ,show,entry_io_point,bot_direction} = this.state;
+    const { error, entryDone ,show,entry_io_point,bot_direction,entry_height} = this.state;
     // const {conveyor_id,direction,disabled, bot_direction,floor_barcodes,conveyorTile,selected_tile,dispatch} = this.props;
     const {conveyor_id,direction,disabled,floor_barcodes,conveyorTile,selected_tile,dispatch,io_point,entry_point} = this.props;
 
@@ -174,6 +215,15 @@ class AddEntryPoint extends Component {
                   <br/>
                   <label for="direction">Conveyor IO Point Barcode*</label>
                   <input id="direction" className="form-control" type="text" value={entry_io_point} disabled/>
+                  <br/>
+                  <label for="direction">Conveyor Entry Height*</label>
+                  <input id="direction" 
+                    className="form-control" 
+                    type="number" 
+                    onChange = {(e)=>this.setState({entry_height: e.target.value})}
+                    min="1"
+                    required
+                  />
                   <br/>
                   <input type="submit" className="btn btn-outline-primary mr-1" value="Submit"></input>
                   <button

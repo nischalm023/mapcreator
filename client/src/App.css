@@ -74,3 +74,9 @@ pre {
 button.validate-req:disabled {
   cursor: not-allowed;
 }
+
+@media (min-width: 1220px){
+  .container {
+    max-width: 1220px;
+  }
+}

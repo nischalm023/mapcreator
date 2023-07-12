@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import { selectActiveConveyor,convertNestedListToList } from "actions/conveyor";
 import { getBarcodes } from "../../../utils/selectors";
 import ButtonForm from "./Util/ButtonForm";
+import {getNeighbourTiles } from "utils/util";
 
 const checkPointLieOnConveyorBelt = (conveyorTile,selectedMapTiles) => {
   for (const [key, value] of Object.entries(conveyorTile)) {
@@ -35,9 +36,16 @@ const IsSelectedTileActivePointOrEndPoint = (conveyorTile,map_tile_value) => {
   return false
 };
 
-const checkPointLieInMiddleConveyorBelt = (conveyorTile,map_tile_value) => {
+const checkPointLieInMiddleConveyorBelt = (conveyorTile,tileId,barcodes) => {
   var selected_tile = convertNestedListToList(conveyorTile)
-  if(!map_tile_value.includes(selected_tile[0]) && !map_tile_value.includes(selected_tile[selected_tile.length - 1])){
+  if (barcodes[tileId].hasOwnProperty('adjacency')) {
+          var nbTileId = convertNestedListToList(barcodes[tileId]["adjacency"])
+        }
+        else {
+          var nbTileId = getNeighbourTiles(tileId)
+        }
+  const filteredArray = selected_tile.filter(value => nbTileId.includes(value));
+  if(filteredArray.length>1){
     return false
   }
   return true
@@ -64,7 +72,7 @@ const shouldBeDisabled = (map_tile_value, barcodes, conveyorTile,pps_dict) => {
      var [conveyor_id,active_point_coordinate,point_exist] =checkPointLieOnConveyorBelt(conveyorTile,map_tile_value)
      if(conveyor_id!=''){
       var [pps_id,pps_coordinate,pps_eligible] = checkPpsEligibleSystem(pps_dict,map_tile_value)
-      var middle_point= checkPointLieInMiddleConveyorBelt(conveyorTile[conveyor_id][["selected_tile"]],map_tile_value)
+      var middle_point= checkPointLieInMiddleConveyorBelt(conveyorTile[conveyor_id][["selected_tile"]],active_point_coordinate,barcodes)
       var point_already_exist = IsSelectedTileActivePointOrEndPoint(conveyorTile[conveyor_id],map_tile_value)
       if(!point_exist && !pps_eligible && !middle_point && !point_already_exist){
         return [conveyor_id,pps_id,pps_coordinate,active_point_coordinate,false]

@@ -117,6 +117,30 @@ export default (state = {}, action) => {
       }
       return Object.assign({}, state, newState);
     }
+
+    case "REMOVE-CONVEYOR-EXIT-IO-POINT-STRIPES": {
+      const { conveyor_io_exit_point } = action.value;
+      const conveyor_tile = (JSON.parse(conveyor_io_exit_point)).toString()
+      let newState = { ...state };
+      var k = 0;
+      if (newState[conveyor_tile]) {
+          newState[conveyor_tile] = { ...state[conveyor_tile], conveyorExitIO: false};
+          delete newState[conveyor_tile].conveyorExitIO;
+      }
+      return Object.assign({}, state, newState);
+    }
+    case "REMOVE-CONVEYOR-ENTRY-IO-POINT-STRIPES": {
+      const { conveyor_io_entry_point } = action.value;
+      const conveyor_tile = (JSON.parse(conveyor_io_entry_point)).toString()
+      let newState = { ...state };
+      var k = 0;
+      if (newState[conveyor_tile]) {
+          newState[conveyor_tile] = { ...state[conveyor_tile], conveyorEntryIO: false};
+          delete newState[conveyor_tile].conveyorEntryIO;
+      }
+      return Object.assign({}, state, newState);
+    }
+
     case "HIGHLIGHT-UNSUCCESS-OVERLAP-BAROCDE": {
       const unsuccess_overlap_barcode = action.value[Object.keys(action.value)[0]] 
       const unsuccess_overlap_barcode_status = action.value[Object.keys(action.value)[1]] 
@@ -141,6 +165,32 @@ export default (state = {}, action) => {
       }
       return Object.assign({}, state, newState);
     }
+    case "CONVEYOR-TILES-ENTRY-IO-POINT-STRIPES": {
+      const conveyor_tile = action.value[Object.keys(action.value)[0]] 
+      const grid_attribute = action.value[Object.keys(action.value)[1]] 
+      let newState = {};
+      var k = 0;
+
+      while (k < conveyor_tile.length) {
+        newState[conveyor_tile[k]] = { ...state[conveyor_tile[k]], conveyorEntryIO: grid_attribute};
+        k++;
+      }
+      return Object.assign({}, state, newState);
+    }
+
+    case "CONVEYOR-TILES-EXIT-IO-POINT-STRIPES": {
+      const conveyor_tile = action.value[Object.keys(action.value)[0]] 
+      const grid_attribute = action.value[Object.keys(action.value)[1]] 
+      let newState = {};
+      var k = 0;
+
+      while (k < conveyor_tile.length) {
+        newState[conveyor_tile[k]] = { ...state[conveyor_tile[k]], conveyorExitIO: grid_attribute};
+        k++;
+      }
+      return Object.assign({}, state, newState);
+    }
+
     case "HIGHLIGHT-SELECTED-REMOVED-CONVEYOR":{
       const { conveyor_tile, remove_conveyor_tile } = action.value;
 

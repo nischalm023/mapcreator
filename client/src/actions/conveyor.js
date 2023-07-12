@@ -1,32 +1,133 @@
 import { clearTiles } from "./actions";
 import {getNeighbouringCoordinateKeys, getNeighbourTiles } from "utils/util";
 import { setErrorMessage } from "./message";
-import conveyor_json from "common/utils/conveyor_json";
+import conveyor_json_v2 from "common/utils/conveyor_json_v2";
+import conveyor_json_v1 from "common/utils/conveyor_json_v1";
 import SweetAlertError from "components/SweetAlertError";
+import {DEFAULT_CONVEYOR_VERSION} from "../constants";
 
+export const manageRemoveConveyorNeighbour = (conveyor_id,barcodes,selectedTiles,conveyorTile) => {
+  for (var i = 0; i < selectedTiles.length; i++) {
+      if(Object.keys(barcodes).length!=0 && selectedTiles.length!=0){
+        if (barcodes[selectedTiles[i]].hasOwnProperty('adjacency')) {
+          var nbTileId = convertNestedListToList(barcodes[selectedTiles[i]]["adjacency"])
+        }
+        else {
+          var nbTileId = getNeighbourTiles(selectedTiles[i])
+        }
+
+        for (var j = 0; j < nbTileId.length; j++) {
+          if(Object.keys(barcodes).includes(nbTileId[j]) && nbTileId[j]!==null && nbTileId[j]!==""){
+              barcodes[nbTileId[j]]["neighbours"][(j + 2) % 4] = [1,1,1] 
+              barcodes[selectedTiles[i]]["neighbours"][j] = [1,1,1] 
+          }
+        }
+      }
+    }
+    for (const [key, value] of Object.entries(conveyorTile)) {
+      if(parseInt(value["conveyor_id"])!==parseInt(conveyor_id)){
+        var selected_array = convertNestedListToList(value["selected_tile"])
+        barcodes = manageConveyorNeighbour(barcodes,selected_array)
+      }
+      
+    }
+    return barcodes
+}
+
+
+export const manageConveyorNeighbour = (barcodes,selectedTiles) =>{
+    let pre_index = ""
+    let conveyor_index = ""
+    for (var i = 0; i < selectedTiles.length; i++) {
+      if(Object.keys(barcodes).length!=0 && selectedTiles.length!=0){
+        if (barcodes[selectedTiles[i]].hasOwnProperty('adjacency')) {
+          var nbTileId = convertNestedListToList(barcodes[selectedTiles[i]]["adjacency"])
+        }
+        else {
+          var nbTileId = getNeighbourTiles(selectedTiles[i])
+        }
+        for (var j = 0; j < nbTileId.length; j++) {
+          if(Object.keys(barcodes).includes(nbTileId[j]) && nbTileId[j]!==null && nbTileId[j]!=="" && selectedTiles.includes(nbTileId[j])){
+            barcodes[selectedTiles[i]]["neighbours"][j] = [1,1,1]
+          }
+          if(Object.keys(barcodes).includes(nbTileId[j]) && nbTileId[j]!==null && nbTileId[j]!=="" && !selectedTiles.includes(nbTileId[j])){
+            barcodes[nbTileId[j]]["neighbours"][(j + 2) % 4] = [1,0,0] 
+            barcodes[selectedTiles[i]]["neighbours"][j] = [1,0,0]
+          }
+        }
+      }
+    }
+    // for (var i = 0; i < selectedTiles.length; i++) {
+    //   if(Object.keys(barcodes).length!=0 && selectedTiles.length!=0){
+    //     if (barcodes[selectedTiles[i]].hasOwnProperty('adjacency')) {
+    //       var nbTileId = convertNestedListToList(barcodes[selectedTiles[i]]["adjacency"])
+    //     }
+    //     else {
+    //       var nbTileId = getNeighbourTiles(selectedTiles[i])
+    //     }
+    //     if(selectedTiles[i] === (selectedTiles.slice(-1))[0]){
+    //       if(nbTileId.includes(selectedTiles[i-1])){
+    //         if(conveyor_index!==""){
+    //           pre_index = ""
+    //         }
+    //         conveyor_index = nbTileId.indexOf(selectedTiles[i-1])
+    //       }
+    //     }else{
+    //       if(nbTileId.includes(selectedTiles[i+1])){
+    //         if(conveyor_index!==""){
+    //           pre_index = (conveyor_index + 2) % 4
+    //         }
+    //         conveyor_index = nbTileId.indexOf(selectedTiles[i+1])
+    //       }
+    //     }
+        
+    //     for (var j = 0; j < nbTileId.length; j++) {
+    //       if(Object.keys(barcodes).includes(nbTileId[j]) && nbTileId[j]!==null && nbTileId[j]!==""){
+    //         if(j === conveyor_index){
+    //           barcodes[selectedTiles[i]]["neighbours"][j] = [1,1,1]
+    //           barcodes[nbTileId[j]]["neighbours"][(j + 2) % 4] = [1,1,1] 
+    //         }
+    //         else if(pre_index === ""){
+    //           barcodes[nbTileId[j]]["neighbours"][(j + 2) % 4] = [1,0,0] 
+    //           barcodes[selectedTiles[i]]["neighbours"][j] = [1,0,0] 
+    //         }else if(pre_index !== j){
+    //           barcodes[nbTileId[j]]["neighbours"][(j + 2) % 4] = [1,0,0] 
+    //           barcodes[selectedTiles[i]]["neighbours"][j] = [1,0,0]
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+    return barcodes
+}
 
 export const addConveyorId = ({
   conveyor_id,
-  conveyor_entry_height,
-  conveyor_exit_height,
+  conveyor_display_name,
   conveyor_step_id,
 }) => (dispatch, getState) => {
   const state = getState();
   const {
     selection: { mapTiles },
   } = state;
+  var barcodes
+  barcodes = state.normalizedMap.entities.barcode
   const selectedTiles = Object.keys(mapTiles);
   var conveyor_tile = []
   for (var i = 0; i < selectedTiles.length; i++) {
       var convert = selectedTiles[i].split(",").map((val) => parseInt(val))
       conveyor_tile.push(convert)
   }
+  barcodes = manageConveyorNeighbour(barcodes,selectedTiles)
+  dispatch({
+    type: "VIEW-OVERLAP-BAROCDES",
+    value: barcodes
+  });
   var ConveyorSelectData = {"conveyor_id":conveyor_id,"selected_tile":conveyor_tile}
 
   var ConveyorData={
     "conveyor_id":conveyor_id,
-    "conveyor_entry_height":conveyor_entry_height,
-    "conveyor_exit_height":conveyor_exit_height,
+    "conveyor_display_name":conveyor_display_name,
     "selected_tile":[],
     "conveyor_active":[],
     "conveyor_step_id":conveyor_step_id
@@ -458,6 +559,8 @@ export const selectEntryConveyor = (formData) => (dispatch, getState) => {
   // if (io_error) {
   //   return dispatch(setErrorMessage(io_reason));
   // }
+  var conveyor_tile_io_point = StringtoListFormat([state.normalizedMap.entities.mappingBarcodeCoord[formData.entry_io_point]])
+  
   var io_point_coordinate = state.normalizedMap.entities.mappingBarcodeCoord[formData.entry_io_point];
   var io_point = JSON.stringify(io_point_coordinate.split(",").map((val) => parseInt(val)))
   var ConveyorData = {
@@ -465,11 +568,16 @@ export const selectEntryConveyor = (formData) => (dispatch, getState) => {
     "conveyor_entry": conveyor_tile,
     "conveyor_io_entry": io_point,
     "entry_point_direction": formData.direction,
-    "bot_orientation_entry": formData.bot_direction
+    "bot_orientation_entry": formData.bot_direction,
+    "conveyor_entry_height": formData.entry_height,
   }
   dispatch({
         type: "CONVEYOR-TILES-STRIPES",
         value: { conveyor_tile, grid_attribute: "conveyor_entry" } ,
+    });
+  dispatch({
+        type: "CONVEYOR-TILES-ENTRY-IO-POINT-STRIPES",
+        value: { conveyor_tile_io_point, conveyorEntryIO: true } ,
     });
   dispatch({
         type: "SELECTED-CONVEYOR-ENTRY-POINT",
@@ -499,8 +607,8 @@ export const selectExitConveyor = (formData) => (dispatch, getState) => {
     });
 
   var conveyor_id = formData.conveyor_id
-  console.log("exit formdata===========",[formData["exit_point"]])
   var conveyor_tile = StringtoListFormat([formData["exit_point"]])
+  var conveyor_tile_io_point = StringtoListFormat([state.normalizedMap.entities.mappingBarcodeCoord[formData.exit_io_point]])
   // var {io_error,io_reason,io_point } = validateIoPoint(selectedTiles,conveyorTile, conveyor_id, "Exit",barcode,formData.bot_direction,formData.direction )
   // if (io_error) {
   //   return dispatch(setErrorMessage(io_reason));
@@ -512,11 +620,16 @@ export const selectExitConveyor = (formData) => (dispatch, getState) => {
     "conveyor_exit": conveyor_tile,
     "conveyor_io_exit": io_point,
     "exit_point_direction": formData.direction,
-    "bot_orientation_exit": formData.bot_direction
+    "bot_orientation_exit": formData.bot_direction,
+    "conveyor_exit_height": formData.exit_height,
   }
   dispatch({
         type: "CONVEYOR-TILES-STRIPES",
         value: { conveyor_tile, grid_attribute: "conveyor_exit" } ,
+    });
+  dispatch({
+        type: "CONVEYOR-TILES-EXIT-IO-POINT-STRIPES",
+        value: { conveyor_tile_io_point, conveyorExitIO: true } ,
     });
   dispatch({
         type: "SELECTED-CONVEYOR-EXIT-POINT",
@@ -591,11 +704,39 @@ export const removeConveyor = (
   var state = getState();
   const {
     normalizedMap: {
-      entities: { conveyorTile },
+      entities: { conveyorTile,ConnectedconveyorTile },
     },
   } = state;
   var conveyor_id = formData.conveyor_id
   var conveyor_tile = conveyorTile[conveyor_id]["selected_tile"]
+  if(ConnectedconveyorTile){
+    var mapping_dict = {}
+    for (const [key, value] of Object.entries(ConnectedconveyorTile)) {
+        if(!Object.keys(mapping_dict).includes(value["conveyor_id_source"].toString())){
+            var mapping_list = []
+            mapping_list.push(value["conveyor_id_destination"].toString())
+            mapping_dict[value["conveyor_id_source"]] = mapping_list
+        }else{
+            mapping_list.push(value["conveyor_id_destination"].toString())
+            mapping_dict[value["conveyor_id_source"]] = mapping_list
+        }
+    }
+    var error_text=''
+    for (const [key, value] of Object.entries(mapping_dict)) {
+        var values = value.map(Number)
+        if(parseInt(conveyor_id) === parseInt(key)){
+            var error_text = `Please disconnect conveyor system ${conveyor_id} and ${value.join()} before deletion`
+            break
+        }else if(values.includes(parseInt(conveyor_id))){
+            var error_text = `Please disconnect conveyor system ${conveyor_id} and ${key} before deletion`
+            break
+        }
+    }
+    if(error_text!==""){
+      return dispatch(setErrorMessage(error_text));
+    }
+  }
+  var active_data = conveyorTile[conveyor_id]["conveyor_active"]
   if (conveyor_tile.length===0){
     dispatch({
       type: "REMOVE-SELECTED-CONVEYOR-ID",
@@ -612,14 +753,35 @@ export const removeConveyor = (
       });
     var state = getState();
     var removed_conveyor_array = convertNestedListToList(conveyor_tile)
-    var barcodes = state.normalizedMap.entities.barcode[removed_conveyor_array[0]]
+    var barcodes
+    barcodes = state.normalizedMap.entities.barcode[removed_conveyor_array[0]]
+    var barcodeDict = state.normalizedMap.entities.barcode
     if(barcodes.hasOwnProperty('remove_conveyor_tile')){
       setTimeout(() => {
-        if (window.confirm("Are you sure you want to delete conveyor id "+conveyor_id+"?") ) {
+        if (window.confirm("Are you sure you want to delete conveyor id "+conveyor_id+"?")){
+          barcodes = manageRemoveConveyorNeighbour(conveyor_id,barcodeDict,removed_conveyor_array,conveyorTile)
+          dispatch({
+            type: "VIEW-OVERLAP-BAROCDES",
+            value: barcodes
+          });
           dispatch({
               type: "CONVEYOR-TILES-STRIPES",
               value: {conveyor_tile,"conveyor_selected_status":0}
                 })
+          if(conveyorTile[conveyor_id].hasOwnProperty("conveyor_io_entry")){
+            var conveyor_io_entry_point = conveyorTile[conveyor_id]["conveyor_io_entry"]
+            dispatch({
+              type: "REMOVE-CONVEYOR-ENTRY-IO-POINT-STRIPES",
+              value: {conveyor_io_entry_point}
+                })
+          }
+          if(conveyorTile[conveyor_id].hasOwnProperty("conveyor_io_exit")){
+            var conveyor_io_exit_point = conveyorTile[conveyor_id]["conveyor_io_exit"]
+            dispatch({
+              type: "REMOVE-CONVEYOR-EXIT-IO-POINT-STRIPES",
+              value: {conveyor_io_exit_point}
+                })
+          }
           dispatch({
               type: "REMOVE-SELECTED-CONVEYOR-ID",
               value: {conveyor_id}
@@ -632,6 +794,12 @@ export const removeConveyor = (
               type: "HIGHLIGHT-SELECTED-REMOVED-CONVEYOR",
               value: {conveyor_tile,"remove_conveyor_tile":0}
                 });
+          if(active_data.length!==0){
+            dispatch({
+                type: "DELETE-TTP-PPS-POINT",
+                value: active_data
+            });
+          }
             }else {
                 dispatch({
                     type: "HIGHLIGHT-SELECTED-REMOVED-CONVEYOR",
@@ -643,6 +811,7 @@ export const removeConveyor = (
   }
   dispatch(clearTiles);
   return Promise.resolve();
+  
 };
 
 export const updateConveyor = (formData) => (dispatch, getState) => {
@@ -656,8 +825,15 @@ export const updateConveyor = (formData) => (dispatch, getState) => {
   let activePointDiff = []
   var ConveyorData = state.normalizedMap.entities.conveyorTile[originalConveyorId];
   // update conveyor details based on form
-  ConveyorData.conveyor_entry_height = parseInt(formData.schema.conveyor_entry_height_info.conveyor_entry_height);
-  ConveyorData.conveyor_exit_height = parseInt(formData.schema.conveyor_exit_height_info.conveyor_exit_height);
+  if(formData.schema.conveyor_entry_height_info){
+    ConveyorData.conveyor_entry_height = parseInt(formData.schema.conveyor_entry_height_info.conveyor_entry_height);
+  }
+  if(formData.schema.conveyor_entry_height_info){
+    ConveyorData.conveyor_entry_height = parseInt(formData.schema.conveyor_entry_height_info.conveyor_entry_height);
+  }
+  if(formData.schema.conveyor_display_name_info){
+    ConveyorData.conveyor_display_name = formData.schema.conveyor_display_name_info.conveyor_display_name;
+  }
   if(ConveyorData.conveyor_active.length !== 0){
     var getNewActiveList = []
     for (var i = 0; i < formData.schema.active_point_info.length; i++) {
@@ -746,11 +922,17 @@ export const updateConveyor = (formData) => (dispatch, getState) => {
   // then update conveyor_exit info from state.
   if(ConveyorData.hasOwnProperty("conveyor_exit")){
     conveyor_tile = ConveyorData.conveyor_exit
+    var conveyor_io_exit_point = ConveyorData.conveyor_io_exit;
     if(!formData.schema.hasOwnProperty("exit_point_info")){
       dispatch({
         type: "CONVEYOR-TILES-STRIPES",
         value: { conveyor_tile, grid_attribute: "conveyor_track" } ,
       });
+      dispatch({
+        type: "REMOVE-CONVEYOR-EXIT-IO-POINT-STRIPES",
+        value: { conveyor_io_exit_point},
+      });
+
     }
   }
   if(!formData.schema.exit_point_info && ConveyorData.hasOwnProperty("conveyor_exit")){
@@ -758,6 +940,7 @@ export const updateConveyor = (formData) => (dispatch, getState) => {
        delete ConveyorData.exit_point_direction;
        delete ConveyorData.conveyor_io_exit;
        delete ConveyorData.conveyor_exit;
+       delete ConveyorData.conveyor_exit_height
      }
   else if(ConveyorData.hasOwnProperty("conveyor_exit")){
        ConveyorData.bot_orientation_exit = parseInt(formData.schema.exit_point_info.exit_bot_orientation_direction);
@@ -771,10 +954,15 @@ export const updateConveyor = (formData) => (dispatch, getState) => {
   // then update conveyor_entry info from state.
   if(ConveyorData.hasOwnProperty("conveyor_entry")){
     conveyor_tile = ConveyorData.conveyor_entry
+    var conveyor_io_entry_point = ConveyorData.conveyor_io_entry;
     if(!formData.schema.hasOwnProperty("entry_point_info")){
       dispatch({
         type: "CONVEYOR-TILES-STRIPES",
         value: { conveyor_tile, grid_attribute: "conveyor_track" } ,
+      });
+      dispatch({
+        type: "REMOVE-CONVEYOR-ENTRY-IO-POINT-STRIPES",
+        value: { conveyor_io_entry_point},
       });
     }
   }
@@ -783,6 +971,7 @@ export const updateConveyor = (formData) => (dispatch, getState) => {
        delete ConveyorData.entry_point_direction;
        delete ConveyorData.conveyor_io_entry;
        delete ConveyorData.conveyor_entry;
+       delete ConveyorData.conveyor_entry_height
      }
   else if(ConveyorData.hasOwnProperty("conveyor_entry")){
        ConveyorData.bot_orientation_entry = parseInt(formData.schema.entry_point_info.entry_bot_orientation_direction);
@@ -900,9 +1089,12 @@ export const downloadConveyor = () => (dispatch, getState) =>{
     },
   } = state;
   var { normalizedMap } = getState();
-
-  var conveyor_id = state.normalizedMap.entities.map.dummy.current_conveyor_id
-  var conveyorJson = conveyor_json(normalizedMap);
+  var converyor_version = state.conveyorVersion
+  if(converyor_version === DEFAULT_CONVEYOR_VERSION){
+      var conveyorJson = conveyor_json_v2(normalizedMap);
+    }else{
+      var conveyorJson = conveyor_json_v1(normalizedMap);
+    }
   const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
       JSON.stringify(conveyorJson)
     )}`;

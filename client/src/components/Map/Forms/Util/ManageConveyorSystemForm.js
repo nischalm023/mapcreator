@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import ButtonForm from "./ButtonForm";
 import { getIoPoint } from "../../../../actions/conveyor";
-
+import * as constants from "../../../../constants";
 
 const exitEntryDirections = {
     0: "North",
@@ -19,8 +19,8 @@ class BaseForm extends Component {
         show_error:false,
         error_text:""
     };
-    toggle = (conveyorInfo=null,floor_barcodes=null) => {
-        console.log(">>>>>>> toggled!!")
+    toggle = (conveyorInfo=null,floor_barcodes=null,conveyor_version=null) => {
+        console.log(">>>>>>> toggled!!",conveyorInfo)
         if(!conveyorInfo){
             this.setState({ show: !this.state.show, formData: {},show_error:false,error_text:"" });
             return;
@@ -49,25 +49,49 @@ class BaseForm extends Component {
                 })
             }
         }
+        
         let initialSchema = {
             conveyor_id_info : {
                 conveyor_id: conveyorInfo.conveyor_id,
                 edit: false,
                 error: ''
             },
-            conveyor_entry_height_info : {
-                conveyor_entry_height: conveyorInfo.conveyor_entry_height?conveyorInfo.conveyor_entry_height:'',
-                edit: false,
-                error: ''
-            },
-            conveyor_exit_height_info : {
-                conveyor_exit_height: conveyorInfo.conveyor_exit_height?conveyorInfo.conveyor_exit_height:'',
-                edit: false,
-                error: ''
-            },
             active_point_info: active_point_info,
             conveyor_step_id_info:conveyor_step_id_list
         };
+        if(conveyorInfo.conveyor_display_name){
+
+            initialSchema["conveyor_display_name_info"] = {
+                conveyor_display_name: conveyorInfo.conveyor_display_name?conveyorInfo.conveyor_display_name:'Conveyor_'+conveyorInfo.conveyor_id,
+                edit: false,
+                error: ''
+            }
+        }else{
+            if(conveyor_version === constants.DEFAULT_CONVEYOR_VERSION){
+                var new_display_name = 'Conveyor_'+conveyorInfo.conveyor_id
+            }else{
+                var new_display_name = 'NA'
+            }
+            initialSchema["conveyor_display_name_info"] = {
+                conveyor_display_name: new_display_name,
+                edit: false,
+                error: ''
+            }
+        }
+        if(conveyorInfo.conveyor_entry_height){
+            initialSchema["conveyor_entry_height_info"] = {
+                conveyor_entry_height: conveyorInfo.conveyor_entry_height?conveyorInfo.conveyor_entry_height:'',
+                edit: false,
+                error: ''
+            }
+        }
+        if(conveyorInfo.conveyor_exit_height){
+            initialSchema["conveyor_exit_height_info"] = {
+                conveyor_exit_height: conveyorInfo.conveyor_exit_height?conveyorInfo.conveyor_exit_height:'',
+                edit: false,
+                error: ''
+            }
+        }
         if(conveyorInfo.conveyor_end){
             initialSchema["end_point_info"] = {
                 end_point_coordinate: floor_barcodes[conveyorInfo.conveyor_end[0]]["barcode"],
@@ -79,7 +103,7 @@ class BaseForm extends Component {
             initialSchema["exit_point_info"] = {
                 exit_point_coordinate: floor_barcodes[conveyorInfo.conveyor_exit[0]]["barcode"],
                 exit_bot_orientation_direction: conveyorInfo.bot_orientation_exit,
-                exit_direction: exitEntryDirections[conveyorInfo.exit_point_direction],
+                exit_direction: conveyorInfo.exit_point_direction,
                 exit_io_point_coordinate: floor_barcodes[JSON.parse(conveyorInfo.conveyor_io_exit).join(',')]["barcode"],
                 edit: false,
                 error: ''
@@ -103,7 +127,7 @@ class BaseForm extends Component {
             initialSchema["entry_point_info"] = {
                 entry_point_coordinate: floor_barcodes[conveyorInfo.conveyor_entry[0]]["barcode"],
                 entry_bot_orientation_direction: conveyorInfo.bot_orientation_entry,
-                entry_direction: exitEntryDirections[conveyorInfo.entry_point_direction],
+                entry_direction: conveyorInfo.entry_point_direction,
                 entry_io_point_coordinate: floor_barcodes[JSON.parse(conveyorInfo.conveyor_io_entry).join(',')]["barcode"],
                 edit: false,
                 error: ''
@@ -134,6 +158,10 @@ class BaseForm extends Component {
             schema.conveyor_id_info.conveyor_id = value;
             schema.conveyor_id_info.error = '';
         }
+        if (field == "conveyor_display_name_info") {
+            schema.conveyor_display_name_info.conveyor_display_name = value;
+            schema.conveyor_display_name_info.error = '';
+        }
         if (field == "conveyor_entry_height_info") {
             schema.conveyor_entry_height_info.conveyor_entry_height = value;
             schema.conveyor_entry_height_info.error = '';
@@ -144,11 +172,11 @@ class BaseForm extends Component {
         }
         let direction_mapping = {"North":0,"East":1,"South":2,"West":3}
         if (field == "exit_bot_orientation_direction") {
-            schema.exit_point_info.exit_bot_orientation_direction = value;
+            schema.exit_point_info.exit_bot_orientation_direction = parseInt(value);
             schema.exit_point_info.error = '';
         }
         if (field == "entry_bot_orientation_direction") {
-            schema.entry_point_info.entry_bot_orientation_direction = value;
+            schema.entry_point_info.entry_bot_orientation_direction = parseInt(value);
             schema.entry_point_info.error = '';
         }
         if (field == "exit_direction") {
@@ -165,10 +193,12 @@ class BaseForm extends Component {
             if(parseInt(value) === 0 || parseInt(value) === 2){
                 possibleBotDirections.push({value: all_directions["East"], label: "East"})
                 possibleBotDirections.push({value: all_directions["West"], label: "West"})
+                schema.exit_point_info.exit_bot_orientation_direction = 1; 
             }
             if(parseInt(value) === 1 || parseInt(value) === 3){
                 possibleBotDirections.push({value: all_directions["North"], label: "North"})
                 possibleBotDirections.push({value: all_directions["South"], label: "South"})
+                schema.exit_point_info.exit_bot_orientation_direction = 0;
             }
             this.setState({
                 exit_bot_direction_options: possibleBotDirections,
@@ -188,10 +218,12 @@ class BaseForm extends Component {
             if(parseInt(value) === 0 || parseInt(value) === 2){
                 possibleBotDirections.push({value: all_directions["East"], label: "East"})
                 possibleBotDirections.push({value: all_directions["West"], label: "West"})
+                schema.entry_point_info.entry_bot_orientation_direction = 1;
             }
             if(parseInt(value) === 1 || parseInt(value) === 3){
                 possibleBotDirections.push({value: all_directions["North"], label: "North"})
                 possibleBotDirections.push({value: all_directions["South"], label: "South"})
+                schema.entry_point_info.entry_bot_orientation_direction = 0;
             }
             this.setState({
                 entry_bot_direction_options: possibleBotDirections,
@@ -244,6 +276,10 @@ class BaseForm extends Component {
             schema.conveyor_id_info.edit = !schema.conveyor_id_info.edit;
             schema.conveyor_id_info.error = '';
         }
+        if(field==="conveyor_display_name_info"){
+            schema.conveyor_display_name_info.edit = !schema.conveyor_display_name_info.edit;
+            schema.conveyor_display_name_info.error = '';
+        }
         if(field==="conveyor_entry_height_info"){
             schema.conveyor_entry_height_info.edit = !schema.conveyor_entry_height_info.edit;
             schema.conveyor_entry_height_info.error = '';
@@ -265,8 +301,14 @@ class BaseForm extends Component {
     deleteRow = (field) => {
         var schema = { ...this.state.schema };
         if(field==="end_point_info") delete schema.end_point_info;
-        if(field==="exit_point_info") delete schema.exit_point_info;
-        if(field==="entry_point_info") delete schema.entry_point_info;
+        if(field==="exit_point_info"){
+            delete schema.exit_point_info;
+            delete schema.conveyor_exit_height_info
+        } 
+        if(field==="entry_point_info"){
+            delete schema.entry_point_info;
+            delete schema.conveyor_entry_height_info
+        }
         this.setState({ schema: schema });
     };
 
@@ -278,21 +320,25 @@ class BaseForm extends Component {
             error = true;
             schema.conveyor_id_info.error = "Conveyor Id cannot be empty.";
         }
-        if(schema.conveyor_entry_height_info.conveyor_entry_height===''){
+        if(schema.conveyor_entry_height_info){
+            if(schema.conveyor_entry_height_info.conveyor_entry_height===''){
             error = true;
             schema.conveyor_entry_height_info.error= "Conveyor entry height cannot be empty.";
+            }
+            if(parseInt(schema.conveyor_entry_height_info.conveyor_entry_height)<=0){
+                error = true;
+                schema.conveyor_entry_height_info.error= "Conveyor entry height cannot be zero or negative.";
+            }
         }
-        if(parseInt(schema.conveyor_entry_height_info.conveyor_entry_height)<=0){
-            error = true;
-            schema.conveyor_entry_height_info.error= "Conveyor entry height cannot be zero or negative.";
-        }
-        if(schema.conveyor_exit_height_info.conveyor_exit_height===''){
+        if(schema.conveyor_exit_height_info){
+            if(schema.conveyor_exit_height_info.conveyor_exit_height===''){
             error = true;
             schema.conveyor_exit_height_info.error = "Conveyor exit height cannot be empty.";
-        }
-        if(parseInt(schema.conveyor_exit_height_info.conveyor_exit_height)<=0){
-            error = true;
-            schema.conveyor_exit_height_info.error = "Conveyor exit height cannot be zero or negative.";
+            }
+            if(parseInt(schema.conveyor_exit_height_info.conveyor_exit_height)<=0){
+                error = true;
+                schema.conveyor_exit_height_info.error = "Conveyor exit height cannot be zero or negative.";
+            }
         }
         if(!error){
             // validate if entered conveyor id is unique
@@ -381,6 +427,7 @@ class BaseForm extends Component {
             entry_direction_options,
             exit_direction_options,
             floor_barcodes,
+            conveyor_version,
             ...rest
         } = this.props;
         // var entryBotOrientationOptions = []
@@ -511,7 +558,7 @@ class BaseForm extends Component {
         }
 
         return (
-            <ButtonForm {...rest} modalClass="manage-conveyor-modal" show={this.state.show} toggle={() => this.toggle(conveyorInfo,floor_barcodes)} >
+            <ButtonForm {...rest} modalClass="manage-conveyor-modal" show={this.state.show} toggle={() => this.toggle(conveyorInfo,floor_barcodes,conveyor_version)} >
                 {Object.keys(this.state.schema).length!==0 &&
                 <form>
                     <div style={{padding:"0px 20px"}}>
@@ -543,6 +590,39 @@ class BaseForm extends Component {
                             {_this.state.schema.conveyor_id_info.error!=='' && <span style={{color:"red",marginLeft:'15px', marginTop:"10px"}}>{_this.state.schema.conveyor_id_info.error}</span>}
                         </div>
                         <br/>
+                         {(_this.state.schema.conveyor_display_name_info) &&
+                        <span>
+                        <div class="row">
+                            <div className="col-5 col-lg-5 col-sm-5 col-md-5">
+                                Conveyor Display Name : 
+                            </div>
+                            <div className="col-6 col-lg-6 col-sm-6 col-md-6">
+                                <input
+                                    style={{ width: "100%" }}
+                                    className="form-control"
+                                    type="text"
+                                    defaultValue={this.state.schema.conveyor_display_name_info.conveyor_display_name}
+                                    value={this.state.schema.conveyor_display_name_info.conveyor_display_name}
+                                    onChange={(e) => this.changeSchemaHandler("conveyor_display_name_info", e.target.value)}
+                                    disabled={!this.state.schema.conveyor_display_name_info.edit ? true : false}
+                                />
+                            </div>
+                            <div className="col-1 col-lg-1 col-sm-1 col-md-1">
+                                <button
+                                    className="btn"
+                                    type="button"
+                                    onClick={() => _this.editRow("conveyor_display_name_info")}
+                                >
+                                    {_this.state.schema.conveyor_display_name_info.edit?<i className="fa fa-check"/>:<i className="fas fa-edit"/>} 
+                                </button>
+                            </div>
+                            {_this.state.schema.conveyor_display_name_info.error!=='' && <span style={{color:"red",marginLeft:'15px', marginTop:"10px"}}>{_this.state.schema.conveyor_display_name_info.error}</span>}
+                        </div>
+                        <br/>
+                        </span>
+                        }
+                        {(_this.state.schema.conveyor_entry_height_info) &&
+                        <span>
                         <div class="row">
                             <div className="col-5 col-lg-5 col-sm-5 col-md-5">
                                 Conveyor Entry Height : 
@@ -569,7 +649,12 @@ class BaseForm extends Component {
                             {_this.state.schema.conveyor_entry_height_info.error!=='' && <span style={{color:"red",marginLeft:'15px', marginTop:"10px"}}>{_this.state.schema.conveyor_entry_height_info.error}</span>}
                         </div>
                         <br/>
+                        </span>
+                        }
+                        {(_this.state.schema.conveyor_exit_height_info) &&
+                        <span>
                         <div class="row">
+
                             <div className="col-5 col-lg-5 col-sm-5 col-md-5">
                                 Conveyor Exit Height : 
                             </div>
@@ -595,6 +680,8 @@ class BaseForm extends Component {
                             {_this.state.schema.conveyor_exit_height_info.error!=='' && <span style={{color:"red",marginLeft:'15px', marginTop:"10px"}}>{_this.state.schema.conveyor_exit_height_info.error}</span>}
                         </div>
                         <br/>
+                        </span>
+                        }
                         {_this.state.schema.end_point_info &&
                             <span>
                                 <div class="row">

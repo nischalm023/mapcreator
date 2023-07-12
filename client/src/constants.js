@@ -41,6 +41,8 @@ export const STORABLE_Y_SCALE =
   (BARCODE_CLICKABLE_AREA_RATIO * DEFAULT_DISTANCE_BW_BARCODES) /
   TILE_SPRITE_HEIGHT;
 
+export var DEFAULT_CONVEYOR_VERSION = 'v2'
+export var CONVEYOR_VERSION = ['v2','v1'] 
 export var STORABLE_OFFSET_X = 580;
 export var STORABLE_OFFSET_Y = 370;
 export var BARCODE_DIGIT_OFFSET = 5; // in y
@@ -100,7 +102,10 @@ export var ENTRY_CONVEYOR = "entry.png";
 // export var IO_POINTS = "io_point_img.png"
 export var IO_POINTS = "iopoint.png"
 export var TOTE_STORABLE = "totestorables.png"
-
+export var CONVEYOR_EXIT_IO_POINTS = "conveyor_io_exit.png"
+export var CONVEYOR_ENTRY_IO_POINTS = "conveyor_io_entry.png"
+export const CONVEYOR_BLOCK_DIRECTIONALITY = "conveyor_directionality.png"
+export const CONVEYOR_DIRECTIONALITY = "conveyor_movement.png"
 
 // graph directionality edge sprites
 export const DIRECTIONALITY_SPRITES_MAP = {
@@ -198,6 +203,17 @@ export const LEGENDSMAP = [
   {
     name: "Tote Storables",
     icon6: "totestorables.png"
+  },
+  {
+    name: "Tote Storables IO Point",
+    icon7: "iopoint.png"
+  },
+  {
+    name: "Conveyor Entry IO Point",
+    icon8: "conveyor_io_entry.png"
+  },
+  {
+    name: "Conveyor Exit IO Point",
+    icon9: "conveyor_io_exit.png"
   }
-
 ];

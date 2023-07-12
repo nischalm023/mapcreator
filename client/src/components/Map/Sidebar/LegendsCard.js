@@ -8,6 +8,9 @@ import exitConveyor from "sprites/exit.png";
 import endConveyor from "sprites/end.png";
 import activeConveyor from "sprites/active.png";
 import toteStorable from "sprites/totestorables.png"
+import conveyorEntryIOPoints from "sprites/conveyor_io_entry.png";
+import toteStorableIOPoints from "sprites/iopoint.png";
+import conveyorExitIOPoints from "sprites/conveyor_io_exit.png";
 import * as constants from "../../../constants";
 const title = "Legends";
 const LegendsMap = constants.LEGENDSMAP;
@@ -40,7 +43,16 @@ const LegendsCard = () => (
             {e.icon6 && <div>
               <img src={toteStorable} style={{height: 26, marginTop: 2}} />
             </div>}
-            <div className="col-10">{e.name}</div>
+            {e.icon7 && <div style={{textAlign:"center", width: 26}}>
+              <img src={toteStorableIOPoints} style={{height: 10, marginTop: 2}} />
+            </div>}
+            {e.icon8 && <div style={{textAlign:"center", width: 26}}>
+              <img src={conveyorEntryIOPoints} style={{height: 10, marginTop: 2}} />
+            </div>}
+            {e.icon9 && <div style={{textAlign:"center", width: 26}}>
+              <img src={conveyorExitIOPoints} style={{height: 10, marginTop: 2}} />
+            </div>}
+            <div className="col-10 ">{e.name}</div>
           </div>
         );
       })}

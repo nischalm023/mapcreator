@@ -25,7 +25,7 @@ export default (state = {}, action) => {
       return addKey(state, "sectors", action.value.sector_id.toString());
     }
     case "ADD-CONVEYOR": {
-      const { conveyor_id, conveyor_height } = action.value;
+      const { conveyor_id } = action.value;
       if (!newState.dummy.hasOwnProperty('conveyors')){
         newState.dummy.conveyors = [];
       }
@@ -33,6 +33,18 @@ export default (state = {}, action) => {
         newState.dummy.conveyors.push(conveyor_id);
         newState.dummy.current_conveyor_id = [];
         newState.dummy.current_conveyor_id.push(conveyor_id);
+      }
+      return newState;
+    }
+  case "ADD-CONNECTED-CONVEYOR": {
+      const { connected_conveyor_id } = action.value;
+      if (!newState.dummy.hasOwnProperty('connectedConveyor')){
+        newState.dummy.connectedConveyor = [];
+      }
+      if(!newState.dummy.connectedConveyor.includes(connected_conveyor_id)){
+        newState.dummy.connectedConveyor.push(connected_conveyor_id);
+        newState.dummy.current_connected_conveyor_id = [];
+        newState.dummy.current_connected_conveyor_id.push(connected_conveyor_id);
       }
       return newState;
     }

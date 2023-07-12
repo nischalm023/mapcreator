@@ -4,6 +4,7 @@ import { createSelector } from "reselect";
 import * as constants from "../../constants";
 import {
   tileToWorldCoordinate,
+  getTileIdToWorldCoordMap,
   getTileBoundingBox
 } from "./world-coordinate-utils-selectors";
 import createCachedSelector from "re-reselect";
@@ -12,11 +13,13 @@ import _ from "lodash";
 // Scale is for stretching out the barcode.png sprite to exactly fit the tile
 // bounding box. Hence it is not {1,1} for the default sprite but some other value.
 export const getTileSpriteScale = createCachedSelector(
+  state => state.selection.directionViewMode,
+  getBarcode,
   getBarcodeSize,
-  barcodeSizeInfo => {
-    const barcodeSizeXInCADCoordinates =
+  (directionViewMode,barcodeInfo,barcodeSizeInfo) => {
+    var barcodeSizeXInCADCoordinates =
       barcodeSizeInfo[1] + barcodeSizeInfo[3];
-    const barcodeSizeYInCADCoordinates =
+    var barcodeSizeYInCADCoordinates =
       barcodeSizeInfo[0] + barcodeSizeInfo[2];
     const defDistance = constants.DEFAULT_DISTANCE_BW_BARCODES;
     // Read tests to understand this calculation
@@ -27,6 +30,32 @@ export const getTileSpriteScale = createCachedSelector(
     return { xScale, yScale };
   }
 )((state, { tileId }) => tileId);
+
+
+export const getConveyorTileSpriteScale = createCachedSelector(
+  getTileIdToWorldCoordMap,
+  (_state, props) => props.tileId,
+  state => state.selection.directionViewMode,
+  getBarcode,
+  getBarcodeSize,
+  (tileIdToWorldCoordinateMap,tileId,directionViewMode,barcodeInfo,barcodeSizeInfo) => {
+    var barcodeSizeXInCADCoordinates =
+      (barcodeSizeInfo[1] + barcodeSizeInfo[3])/2;
+    var barcodeSizeYInCADCoordinates =
+      (barcodeSizeInfo[0] + barcodeSizeInfo[2])/2;
+    const defDistance = constants.DEFAULT_DISTANCE_BW_BARCODES;
+    // Read tests to understand this calculation
+    const xScaleConveyor =
+      (barcodeSizeXInCADCoordinates / defDistance) * constants.DEFAULT_X_SCALE;
+    const yScaleConveyor =
+      (barcodeSizeYInCADCoordinates / defDistance) * constants.DEFAULT_Y_SCALE;
+    var xCoord = tileIdToWorldCoordinateMap[tileId].x - (constants.STORABLE_POINT_HEIGHT)/2*xScaleConveyor;
+    var yCoord = tileIdToWorldCoordinateMap[tileId].y - (constants.STORABLE_POINT_HEIGHT)/2*yScaleConveyor;
+    return { xScaleConveyor, yScaleConveyor,xCoord,yCoord};
+  }
+)((state, { tileId }) => tileId);
+
+
 
 export const getMainTileSpriteData = createSelector(
   getBarcode,
@@ -56,15 +85,6 @@ export const getMainTileSpriteData = createSelector(
         }
       }
     });
-    // {
-      // conveyor_selected_status = 1 (selected conveyor tile)
-      // conveyor_selected_status = 2 (entry points on conveyor tile)
-      // conveyor_selected_status = 3 (exit points on conveyor tile)
-      // conveyor_selected_status = 4 (end points on conveyor tile)
-      // conveyor_selected_status = 5 (active point on conveyor tile)
-      // remove_conveyor_tile = 1 (remove selected conveyor tile)
-      // conveyor_selected_status = 0 (selected conveyor tile for normal color)
-    // }
     if ( barcode.success_overlap_barcode_status === 1 && !zoneViewMode && !sectorViewMode) tileSprite = constants.QUEUE;
     if ( barcode.unsuccess_overlap_barcode_status === 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.ODS_EXCLUDED;
     if ( barcode.highlight_status > 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.HIGHLIGHT;
@@ -267,6 +287,7 @@ export const getStorableTileSpriteScale = (xWidth,yHeight) => {
 
 export const getAllSpritesData = createSelector(
   getMainTileSpriteData,
+  getConveyorTileSpriteScale,
   getBarcodeDigitSpritesData,
   getDirectionalitySpritesData,
   tileToWorldCoordinate,
@@ -279,6 +300,7 @@ export const getAllSpritesData = createSelector(
   (_state,props)=> props.tileId,
   (
     mainSpriteData,
+    { xScaleConveyor, yScaleConveyor,xCoord,yCoord},
     barcodeDigitSpritesData,
     directionalitySpritesData,
     { x: centreX, y: centreY },
@@ -293,9 +315,6 @@ export const getAllSpritesData = createSelector(
     let name = constants.BARCODE_CENTRE_SPRITE
     let io_point={}
     var storable_list = []
-    if(barcode_state[props]["coordinate"]=="432,9"){
-      console.log("xScale,yScale================",xScale,yScale)
-    }
     if(barcode_state[props].isIoPoint){
       if(storable_state && totestorageMode){
         var storable_list = []
@@ -327,7 +346,28 @@ export const getAllSpritesData = createSelector(
         yScale
       }
     }
-    const baseData = {
+    if(barcode_state[props].conveyorEntryIO){
+      io_point={
+        name : constants.CONVEYOR_ENTRY_IO_POINTS,
+        x : centreX-constants.IO_POINT_HEIGHT*xScale,
+        y : centreY-constants.IO_POINT_HEIGHT*yScale,
+        xScale,
+        yScale
+      }
+    }
+    if(barcode_state[props].conveyorExitIO){
+      io_point={
+        name : constants.CONVEYOR_EXIT_IO_POINTS,
+        x : centreX-constants.IO_POINT_HEIGHT*xScale,
+        y : centreY-constants.IO_POINT_HEIGHT*yScale,
+        xScale,
+        yScale
+      }
+    }
+    if(directionViewMode && barcode_state[props].hasOwnProperty("grid_attribute") && barcode_state[props]["grid_attribute"]!==0){
+      mainSpriteData = {...mainSpriteData,...{xScale:xScaleConveyor,yScale:yScaleConveyor,x:xCoord,y:yCoord}}
+    }
+    var baseData = {
       main: mainSpriteData,
       ...barcodeDigitSpritesData,
       io_point:io_point,
@@ -341,7 +381,11 @@ export const getAllSpritesData = createSelector(
         yScale
       }
     };
-    if (directionViewMode) return { ...baseData, ...directionalitySpritesData };
+
+    if(directionViewMode){
+      baseData = { ...baseData, ...directionalitySpritesData };
+    }
+    
     return baseData;
   }
 );

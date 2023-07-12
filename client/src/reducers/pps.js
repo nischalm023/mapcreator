@@ -69,7 +69,7 @@ export default (state = {}, action) => {
           newState[pps_id]["pps_points"] = []
         }else{
           for (var j = 0; j < newState[pps_id]["pps_points"].length; j++) {
-              if(newState[pps_id]["pps_points"][j]["coordinate"] == pps_list[i]["conveyor_active_point"][0]){
+              if(newState[pps_id]["pps_points"][j]["coordinate"] == `[${pps_list[i]["conveyor_active_point"][0]}]`){
                 newState[pps_id]["pps_points"].splice(j, 1);
               }
           }

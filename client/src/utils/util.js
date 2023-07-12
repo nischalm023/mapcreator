@@ -133,6 +133,9 @@ export const calculateVsdWorldCordinate = (world_cordinate,arbitrary_origin_valu
 
 // calculation for ttp barcode format
 export const calculateVdaBarcode = (world_cordinate,arbitrary_origin_value,vda_offset) =>{
+    if(world_cordinate[0]===-190120 && world_cordinate[1] === 111530){
+      console.log("stop")
+    }
     var vda_offset_x = vda_offset[0]
     var vda_offset_y = vda_offset[1]
     var vda_cordinate_x = (Math.abs(world_cordinate[0] - arbitrary_origin_value[0]) + vda_offset_x)
@@ -174,6 +177,7 @@ export const getArbitraryOriginValue = (barcodeDict) =>{
     const highest_y = coordinate_list.reduce((a, b) => a[1] > b[1] ? a : b);
     const lowest_x = coordinate_list.reduce((a, b) => a[0] < b[0] ? a : b);
     var offset_value = [lowest_x[0],highest_y[1]]
+    console.log("offset_value========",offset_value)
     return offset_value
 }
 
@@ -509,8 +513,10 @@ export var createMapFromCoordinateData = (
     sectorBarcodeMapping: [{}],
     sectorMxUPreferences: {},
     queueDatas: [],
+    conveyorVersion:"v2",
     downloadConveyor:[],
     conveyors:[],
+    connectedConveyor:[],
     toteStorablesIds:[],
     ioPointsIds:[],
     barcodeDistance:parseInt(barcode_distances / 2),

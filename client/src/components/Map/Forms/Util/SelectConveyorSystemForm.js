@@ -5,8 +5,7 @@ import { getIoPoint } from "../../../../actions/conveyor";
 class BaseForm extends Component {
     state = {
         show: false,
-        entry_height:"",
-        exit_height:"",
+        conveyor_display_name:"",
         step_dict:{},
         show_error:false,
         error_text:""
@@ -20,8 +19,7 @@ class BaseForm extends Component {
        event.preventDefault();
        var data = {
                     conveyor_id: conveyor_id,
-                    conveyor_entry_height: parseInt(this.state.entry_height),
-                    conveyor_exit_height:  parseInt(this.state.exit_height),
+                    conveyor_display_name: this.state.conveyor_display_name,
                     conveyor_step_id:this.state.step_dict
                 }
        var error = false;
@@ -67,7 +65,7 @@ class BaseForm extends Component {
             disabled,
             ...rest
         } = this.props;
-        const { show,entry_height,exit_height,step_dict} = this.state;
+        const { show,conveyor_display_name,step_dict} = this.state;
         let _this=this
         var multiStepPointRows = [];
         selected_tile.forEach(function (key, index) {
@@ -102,7 +100,7 @@ class BaseForm extends Component {
                 <div className="form-group" style={{padding:"0px 20px"}}>
                     <div class="row">
                         <div className="col-5 col-lg-5 col-sm-5 col-md-5">
-                                Conveyor ID : 
+                                Conveyor ID 
                         </div>
                         <div className="col-7 col-lg-7 col-sm-7 col-md-7">
                             <input id="conveyor_id" className="form-control" type="text" value={nextConveyorId} disabled/>
@@ -111,31 +109,16 @@ class BaseForm extends Component {
                   <br/>
                   <div class="row">
                         <div className="col-5 col-lg-5 col-sm-5 col-md-5">
-                                Conveyor Entry Height : 
+                                Conveyor Display Name 
                         </div>
                         <div className="col-7 col-lg-7 col-sm-7 col-md-7">
                             <input id="conveyor_entry_height" 
-                                onChange={(e)=>this.setState({entry_height: e.target.value})}
+                                onChange={(e)=>this.setState({conveyor_display_name: e.target.value})}
                                 className="form-control" 
-                                type="number" 
+                                type="text" 
                                 min="1" 
                                 required
                             />
-                        </div>
-                    </div>
-                  <br/>
-                  <div class="row">
-                        <div className="col-5 col-lg-5 col-sm-5 col-md-5">
-                                Conveyor Exit Height : 
-                        </div>
-                        <div className="col-7 col-lg-7 col-sm-7 col-md-7">
-                            <input id="conveyor_exit_height"
-                                 onChange={(e)=>this.setState({exit_height: e.target.value})}
-                                 className="form-control" 
-                                 type="number" 
-                                 min="1" 
-                                 required
-                             />
                         </div>
                     </div>
                   <br/>

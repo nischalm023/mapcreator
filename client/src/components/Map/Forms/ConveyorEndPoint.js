@@ -3,6 +3,7 @@ import { selectEndConveyor,convertNestedListToList } from "actions/conveyor";
 import SweetAlertError from "components/SweetAlertError";
 import { connect } from "react-redux";
 import { getBarcodes } from "../../../utils/selectors";
+import {getNeighbourTiles } from "utils/util";
 
 const checkPointLieOnConveyorBelt = (conveyorTile,selectedMapTiles) => {
   for (const [key, value] of Object.entries(conveyorTile)) {
@@ -32,9 +33,16 @@ const IsSelectedTileActivePointOrEndPoint = (conveyorTile,map_tile_value) => {
   return false
 };
 
-const checkPointLieInMiddleConveyorBelt = (conveyorTile,map_tile_value) => {
+const checkPointLieInMiddleConveyorBelt = (conveyorTile,tileId,barcodes) => {
   var selected_tile = convertNestedListToList(conveyorTile)
-  if(!map_tile_value.includes(selected_tile[0]) && !map_tile_value.includes(selected_tile[selected_tile.length - 1])){
+  if (barcodes[tileId].hasOwnProperty('adjacency')) {
+          var nbTileId = convertNestedListToList(barcodes[tileId]["adjacency"])
+        }
+        else {
+          var nbTileId = getNeighbourTiles(tileId)
+        }
+  const filteredArray = selected_tile.filter(value => nbTileId.includes(value));
+  if(filteredArray.length>1){
     return false
   }
   return true
@@ -46,7 +54,7 @@ const shouldBeDisabled = (map_tile_value, barcodes, conveyorTile) => {
   if(map_tile_value.length==1){
      var [conveyor_id,point_exist] =checkPointLieOnConveyorBelt(conveyorTile,map_tile_value)
      if(conveyor_id!=''){
-      var middle_point= checkPointLieInMiddleConveyorBelt(conveyorTile[conveyor_id][["selected_tile"]],map_tile_value)
+      var middle_point= checkPointLieInMiddleConveyorBelt(conveyorTile[conveyor_id][["selected_tile"]],map_tile_value[0],barcodes)
       var point_already_exist = IsSelectedTileActivePointOrEndPoint(conveyorTile[conveyor_id],map_tile_value)
       if(!point_exist && !middle_point && !point_already_exist){
         return [conveyor_id,false]

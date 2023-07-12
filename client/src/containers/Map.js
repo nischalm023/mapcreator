@@ -21,13 +21,16 @@ import RightSidebar from "components/Map/Sidebar/RightSidebar";
 import BarcodeViewPopup from "components/Map/BarcodeViewPopup";
 import ChangeFloorDropdown from "components/Map/Forms/ChangeFloorDropdown";
 import ChangeBarcodeFormat from "components/Map/Forms/ChangeBarcodeFormat";
+import ManageConveyorVersion from "components/Map/Forms/ManageConveyorVersion";
 import CopyMap from "components/Map/Forms/CopyMap";
 import DeleteMap from "components/Map/Forms/DeleteMap";
 import RequestValidation from "components/Map/Forms/RequestValidation";
 import SampleRacksJson from "components/Map/SampleRacksJson";
 import UploadMapDetailsToGsb from "components/Map/Forms/UploadMapDetailsToGsb";
 import { runSanity , showHighlight } from "actions/actions";
+import { validateConveyorEntity } from "actions/validateConveyor";
 import { runHaiMapConversionScriptToMap} from "utils/api";
+
 import _ from "lodash";
 import "./savedMap.css";
 const pendo = window.pendo;
@@ -77,30 +80,6 @@ class Map extends Component {
     return empty_IO_list
   }
 
-  validateConveyorEntity = (conveyorTile) => {
-    var failed_list = []
-    var failed_conveyors_info = {}
-    for (const [key, value] of Object.entries(conveyorTile)) {
-       if(value.conveyor_active.length === 0 || !value.hasOwnProperty("conveyor_exit") || !value.hasOwnProperty("conveyor_entry")){
-          failed_list.push(key)
-          failed_conveyors_info[value.conveyor_id] = {
-            conveyor_id : value.conveyor_id,
-            no_active_points : value.conveyor_active.length === 0,
-            no_exit_point : !value.hasOwnProperty("conveyor_exit"),
-            no_entry_point : !value.hasOwnProperty("conveyor_entry")
-          }
-       }
-    }
-    if(failed_list.length !== 0){
-      this.setState({
-        failedConveyorsInfo : failed_conveyors_info
-      })
-      return true
-    }else{
-      return false
-    }
-  };
-
 
   handleDownloadClick(nMap,floor = null){
     const {dispatch} = this.props;
@@ -147,10 +126,19 @@ class Map extends Component {
   }
   handleSaveClick(nMap){
     const {dispatch} = this.props;
-    let failed_conveyor = this.validateConveyorEntity(nMap.entities.conveyorTile)
-    if(failed_conveyor){
+    let error_text = validateConveyorEntity(nMap.entities.ConnectedconveyorTile,nMap.entities.conveyorTile)
+    if(error_text!==""){
+      var multiErrorStringRows = [];
+      error_text.split("\n").map((key) => (
+        multiErrorStringRows.push(
+          <div>
+            <span key={key}>{key}</span>
+          </div>
+          )
+        ))
       this.setState({
-        conveyorModalShow : true
+        conveyorModalShow : true,
+        failedConveyorsInfo : multiErrorStringRows
       })
     }
     else{
@@ -376,6 +364,12 @@ class Map extends Component {
                   dispatch={dispatch}/>
                 </div>
               </div>
+              <div className={checked_version === "true" ? "d-none" : "row "} style={{padding:"0.5rem 0"}}>
+                <div className="col float-right" style={{paddingRight: "0px"}}>
+                  <ManageConveyorVersion 
+                  dispatch={dispatch}/>
+                </div>
+              </div>
             </div>
           </div>
           <div className="row" id="pixi-canvas-wrapper">
@@ -427,31 +421,7 @@ class Map extends Component {
                 </div>
             </Modal>
          <Modal isOpen={this.state.conveyorModalShow} toggle = {() => {this.setState({conveyorModalShow: !this.state.conveyorModalShow})}} className = "confirmation-modal">
-                {/* <span>Please define Entry,Exit,Active point for conveyor system.</span> */}
-                {Object.keys(this.state.failedConveyorsInfo).map(key => {
-                  const conveyor = this.state.failedConveyorsInfo[key];
-                  if (conveyor.no_active_points && conveyor.no_entry_point && conveyor.no_exit_point) {
-                    return <span key={key}>Conveyor ID {conveyor.conveyor_id} does not have active, entry and exit points defined.</span>;
-                  } 
-                  else if(conveyor.no_active_points && conveyor.no_entry_point){
-                    return <span key={key}>Conveyor ID {conveyor.conveyor_id} does not have active and entry points defined.</span>;
-                  }
-                  else if(conveyor.no_entry_point && conveyor.no_exit_point){
-                    return <span key={key}>Conveyor ID {conveyor.conveyor_id} does not have entry and exit points defined.</span>;
-                  }
-                  else if(conveyor.no_active_points && conveyor.no_exit_point){
-                    return <span key={key}>Conveyor ID {conveyor.conveyor_id} does not have active and exit points defined.</span>;
-                  }
-                  else if(conveyor.no_active_points){
-                    return <span key={key}>Conveyor ID {conveyor.conveyor_id} does not have any active points defined.</span>;
-                  }
-                  else if(conveyor.no_entry_point){
-                    return <span key={key}>Conveyor ID {conveyor.conveyor_id} does not have entry point defined.</span>;
-                  }
-                  else if(conveyor.no_exit_point){
-                    return <span key={key}>Conveyor ID {conveyor.conveyor_id} does not have exit point defined.</span>;
-                  }
-                })}
+                {this.state.failedConveyorsInfo}
                 <br/>
                 <span> Do you want to continue?</span>
                 <br></br>

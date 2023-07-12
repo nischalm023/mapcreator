@@ -33,6 +33,7 @@ import { fitToViewport, setViewportClamp } from "./viewport";
 import { getLinearWorldCordXY ,mappedNeighbour} from "./AddAdjacency";
 import { convertNestedListToList} from "./conveyor";
 import { setErrorMessage, setSuccessMessage } from "./message";
+import {validateConveyorEntity} from "./validateConveyor"
 import {
   getMap,
   updateMap,
@@ -199,6 +200,17 @@ export const setSectorsMxUPreferences = (getState) => {
     });
 };
 
+export const conveyorVersion = (getState) => {  
+  const state = getState();
+  const dummyMap = state.normalizedMap.entities.map.dummy;
+  if(dummyMap.hasOwnProperty("conveyorVersion")){
+    state.conveyorVersion = dummyMap.conveyorVersion
+  }else{
+    state.conveyorVersion = 'v1'
+  }
+  return state
+};
+
 export const barcodeCordMapping = (getState) => {  
   const state = getState();
   const normalizedMap = state.normalizedMap;
@@ -249,6 +261,22 @@ export const setConveyorTile = (getState) => {
       if(!map.map.hasOwnProperty("conveyorTile")){
         normalizedMap.entities.conveyorTile = conveyorTile;
         normalizedMap.entities.map.dummy.conveyorTile = conveyorTile;
+      }
+    });
+};
+
+export const setConnectedConveyorTile = (getState) => {
+  const state = getState();
+  const normalizedMap = state.normalizedMap;
+  var mapId = getMapId(state);
+  var ConnectedconveyorTile = {};
+  return getMap(mapId)
+    .then(handleErrors)
+    .then((res) => res.json())
+    .then((map) => {
+      if(!map.map.hasOwnProperty("ConnectedconveyorTile")){
+        normalizedMap.entities.ConnectedconveyorTile = ConnectedconveyorTile;
+        normalizedMap.entities.map.dummy.ConnectedconveyorTile = ConnectedconveyorTile;
       }
     });
 };
@@ -317,12 +345,14 @@ export const fetchMap = (mapId, onSuccess) => (dispatch, getState) => {
     .then((res) => res.json())
     .then((map) => dispatch(newMap(map)))
     .then((map) => barcodeCordMapping(getState))
+    .then((map) => conveyorVersion(getState))
     .then(() => dispatch(setViewportClamp))
     .then(() => dispatch(fitToViewport))
     .then(() => getBarcodeDistance(dispatch,getState,parseInt(mapId)))
     .then(()=>  setTtpBarcodeFormat(dispatch,getState))
     .then(() => setSectorsMxUPreferences(getState))
     .then(() => setConveyorTile(getState))
+    .then(() => setConnectedConveyorTile(getState))
     .then(() => getBarcodeSpacing(dispatch,getState,parseInt(mapId)))
     .then(() => setIOPoints(getState))
     .then(() => setToteStorables(getState))
@@ -650,7 +680,7 @@ export const addHighwayQueue = () => (dispatch, getState) => {
 };
 
 export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
-  var { normalizedMap} = getState();
+  var { normalizedMap,conveyorVersion} = getState();
   var  withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap)
   var withAdjacencyWorldCoordinate = addWorldCoordinateAndAdjacency(withWorldCoordinate)
   var checkChargerNeighbour = updateAndCheckChargerNeighbour(dispatch,getState)
@@ -661,7 +691,7 @@ export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
   // denormalize it
   const mapObj = denormalizeMap(normalizedMap);
   let updatedMapObj = updateMapObj(mapObj, normalizedMap);
-
+  updatedMapObj.map.conveyorVersion = conveyorVersion
   return updateMap(updatedMapObj.id, updatedMapObj.map)
     .then(handleErrors)
     .then((res) => res.json())
@@ -670,23 +700,6 @@ export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
     .then(() => setSectorsMxUPreferences(getState))
     .then((map) => barcodeCordMapping(getState))
     .catch(onError);
-};
-
-const validateConveyorEntity = (conveyorTile) => {
-  var failed_list = []
-  var failed_conveyors_info = {}
-  for (const [key, value] of Object.entries(conveyorTile)) {
-     if(value.conveyor_active.length === 0 || !value.hasOwnProperty("conveyor_exit") || !value.hasOwnProperty("conveyor_entry")){
-        failed_list.push(key)
-        failed_conveyors_info[value.conveyor_id] = {
-          conveyor_id : value.conveyor_id,
-          no_active_points : value.conveyor_active.length === 0,
-          no_exit_point : !value.hasOwnProperty("conveyor_exit"),
-          no_entry_point : !value.hasOwnProperty("conveyor_entry")
-        }
-     }
-  }
-  return [failed_list, failed_conveyors_info]
 };
 
 const validatePpsPoint = (entities) => {
@@ -706,38 +719,12 @@ const validatePpsPoint = (entities) => {
 
 export const downloadMap = (singleFloor = false) => (dispatch, getState) => {
   var { normalizedMap } = getState();
+  var converyor_version = getState().conveyorVersion
   setSectorsBarcodeMapping(dispatch, getState);
   if(Object.keys(normalizedMap.entities.conveyorTile).length !== 0){
-    var result = validateConveyorEntity(normalizedMap.entities.conveyorTile) 
-    var failed_list = result[0]
-    var failed_conveyors_info = result[1]
-    if(failed_list.length !== 0){
-      let errorMessage = '';
-      Object.keys(failed_conveyors_info).map(key => {
-        const conveyor = failed_conveyors_info[key];
-        if (conveyor.no_active_points && conveyor.no_entry_point && conveyor.no_exit_point) {
-          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active, entry and exit points defined.`
-        } 
-        else if(conveyor.no_active_points && conveyor.no_entry_point){
-          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active and entry points defined.`
-        }
-        else if(conveyor.no_entry_point && conveyor.no_exit_point){
-          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any entry and exit points defined.`
-        }
-        else if(conveyor.no_active_points && conveyor.no_exit_point){
-          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active and exit points defined.`
-        }
-        else if(conveyor.no_active_points){
-          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active points defined.`
-        }
-        else if(conveyor.no_entry_point){
-          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have entry point defined.`
-        }
-        else if(conveyor.no_exit_point){
-          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have exit point defined.`
-        }
-      })
-      return dispatch(setErrorMessage(errorMessage));
+    var error_text = validateConveyorEntity(normalizedMap.entities.ConnectedconveyorTile,normalizedMap.entities.conveyorTile)
+    if(error_text!==""){
+      return dispatch(setErrorMessage(error_text));
     }
   }
   if(Object.keys(normalizedMap.entities.pps).length !== 0){
@@ -746,7 +733,7 @@ export const downloadMap = (singleFloor = false) => (dispatch, getState) => {
      return dispatch(setErrorMessage(`PPS IDs ${nonactive_pps_list} are of the type TTP / RTP + TTP and do not have any associated conveyor active points. Please associate active points or change the PPS eligible agents`));
    }
   }
-  const exportedJson = exportMap(normalizedMap, singleFloor);
+  const exportedJson = exportMap(normalizedMap, singleFloor,converyor_version);
   var zip = new JSZip();
   Object.keys(exportedJson).forEach((fileName) => {
     if (fileName != "sector") {
@@ -768,39 +755,13 @@ export const copyJSONToClipboard = (fieldName, singleFloor = false) => (
 ) => {
   setSectorsBarcodeMapping(dispatch, getState);
   var { normalizedMap } = getState();
+  var converyor_version = getState().conveyorVersion
   // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
-  const exportedJson = exportMap(normalizedMap, singleFloor);
+  const exportedJson = exportMap(normalizedMap, singleFloor,converyor_version);
   if(Object.keys(normalizedMap.entities.conveyorTile).length !== 0){
-    var result = validateConveyorEntity(normalizedMap.entities.conveyorTile) 
-    var failed_list = result[0]
-    var failed_conveyors_info = result[1]
-    if(failed_list.length !== 0){
-      let errorMessage = '';
-      Object.keys(failed_conveyors_info).map(key => {
-        const conveyor = failed_conveyors_info[key];
-        if (conveyor.no_active_points && conveyor.no_entry_point && conveyor.no_exit_point) {
-          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active, entry and exit points defined.`
-        } 
-        else if(conveyor.no_active_points && conveyor.no_entry_point){
-          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active and entry points defined.`
-        }
-        else if(conveyor.no_entry_point && conveyor.no_exit_point){
-          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any entry and exit points defined.`
-        }
-        else if(conveyor.no_active_points && conveyor.no_exit_point){
-          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active and exit points defined.`
-        }
-        else if(conveyor.no_active_points){
-          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have any active points defined.`
-        }
-        else if(conveyor.no_entry_point){
-          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have entry point defined.`
-        }
-        else if(conveyor.no_exit_point){
-          errorMessage = errorMessage + `\nConveyor ID ${conveyor.conveyor_id} does not have exit point defined.`
-        }
-      })
-      return dispatch(setErrorMessage(errorMessage));
+    var error_text = validateConveyorEntity(normalizedMap.entities.ConnectedconveyorTile,normalizedMap.entities.conveyorTile)
+    if(error_text!==""){
+      return dispatch(setErrorMessage(error_text));
     }
   }
   if(Object.keys(normalizedMap.entities.pps).length !== 0){
@@ -865,7 +826,8 @@ export const requestValidation = (id, email, map_updated_time) => (
   var { normalizedMap } = getState();
   // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   setSectorsBarcodeMapping(dispatch, getState);
-  const exportedJson = exportMap(normalizedMap, false);
+  var converyor_version = getState().conveyorVersion
+  const exportedJson = exportMap(normalizedMap, false,converyor_version);
   var payload = formatMapWithDataSuffix(id, exportedJson, map_updated_time);
   payload["email"] = email;
   const params = new URLSearchParams(window.location.search);
@@ -893,13 +855,22 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
   getState
 ) => {
   const state = getState();
+
   let id = getMapId(state);
   let { normalizedMap } = state;
+  var converyor_version = state.conveyorVersion
+  if(Object.keys(normalizedMap.entities.conveyorTile).length !== 0){
+    var error_text = validateConveyorEntity(normalizedMap.entities.ConnectedconveyorTile,normalizedMap.entities.conveyorTile)
+    if(error_text!==""){
+      return dispatch(setErrorMessage(error_text));
+    }
+  }
   // let withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   setSectorsBarcodeMapping(dispatch, getState);
   const mapObj = denormalizeMap(normalizedMap);
   let updatedMapObj = updateMapObj(mapObj, normalizedMap);
-  const exportedJson = exportMap(normalizedMap, false);
+  updatedMapObj.map.conveyorVersion = converyor_version
+  const exportedJson = exportMap(normalizedMap, false,converyor_version);
   let chargerDict = getParticularEntity(state, { entityName: "charger" });
   let chargers = Object.entries(chargerDict).map(([, val]) => val);
   let ppsDict = getParticularEntity(state, { entityName: "pps" });
@@ -955,6 +926,7 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
       }
   });
   data.append('map_tool_id', id);
+  data.append('converyor_version',converyor_version);
   data.append('gsb_solution_id', gsbSolutionId);
   data.append('gsb_agent_id', gsbAgentId);
   data.append('functional_area_id', gsbFunctionalAreaId);

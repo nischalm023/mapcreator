@@ -7,11 +7,13 @@ import barcodeReducer from "./barcode/index";
 import ppsReducer from "./pps";
 import conveyorReducer from "./conveyor";
 import iopointReducer from "./iopoint";
+import connectedConveyorReducer from "./connectedconveyor";
 import totestorableReducer from "./totestorable";
 import DownloadConveyorReducer from "./download_conveyor";
 import currentFloorReducer from "./currentFloor";
 import barcodeDistanceReducer from "./barcodeDistance";
 import mapReducer from "./map";
+import conveyorVersionReducer from "./conveyorVersion";
 import elevatorReducer from "./elevator";
 import zoneReducer from "./zone";
 import sectorReducer from "./sector";
@@ -27,6 +29,7 @@ export var basePPSReducer = createEntityReducer("PPS", "pps_id");
 export var baseElevatorReducer = createEntityReducer("ELEVATOR", "elevator_id");
 export var baseChargerReducer = createEntityReducer("CHARGER", "charger_id");
 export var baseConveyorReducer = createEntityReducer("CONVEYOR", "conveyor_id");
+export var baseConnectedConveyorReducer = createEntityReducer("CONNECTED_CONVEYOR", "connected_conveyor_id");
 export var baseIopointReducer = createEntityReducer("IO-POINT", "io_point_id");
 export var baseTotestorableReducer = createEntityReducer("TOTE-STORABLE", "next_tote_storable_id");
 
@@ -39,9 +42,8 @@ export const entitiesReducer = combineReducers({
   odsExcluded: createEntityReducer("ODS-EXCLUDED", "ods_excluded_id"),
   dockPoint: createEntityReducer("DOCK-POINT", "dock_point_id"),
   fireEmergency: createEntityReducer("FIRE-EMERGENCY", "fire_emergency_id"),
-  // ioPoints: createEntityReducer("IO-POINT", "io_point_id"),
+  ConnectedconveyorTile: reduceReducers(baseConnectedConveyorReducer, connectedConveyorReducer),
   ioPoints: reduceReducers(baseIopointReducer, iopointReducer),
-  // toteStorables: createEntityReducer("TOTE-STORABLE", "next_tote_storable_id"),
   toteStorables: reduceReducers(baseTotestorableReducer, totestorableReducer),
   barcode: reduceReducers(barcodeReducer, baseBarcodeReducer),
   DownloadconveyorTile: reduceReducers(baseConveyorReducer, conveyorReducer),
@@ -141,6 +143,7 @@ export const selectedDistanceTilesReducer = (state = {}, action) => {
     // should deselect if a map tile is clicked
     case "CLICK-ON-MAP-TILE":
     case "ADD-CONVEYOR":
+    case "ADD-CONNECTED-CONVEYOR":
     case "CHANGE-FLOOR":
     case "ADD-ELEVATOR":
     case "SHIFT-BARCODE":
@@ -426,6 +429,7 @@ export default combineReducers({
   normalizedMap: normalizedMapReducer,
   currentFloor: currentFloorReducer,
   barcodeDistance:barcodeDistanceReducer,
+  conveyorVersion:conveyorVersionReducer,
   selection: reduceReducers(selectionReducer, baseSelectionReducer),
   spritesheetLoaded: spritesheetLoadedReducer,
   selectedArea: selectedAreaReducer,

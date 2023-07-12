@@ -12,6 +12,7 @@ import {
 } from "actions/conveyor";
 import "./uploadMaptoGsb.css";
 import { getBarcodes } from "../../../utils/selectors";
+import * as constants from "../../../constants";
 
 
 const schema = () => {
@@ -38,7 +39,7 @@ const ManageConveyorSystem = ({ onSubmit, disabled, conveyorInfo, allConveyorIds
                                 pps_ids,
                                 // entry_bot_direction_options, exit_bot_direction_options,
                                 entry_direction_options, exit_direction_options,
-                                floor_barcodes}) => (
+                                floor_barcodes,conveyor_version}) => (
     <ManageConveyorSystemForm
         schema={schema()}
         disabled={disabled}
@@ -51,6 +52,7 @@ const ManageConveyorSystem = ({ onSubmit, disabled, conveyorInfo, allConveyorIds
         exit_direction_options={exit_direction_options}
         floor_barcodes={floor_barcodes}
         onSubmit={onSubmit}
+        conveyor_version={conveyor_version}
         buttonText={"Manage Conveyor System"}
     />
 );
@@ -73,7 +75,7 @@ const getPpsIds = (pps_dict) => {
 export default connect(
     state => {
         let conveyorTiles = state.normalizedMap.entities.conveyorTile;
-        
+        let conveyor_version = state.conveyorVersion
         // find conveyor info related to the selected tile
         let conveyorInfo = {};
         let pps_ids = [];
@@ -142,7 +144,8 @@ export default connect(
             // exit_bot_direction_options:exit_bot_direction_options,
             entry_direction_options:entry_direction_options,
             exit_direction_options:exit_direction_options,
-            floor_barcodes:floor_barcodes
+            floor_barcodes:floor_barcodes,
+            conveyor_version:conveyor_version
         }
     },
     dispatch => ({

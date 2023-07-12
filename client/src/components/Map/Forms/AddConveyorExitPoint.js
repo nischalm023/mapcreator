@@ -31,6 +31,17 @@ const checkPointAlreadyExistOnConveyorBelt = (conveyorTile) => {
   return false
 };
 
+const checkIOPointNotLieOnConveyorBelt = (conveyorTile,io_point) => {
+  for (const [key, value] of Object.entries(conveyorTile)) {
+    var selected_tile = convertNestedListToList(value["selected_tile"])
+    if(selected_tile.includes(io_point)){
+      return true
+    }
+  }
+  return false
+};
+
+
 const checkExistPointConveyorBelt = (conveyorTile,map_tile_value) => {
   if(conveyorTile.hasOwnProperty("conveyor_entry") && conveyorTile["conveyor_entry"].toString()==map_tile_value){
     return true
@@ -53,24 +64,52 @@ const checkExistPointConveyorBelt = (conveyorTile,map_tile_value) => {
 //   }
 // };
 
-const checkPointLieOnEdgeInConveyorBelt = (conveyorTile,tileId) => {
+const checkPointLieOnEdgeInConveyorBelt = (conveyorTile,tileId,barcodes) => {
   var selected_tile = convertNestedListToList(conveyorTile)
-  if(selected_tile[0] === tileId || selected_tile[selected_tile.length - 1] === tileId){
+  if (barcodes[tileId].hasOwnProperty('adjacency')) {
+          var nbTileId = convertNestedListToList(barcodes[tileId]["adjacency"])
+        }
+        else {
+          var nbTileId = getNeighbourTiles(tileId)
+        }
+  const filteredArray = selected_tile.filter(value => nbTileId.includes(value));
+  if(filteredArray.length===1){
     return false
   }
   return true
 };
+
+const checkPointAlreadyExist = (conveyorTile,io_point) => {
+  for (const [key, value] of Object.entries(conveyorTile)) {
+    if(value.hasOwnProperty("conveyor_io_exit")){
+      var io_point_exist = JSON.parse(value["conveyor_io_exit"])
+      if(io_point_exist.toString() === io_point){
+        return true
+      }
+    }
+    if(value.hasOwnProperty("conveyor_io_entry")){
+      var io_point_entry = JSON.parse(value["conveyor_io_entry"])
+      if(io_point_entry.toString() === io_point){
+        return true
+      }
+    }
+  }
+  return false
+};
+
 
 const shouldBeDisabled = (map_tile_value, barcodes, conveyorTile) => {
   var conveyor_id = ''
   if(map_tile_value.length==2){
      var [conveyor_id,exit_point,io_point,point_exist] =checkPointLieOnConveyorBelt(conveyorTile,map_tile_value)
      if(conveyor_id!=''){
+      var io_point_not_lie_on_conveyor_belt = checkIOPointNotLieOnConveyorBelt(conveyorTile,io_point)
+      var io_point_exist = checkPointAlreadyExist(conveyorTile,io_point)
       var already_point_exist = checkPointAlreadyExistOnConveyorBelt(conveyorTile[conveyor_id])
-      var edge_point_exist = checkPointLieOnEdgeInConveyorBelt(conveyorTile[conveyor_id]["selected_tile"],exit_point)
+      // var edge_point_exist = checkPointLieOnEdgeInConveyorBelt(conveyorTile[conveyor_id]["selected_tile"],exit_point,barcodes)
       var check_entry_exist_point_match = checkExistPointConveyorBelt(conveyorTile[conveyor_id],exit_point)
       // var exit_periphery_check = IfExitPointLieOnPheriphery(barcodes,map_tile_value,conveyorTile[conveyor_id])
-      if(!point_exist && !already_point_exist && !edge_point_exist && !check_entry_exist_point_match){
+      if(!io_point_exist && !io_point_not_lie_on_conveyor_belt && !point_exist && !already_point_exist && !check_entry_exist_point_match){
         return [conveyor_id,exit_point,io_point,false]
       }
      }
@@ -88,6 +127,7 @@ class AddExitPoint extends Component {
     conveyor_id:"",
     show: false,
     exit_io_point:"",
+    exit_height:"",
     bot_direction_options: {North: 0, East: 1, South: 2, West: 3}
   };
   handleSubmit = (event,dispatch,conveyor_id,direction,exit_point) => {
@@ -97,7 +137,8 @@ class AddExitPoint extends Component {
             direction:parseInt(this.state.direction),
             exit_io_point:this.state.exit_io_point,
             conveyor_id: conveyor_id,
-            exit_point:exit_point
+            exit_point:exit_point,
+            exit_height:parseInt(this.state.exit_height)
         };
         this.toggle()
         dispatch(selectExitConveyor(formData));
@@ -143,7 +184,7 @@ class AddExitPoint extends Component {
 
   render() {
     
-    const { error ,show, exit_io_point} = this.state;
+    const { error ,show, exit_io_point,exit_height} = this.state;
     const {conveyor_id,direction,disabled,floor_barcodes,conveyorTile,selected_tile,dispatch,io_point,exit_point} = this.props;
     return (
       <div>
@@ -186,6 +227,15 @@ class AddExitPoint extends Component {
                   <br/>
                   <label for="direction">Conveyor IO Point Barcode*</label>
                   <input id="direction" className="form-control" type="text" value={exit_io_point} disabled/>
+                  <br/>
+                  <label for="direction">Conveyor Exit Height*</label>
+                  <input id="direction" 
+                    className="form-control" 
+                    type="number" 
+                    min="1"
+                    onChange = {(e)=>this.setState({exit_height: e.target.value})}
+                    required
+                  />
                   <br/>
                   <input type="submit" className="btn btn-outline-primary mr-1" value="Submit"></input>
                   <button

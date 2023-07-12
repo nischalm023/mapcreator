@@ -27,6 +27,7 @@ import AddZone from "components/Map/Forms/AddZone";
 import AddSector from "components/Map/Forms/AddSector";
 import EditSpecialBarcode from "components/Map/Forms/EditSpecialBarcodes";
 import AlignBarcode from "components/Map/Forms/AlignBarcode";
+import LinkConveyor from "components/Map/Forms/LinkConveyor";
 import AssignIOPoints from "components/Map/Forms/AssignIOPoints";
 import CreateToteLocations from "components/Map/Forms/CreateToteLocations";
 import ShiftBarcode from "components/Map/Forms/ShiftBarcode";
@@ -35,6 +36,7 @@ import AddTTPTransitBarcode from "components/Map/Forms/AddTTPTransitBarcode";
 import LocateBarcode from "components/Map/Forms/LocateBarcode";
 import SectorMSUMapping from "components/Map/Forms/SectorMSUMapping";
 import ManageConveyorSystem from "components/Map/Forms/ManageConveyorSystem";
+import ManageConnectedConveyorSystem from "components/Map/Forms/ManageConnectedConveyorSystem";
 import ViewConveyorSystem from "components/Map/Forms/ViewConveyorSystem";
 import AddConveyorEntryPoint from "components/Map/Forms/AddConveyorEntryPoint";
 import AddConveyorExitPoint from "components/Map/Forms/AddConveyorExitPoint";
@@ -44,6 +46,7 @@ import ConveyorDownload from "components/Map/Forms/ConveyorDownload";
 import ManageTtpOverlap from "components/Map/Forms/ManageTtpOverlap";
 import ViewOverlapBarcodes from "components/Map/Forms/ViewOverlapBarcodes";
 import ManageStorableSizeInfo from "components/Map/Forms/ManageStorableSizeInfo";
+import manageStorableNeighbour from "components/Map/Forms/multiNeighbourBarcode";
 import manageMultipleSizeInfoBarcodeData from "components/Map/Forms/MutipleSizeInfoBarcode";
 
 import {
@@ -123,8 +126,9 @@ class RightSidebar extends Component {
               CreateToteLocations,
               ManageTtpOverlap,
               ManageStorableSizeInfo,
+              manageStorableNeighbour,
               manageMultipleSizeInfoBarcodeData,
-              ViewOverlapBarcodes
+              ViewOverlapBarcodes,
             ].map((Elm, idx) => (
               <div
                 key={idx}
@@ -139,7 +143,17 @@ class RightSidebar extends Component {
               {this.props.TTPMode === true ?<AddTTPTransitBarcode />: <AddTransitBarcode />}
           </div>
           <div className="conveyor-buttons">
-          <div className="row">
+            <div className="row">
+              <div className="col">
+                <LinkConveyor />
+              </div>
+            </div>
+            <div className="row py-1">
+              <div className="col">
+                <ManageConnectedConveyorSystem />
+              </div>
+            </div>
+            <div className="row py-1">
               <div className="col">
                 <ManageConveyorSystem />
               </div>

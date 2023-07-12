@@ -17,14 +17,17 @@ class AddPPS extends Component {
     };
     toggle = () => {
       if(!this.state.show){
+        const params = new URLSearchParams(window.location.search);
+        let gsbAgentName = params.get('gsb_agent_name') ? params.get('gsb_agent_name') : 'rtp';
+        let gsb = params.get('gsb') ? eval(params.get('gsb')) : false;
         this.setState({ 
           error: undefined,
-          eligible_type:this.state.eligible_type,
+          eligible_type:gsbAgentName,
           pick_direction:0,
           pps_type:"manual" 
         });
       }
-      this.setState({ show: !this.state.show, eligible_type:"rtp"});
+      this.setState({ show: !this.state.show})
     }
     onClickk = (e) => {
       this.setState({ eligible_type: e.target.value })
@@ -53,6 +56,10 @@ class AddPPS extends Component {
     if(gsbAgentName=="ttp_rtp"){
           this.setState({ eligible_type: "ttp_rtp" })
         }
+    if(gsbAgentName=="rtp"){
+          this.setState({ eligible_type: "rtp" })
+        }
+
     };
     render() {
         const { error, show, eligible_type, pick_direction, pps_type} = this.state;

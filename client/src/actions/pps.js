@@ -129,6 +129,8 @@ export const removePps = ({ pps_id}) => (dispatch, getState) => {
   const state = getState();
   const queue_barcodes = state.normalizedMap.entities.pps[pps_id].queue_barcodes;
   var barcodeMapping = state.normalizedMap.entities.mappingBarcodeCoord
+  const conveyorTile = state.normalizedMap.entities.conveyorTile
+  const pps_data = state.normalizedMap.entities.pps
   if (queue_barcodes) {
     const queue_coordinates = _.map(queue_barcodes, function (barcode) {
       return barcodeMapping[barcode];
@@ -142,4 +144,36 @@ export const removePps = ({ pps_id}) => (dispatch, getState) => {
     type: "DELETE-PPS-BY-ID",
     value: pps_id
   });
+  
+  var pps_point_list = []
+  if(pps_data[pps_id].hasOwnProperty("pps_points")){
+      for (var j = 0; j < pps_data[pps_id]["pps_points"].length; j++) {
+          if(pps_data[pps_id]["pps_points"][j]["type"] === "ttp"){
+              var active_point = JSON.parse(pps_data[pps_id]["pps_points"][j]["coordinate"]).toString()
+              pps_point_list.push(active_point)
+          }
+      }
+  }
+  var active_barcode = []
+  for (const [key, value] of Object.entries(conveyorTile)) {
+    var del_active_point_data = []
+    var active_list = conveyorTile[key].conveyor_active
+      if(active_list.length != 0){
+          for (var i = 0; i < active_list.length; i++) {
+            if(pps_point_list.includes(active_list[i]["conveyor_active_point"][0])){
+                active_barcode.push([active_list[i]["conveyor_active_point"][0].split(",").map((val) => parseInt(val))])
+              }
+          }
+
+      }
+    conveyorTile[key].conveyor_active = active_list.filter(obj => !pps_point_list.includes(obj["conveyor_active_point"][0]));
+    
+    }
+  if(active_barcode.length>0){
+      dispatch({
+        type: "CONVEYOR-TILES-STRIPES",
+        value: { active_barcode, grid_attribute: "conveyor_track" } ,
+      });
+  }  
+  
 };
