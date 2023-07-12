@@ -70,7 +70,7 @@ export default (state = {}, action) => {
     case "DELETE-CHARGER-DATA": {
       // const {entry_point_coordinate, charger_id} = action.value;
       const chargerInfo = action.value.chargerDetails;
-      const entry_point_coordinate = implicitBarcodeToCoordinate(chargerInfo.entry_point_location);
+      const entry_point_coordinate = chargerInfo.entry_point_coordinate;
       const charger_id = chargerInfo.charger_id;
       var newState = _.cloneDeep(state);
       Object.keys(newState).forEach(floorId => {

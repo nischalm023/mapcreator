@@ -239,6 +239,8 @@ export const removeCharger = ({ charger_id }) => (dispatch, getState) => {
   var chargerDetails = _.find(getState().normalizedMap.entities.charger, {
     charger_id: charger_id
   });
+  var barcodeMapping = getState().normalizedMap.entities.mappingBarcodeCoord
+  chargerDetails["entry_point_coordinate"] = barcodeMapping[chargerDetails.entry_point_location]
   dispatch({
     type: "DELETE-CHARGER-DATA",
     value: { chargerDetails }

@@ -10,9 +10,7 @@ import _ from "lodash";
 
 const deleteChargerData = (state, action) => {
   const chargerInfo = action.value.chargerDetails;
-  const entryPointCoordinate = implicitBarcodeToCoordinate(
-    chargerInfo.entry_point_location
-  );
+  const entryPointCoordinate = chargerInfo.entry_point_coordinate
   const chargerCoordinate = chargerInfo.coordinate;
   const chargerDirection = chargerInfo.charger_direction;
   var index = 0;
