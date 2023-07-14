@@ -81,7 +81,7 @@ export const setCoexistenceBarcodeLabel = (dispatch,barcode,direction,world_cord
     if(world_cordinate[1]<=arbitrary_origin_value[1]){
       var barcodeOffset = getCurrentOffset
     }else{
-      var barcodeOffset_y = getCurrentOffset[1] - (distance*2)
+      var barcodeOffset_y = getCurrentOffset[1] - Math.abs(Math.abs(arbitrary_origin_value[1]) - Math.abs(world_cordinate[1]))
       var barcodeOffset = [getCurrentOffset[0],barcodeOffset_y]
       var offset_value = [offset_value[0],world_cordinate[1]]
     }
@@ -90,7 +90,7 @@ export const setCoexistenceBarcodeLabel = (dispatch,barcode,direction,world_cord
     if(world_cordinate[0]>=arbitrary_origin_value[0]){
       var barcodeOffset = getCurrentOffset
     }else{
-      var barcodeOffset_x = getCurrentOffset[0] - (distance*2)
+      var barcodeOffset_x = getCurrentOffset[0] - Math.abs(Math.abs(world_cordinate[0]) - Math.abs(arbitrary_origin_value[0]))
       var barcodeOffset = [barcodeOffset_x,getCurrentOffset[1]]
       var offset_value = [world_cordinate[0],offset_value[1]]
     }

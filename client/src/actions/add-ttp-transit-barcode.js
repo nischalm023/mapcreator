@@ -423,7 +423,7 @@ const getTransitBarcodeInfo = (dispatch, state, formData) => {
   if(barcodeFormat == TTP_BARCODE_FORMAT){
     var [ttp_barcode_value,error] = setCoexistenceBarcodeLabel(dispatch,barcode,direction,
       [transitBarcodeWorldCoord["x"],transitBarcodeWorldCoord["y"]],arbitrary_origin_value,vda_offset,
-      state.barcodeDistance,currentFloor)
+      distance,currentFloor)
       if(error){
         return dispatch(setErrorMessage(ttp_barcode_value)
         );
