@@ -51,6 +51,39 @@ app.get("/api/backtracking",
   })
 );
 
+app.get("/api/backtracking_conveyor",
+  wrap(async(request,response) => {
+  const attributes = ["id"];
+  var maps = await Map.findAll({
+        attributes,
+      })
+  var mapsJson = maps.map(map => map.toJSON());
+  for (var i = 0; i < mapsJson.length; i++) {
+    var map =  await Map.findByPk(mapsJson[i]["id"]);
+      var map_data = map.toJSON()
+       if(map_data["map"] && map_data["map"].hasOwnProperty("conveyors")){
+          var conveyors = map_data["map"]["conveyors"]
+          if(conveyors.length>0 && conveyors[0]!==null){
+            for (var k = 0; k < conveyors.length; k++) {
+               if(!conveyors[k].hasOwnProperty("conveyor_step_id") && conveyors[k].hasOwnProperty("selected_tile")){
+                var conveyor_step_id={}
+                for (var i = 0; i < conveyors[k]["selected_tile"].length; i++) {
+                  conveyor_step_id[conveyors[k]["selected_tile"][i].toString()]=(i+1).toString()
+                }
+                conveyors[k]["conveyor_step_id"] = conveyor_step_id
+                console.log("conveyor_step_id========",conveyor_step_id,map_data["id"])
+               }
+            }
+          }
+    await map.update({ map: map_data["map"]});    
+    }
+  }
+  console.log("done")
+  })
+);
+
+
+
 
 // should only return the id of the map
 app.post(
