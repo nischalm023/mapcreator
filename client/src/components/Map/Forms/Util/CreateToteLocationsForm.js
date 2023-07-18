@@ -429,7 +429,7 @@ class BaseForm extends Component {
                       Tote Height(mm)
                     </div>
                     <div className="col-2 col-lg-2 col-sm-2 col-md-2">
-                      n-deep
+                      Depth
                     </div>
                     <div className="col-2 col-lg-2 col-sm-2 col-md-2">
                       Bot Orientation
