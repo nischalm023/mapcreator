@@ -413,7 +413,7 @@ class BaseForm extends Component {
                 </div>
               </div>
             </div>
-            <br/><br/>
+            <br/>
             {Object.keys(this.state.multiSchema).length!==0 &&
             <div className="row">
               <div className="col-lg-11 col-md-11 col-sm-11 col-11">
