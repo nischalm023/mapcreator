@@ -428,7 +428,7 @@ class BaseForm extends Component {
                       Tote Height(mm)
                     </div>
                     <div className="col-2 col-lg-2 col-sm-2 col-md-2">
-                      Depth
+                      n-deep
                     </div>
                     <div className="col-2 col-lg-2 col-sm-2 col-md-2">
                       Bot Orientation
@@ -441,7 +441,7 @@ class BaseForm extends Component {
               </div>
             </div>}
             {multiRows}
-            <button type="button" onClick={() => this.addNewRow(nextToteStorableId, botDirection)} className="btn btn-outline-secondary mr-1">
+            <button style={{marginTop:"10px"}} type="button" onClick={() => this.addNewRow(nextToteStorableId, botDirection)} className="btn btn-outline-secondary mr-1">
               Add Tote Location
             </button>
             <br/><br/>
