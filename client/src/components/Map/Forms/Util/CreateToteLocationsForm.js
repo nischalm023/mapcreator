@@ -413,7 +413,6 @@ class BaseForm extends Component {
                 </div>
               </div>
             </div>
-            <br/>
             {Object.keys(this.state.multiSchema).length!==0 &&
             <div className="row">
               <div className="col-lg-11 col-md-11 col-sm-11 col-11">
@@ -445,7 +444,7 @@ class BaseForm extends Component {
             <button type="button" onClick={() => this.addNewRow(nextToteStorableId, botDirection)} className="btn btn-outline-secondary mr-1">
               Add Tote Location
             </button>
-            <br/><br/><br/>
+            <br/><br/>
           </div>
           <div>
             <button type="button" onClick={() => {
