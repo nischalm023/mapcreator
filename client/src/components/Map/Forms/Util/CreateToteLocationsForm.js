@@ -53,7 +53,7 @@ class BaseForm extends Component {
         initialStorableDirection = tote.storable_direction.value;
         initialMultiSchema[i] = {
           tote_id: { type: "string", title: "Tote Id", value: tote.tote_id.value },
-          tote_location: { type: "string", title: "Tote Location", value: 'TOT_' + String(tote.tote_id.value).padStart(7, '0') },
+          tote_location: { type: "string", title: "Tote Location", value: 'TLOC_' + String(tote.tote_id.value).padStart(7, '0') },
           tote_type: { type: "string", title: "Tote Type", value: "Type_1" },
           tote_height: { type: "string", title: "Tote Height", value: tote.tote_height.value },
           ndeep: { type: "string", title: "ndeep", value: tote.ndeep.value },
@@ -166,7 +166,7 @@ class BaseForm extends Component {
     }
     multiSchema[nextId] = {
       tote_id: { type: "string", title: "Tote Id", value: nextId },
-      tote_location: { type: "string", title: "Tote Location", value: 'TOT_'+String(nextId).padStart(7, '0') },
+      tote_location: { type: "string", title: "Tote Location", value: 'TLOC_'+String(nextId).padStart(7, '0') },
       tote_type: { type: "string", title: "Tote Type", value: "Type_1" },
       tote_height: { type: "string", title: "Tote Height", value: "" },
       ndeep: { type: "string", title: "ndeep", value: {value: 'single', label: 'Single'}},
