@@ -305,7 +305,7 @@ class BaseForm extends Component {
               <div className="form-group field">
                 <div className="row">
                   <div className="col-2 col-lg-2 col-sm-2 col-md-2">
-                    <input className="form-control" type="text" key={"tote_location" + index} 
+                    <input className="form-control" style={{width:"140px"}} type="text" key={"tote_location" + index} 
                       value={_this.state.multiSchema[key].tote_location.value} 
                     />
                   </div>
