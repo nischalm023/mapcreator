@@ -24,7 +24,7 @@ class AddPPS extends Component {
           pps_type:"manual" 
         });
       }
-      this.setState({ show: !this.state.show });
+      this.setState({ show: !this.state.show, eligible_type:"rtp"});
     }
     onClickk = (e) => {
       this.setState({ eligible_type: e.target.value })
