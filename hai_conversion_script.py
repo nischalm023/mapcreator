@@ -10,6 +10,7 @@ import ast
 import copy
 from collections import defaultdict
 import math
+import numpy as np
 
 # mapped rotation
 def get_rotation(rotation):
@@ -656,6 +657,7 @@ class ValidationAutocad:
 def my_link_1():
 	req_file = request.files
 	df = pd.read_excel(req_file["arrFile"])
+	df['SECTOR_ID'] = df['SECTOR_ID'].replace(['undefined'], np.nan)
 	df['Position X'] = df['Position X'].apply(lambda x: ((int(x/10)+1 if (x/10) % 1 >= 0.5 else int(x/10)))*10)
 	df['Position Y'] = df['Position Y'].apply(lambda x: ((int(x/10)+1 if (x/10) % 1 >= 0.5 else int(x/10)))*10)
 	error,status = ValidationAutocad().validation(df)
