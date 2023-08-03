@@ -112,11 +112,12 @@ export const addPPSes = formData => (dispatch, getState) => {
 export const removePpsQueue = ({pps_id}) => (dispatch, getState) => {
   const state = getState();
   const queue_barcodes = state.normalizedMap.entities.pps[pps_id].queue_barcodes;
+  var barcodeMapping = state.normalizedMap.entities.mappingBarcodeCoord
   if (queue_barcodes == []) {
     return Promise.resolve();
   }
   const queue_coordinates = _.map(queue_barcodes, function (barcode) {
-    return implicitBarcodeToCoordinate(barcode);
+    return barcodeMapping[barcode];
   });
   dispatch({
     type: "DELETE-PPS-QUEUE",
@@ -127,9 +128,10 @@ export const removePpsQueue = ({pps_id}) => (dispatch, getState) => {
 export const removePps = ({ pps_id}) => (dispatch, getState) => { 
   const state = getState();
   const queue_barcodes = state.normalizedMap.entities.pps[pps_id].queue_barcodes;
+  var barcodeMapping = state.normalizedMap.entities.mappingBarcodeCoord
   if (queue_barcodes) {
     const queue_coordinates = _.map(queue_barcodes, function (barcode) {
-      return implicitBarcodeToCoordinate(barcode);
+      return barcodeMapping[barcode];
     });
     dispatch({
       type: "DELETE-PPS-QUEUE",

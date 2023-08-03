@@ -123,7 +123,14 @@ export default (state = {}, action) => {
       };
     }
     case "DELETE-PPS-QUEUE": {
-
+      return {
+        ...state,
+        [action.value.pps_id]: {
+          ...state[action.value.pps_id],
+          queue_barcodes: []
+        }
+            
+      };
     }
   }
   return { ...state };
