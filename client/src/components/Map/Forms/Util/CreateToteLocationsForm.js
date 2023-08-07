@@ -142,15 +142,7 @@ class BaseForm extends Component {
   addNewRow = (nextToteStorableId, botDirection) => {
     var multiSchema = { ...this.state.multiSchema };
     let nextId = 0;
-    if(Object.keys(multiSchema).length!==0){
-      for(let key in multiSchema){
-        nextId = Math.max(nextId, multiSchema[key].tote_id.value);
-      }
-      nextId = nextId + 1;
-    }
-    else{
-      nextId = nextToteStorableId;
-    }
+    nextId = nextToteStorableId;
     for (let key in multiSchema) {
       let tote = multiSchema[key];
       nextToteStorableId = Math.max(tote.tote_id.value, nextToteStorableId);
