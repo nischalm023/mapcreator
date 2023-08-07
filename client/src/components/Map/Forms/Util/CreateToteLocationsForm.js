@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import ButtonForm from "./ButtonForm";
 import Select from "react-select";
 import {existingStorableLocation} from "../CreateToteLocations";
+import { setErrorMessage } from "actions/message";
 
 let ndeepOptions = [
   {value: "single", label: "Single"},
@@ -27,13 +28,18 @@ class BaseForm extends Component {
         storable_direction_options: [],
         storable_direction: { type: "string", title: "Tote Id", value: "" },
         edit: true,
-        error: ''
+        error: '',
+        location_status:'',
+        old_location:''
       }
     },
     lastKey: 0
   };
-  toggle = (ioPointBarcode=null, ioPointId=null, agent=null, botDirection=null, nextToteStorableId=null, existingTotes={}) => {
-    if (!this.state.show) {
+  toggle = (onError,ioPointBarcode=null, ioPointId=null, agent=null, botDirection=null, nextToteStorableId=null, existingTotes={},selectedIoPoint=[],is_disabled=false,message=null) => {
+    if(is_disabled){
+      onError(message)
+    }else{
+          if (!this.state.show) {
       const existingTotesInIoPoint = Object.fromEntries(
         Object.entries(existingTotes).filter(([key, value]) => value.io_point_id === ioPointId)
       );
@@ -50,10 +56,15 @@ class BaseForm extends Component {
       let i = 0;
       for(let key in existingTotesInIoPoint){
         let tote = existingTotesInIoPoint[key];
+        if(selectedIoPoint.length === 1){
+          var tote_location_value = 'TLOC_' + String(tote.tote_id.value).padStart(7, '0') 
+        }else{
+          var tote_location_value = ""
+        }
         initialStorableDirection = tote.storable_direction.value;
         initialMultiSchema[i] = {
           tote_id: { type: "string", title: "Tote Id", value: tote.tote_id.value },
-          tote_location: { type: "string", title: "Tote Location", value: 'TOT_' + String(tote.tote_id.value).padStart(7, '0') },
+          tote_location: { type: "string", title: "Tote Location", value: tote_location_value},
           tote_type: { type: "string", title: "Tote Type", value: "Type_1" },
           tote_height: { type: "string", title: "Tote Height", value: tote.tote_height.value },
           ndeep: { type: "string", title: "ndeep", value: tote.ndeep.value },
@@ -62,7 +73,9 @@ class BaseForm extends Component {
           storable_direction_options: storableDirections,
           storable_direction: { type: "string", title: "Tote Id", value: initialStorableDirection},
           edit: false,
-          error: ''
+          error: '',
+          location_status:'existing',
+          old_location:tote.tote_location.value
         }
         i++;
       }
@@ -78,7 +91,9 @@ class BaseForm extends Component {
     }
     this.setState({ show: !this.state.show, formData: {} });
   }
-  onSubmitHandler = (onSubmit, barcode, ioPointId, nextToteStorableId,existing_location_list,floor_barcodes) => {
+    }
+
+  onSubmitHandler = (onSubmit, barcode, ioPointId, nextToteStorableId,existing_location_list,floor_barcodes,selectedIoPoint,io_locationId_mapping) => {
     let finalSetOfTotes = {};
     for (let key in this.state.multiSchema) {
       let tote = this.state.multiSchema[key];
@@ -135,11 +150,11 @@ class BaseForm extends Component {
         "schema": this.state.schema,
         "multiSchema": this.state.multiSchema
       }
-      onSubmit(data, barcode, ioPointId, nextToteStorableId, finalSetOfTotes);
+      onSubmit(data, barcode, ioPointId, nextToteStorableId, finalSetOfTotes,selectedIoPoint,io_locationId_mapping);
       this.toggle();
     } 
   };
-  addNewRow = (nextToteStorableId, botDirection,all_storable_id) => {
+  addNewRow = (nextToteStorableId, botDirection,selectedIoPoint,all_storable_id) => {
     var multiSchema = { ...this.state.multiSchema };
     let nextId = 0;
     if(Object.keys(multiSchema).length!==0){
@@ -167,9 +182,14 @@ class BaseForm extends Component {
     else if (initialBotDirection.value == "west" || initialBotDirection.value == "east") {
       storableDirections = ["north", "south"];
     }
+    if(selectedIoPoint.length === 1){
+      var tote_location_value = 'TLOC_'+String(nextId).padStart(7, '0')
+    }else{
+      var tote_location_value = ""
+    }
     multiSchema[nextId] = {
       tote_id: { type: "string", title: "Tote Id", value: nextId },
-      tote_location: { type: "string", title: "Tote Location", value: 'TOT_'+String(nextId).padStart(7, '0') },
+      tote_location: { type: "string", title: "Tote Location", value: tote_location_value},
       tote_type: { type: "string", title: "Tote Type", value: "Type_1" },
       tote_height: { type: "string", title: "Tote Height", value: "" },
       ndeep: { type: "string", title: "ndeep", value: {value: 'single', label: 'Single'}},
@@ -178,12 +198,16 @@ class BaseForm extends Component {
       storable_direction_options: storableDirections,
       storable_direction: { type: "string", title: "Tote Id", value: {value: storableDirections[0], label: storableDirections[0][0].toUpperCase() + storableDirections[0].slice(1)}},
       edit: true,
-      error: ''
+      error: '',
+      location_status:'new'
     };
     this.setState({ multiSchema: multiSchema });
   }
   changeMultiSchemaHandler = (key, field, value) => {
     var multiSchema = { ...this.state.multiSchema };
+    Object.keys(multiSchema).forEach(function (key, index) {
+      multiSchema[key].error = ''
+    })
     if (field == "tote_height") {
       multiSchema[key].tote_height.value = value;
       if(value>0 && value<=10000){
@@ -274,6 +298,7 @@ class BaseForm extends Component {
     const {
       schema = { ...schema },
       onSubmit,
+      onError,
       barcode,
       nextToteStorableId,
       ioPointBarcode,
@@ -282,8 +307,14 @@ class BaseForm extends Component {
       botDirection,
       existingTotes,
       existing_location_list,
+      selectedIoPoint,
       floor_barcodes,
       all_storable_id,
+      io_locationId_mapping,
+      is_disabled,
+      message,
+      io_without_storable,
+      io_with_storable,
       ...rest
     } = this.props;
     var multiRows = [];
@@ -301,18 +332,20 @@ class BaseForm extends Component {
           storableDirectionsOptions.push({ value: direction, label: label })
         }
         multiRows.push(<div key={"rack-" + index}>
-          <div className="row">
+          <div className="row" style={{margin:"0px 0px 4px 0px"}}>
             <div className="col-lg-11 col-md-11 col-sm-11 col-11">
               <div className="form-group field">
                 <div className="row">
                   <div className="col-2 col-lg-2 col-sm-2 col-md-2">
-                    <input className="form-control" type="text" key={"tote_location" + index} 
+                    <input className="form-control" style={{width:"140px"}} type="text" key={"tote_location" + index} 
                       value={_this.state.multiSchema[key].tote_location.value} 
+                      disabled
                     />
                   </div>
                   <div className="col-2 col-lg-2 col-sm-2 col-md-2">
                     <input className="form-control" type="text" key={"tote_type" + index}
                       value={_this.state.multiSchema[key].tote_type.value}
+                      disabled
                     />
                   </div>
                   <div className="col-2 col-lg-2 col-sm-2 col-md-2">
@@ -379,47 +412,81 @@ class BaseForm extends Component {
         </div>);
       })
     }
+    var multiIOPointWithStorableRows = [];
+        if(io_with_storable!== undefined){
+           io_with_storable.forEach(function (key, index) {
+                multiIOPointWithStorableRows.push(<div className="muti_io_barcode" key={"active-point-" + index}>
+                      <input className="form-control" type="text" id={"quantity_"+index} disabled value={floor_barcodes[key]["barcode"]}/>
+                </div>);
+            })
+            if(io_with_storable.length%2!==0){
+                  multiIOPointWithStorableRows.push(<div className="muti_io_barcode">
+                      <input className="form-control" type="text"  disabled value=""/>
+                </div>)
+                }
+        } 
+    var multiIOPointWithoutStorableRows = [];
+      if(io_without_storable!== undefined){
+        io_without_storable.forEach(function (key, index) {
+                multiIOPointWithoutStorableRows.push(<div className="muti_io_barcode" key={"active-point-" + index}>
+                        <input className="form-control"  type="text" id={"quantity_"+index} disabled value={floor_barcodes[key]["barcode"]}/>
+                </div>);
+            })
+        if(io_without_storable.length%2!==0){
+                  multiIOPointWithoutStorableRows.push(<div className="muti_io_barcode">
+                      <input className="form-control" type="text"  disabled value=""/>
+                </div>)
+                }
+      }
     return (
-      <ButtonForm {...rest} modalClass="tote-location-modal" show={this.state.show} toggle={()=>this.toggle(ioPointBarcode, ioPointId, agent, botDirection, nextToteStorableId, existingTotes)} >
+      <ButtonForm {...rest} modalClass="tote-location-modal" show={this.state.show} toggle={()=>this.toggle(onError,ioPointBarcode, ioPointId, agent, botDirection, nextToteStorableId, existingTotes,selectedIoPoint,is_disabled,message)} >
         <form>
           <div>
             <legend id="root__title">{schema.title}</legend>
             <hr />
-            <div className="row">
-              <div className="col-lg-11 col-md-11 col-sm-11 col-11">
-                <div className="form-group field">
+            <div className="tote-select-buttons">
                   <div className="row">
-                    <div className="col-6 col-lg-6 col-sm-6 col-md-6">
-                      IO Point
-                    </div>
-                    <div className="col-6 col-lg-6 col-sm-6 col-md-6">
+                    {(io_with_storable!== undefined && io_with_storable.length !== 0) && 
+                      <div className="col-5 col-lg-5 col-sm-5 col-md-5">
+                        IO Point(s) With Storable(s)
+                      </div>
+                    }
+                    {(io_without_storable !== undefined && io_without_storable.length !== 0) && 
+                      <div className="col-5 col-lg-5 col-sm-5 col-md-5">
+                        IO Point(s) Without Storable(s)
+                      </div>
+                    }
+                    <div className="col-2 col-lg-2 col-sm-2 col-md-2" style={{marginLeft:"-9px"}}>
                       Agent
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-lg-11 col-md-11 col-sm-11 col-11">
-                <div className="form-group field">
                   <div className="row">
-                    <div className="col-6 col-lg-6 col-sm-6 col-md-6">
-                      <input className="form-control" type="text" 
-                        value={this.state.schema.io_point.value}  
-                      />
-                    </div>
-                    <div className="col-6 col-lg-6 col-sm-6 col-md-6">
-                      <input className="form-control" type="text" 
-                        value={this.state.schema.agent.value}  
-                      />
+                    {(io_with_storable!== undefined && io_with_storable.length !== 0) && 
+                      <div className="col-5 col-lg-5 col-sm-5 col-md-5">
+                        <div className="tote_scrollable">
+                           {multiIOPointWithStorableRows}
+                        </div>
+                      </div>
+                    }
+                    {(io_without_storable !== undefined && io_without_storable.length !== 0) &&   
+                      <div className="col-5 col-lg-5 col-sm-5 col-md-5">
+                        
+                        <div className="tote_scrollable">
+                             {multiIOPointWithoutStorableRows}
+                        </div>
+                      </div>
+                    }
+                    <div className="col-2 col-lg-2 col-sm-2 col-md-2">
+                      <div style={{padding:"7px 0px",marginLeft:"-9px",width:"134px"}}>
+                        <input className="form-control" type="text" 
+                          value={this.state.schema.agent.value}  
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
             </div>
-            <br/>
             {Object.keys(this.state.multiSchema).length!==0 &&
-            <div className="row">
+            <div className="row" style={{margin:"-5px 0px -6px"}}>
               <div className="col-lg-11 col-md-11 col-sm-11 col-11">
                 <div className="form-group field">
                   <div className="row">
@@ -433,7 +500,7 @@ class BaseForm extends Component {
                       Tote Height(mm)
                     </div>
                     <div className="col-2 col-lg-2 col-sm-2 col-md-2">
-                      n-deep
+                      Depth
                     </div>
                     <div className="col-2 col-lg-2 col-sm-2 col-md-2">
                       Bot Orientation
@@ -446,14 +513,14 @@ class BaseForm extends Component {
               </div>
             </div>}
             {multiRows}
-            <button style={{marginTop:"10px"}} type="button" onClick={() => this.addNewRow(nextToteStorableId, botDirection,all_storable_id)} className="btn btn-outline-secondary mr-1">
+            <button style={{margin:"0px 10px 20px"}} type="button" onClick={() => this.addNewRow(nextToteStorableId, botDirection,selectedIoPoint,all_storable_id)} className="btn btn-outline-secondary mr-1">
               Add Tote Location
             </button>
-            <br/><br/><br/>
+            <br/>
           </div>
-          <div>
+          <div style={{margin:"0px 10px"}}>
             <button type="button" onClick={() => {
-              this.onSubmitHandler(onSubmit, barcode, ioPointId, nextToteStorableId,existing_location_list,floor_barcodes);
+              this.onSubmitHandler(onSubmit, barcode, ioPointId, nextToteStorableId,existing_location_list,floor_barcodes,selectedIoPoint,io_locationId_mapping);
             }}
               className="btn btn-outline-primary mr-1">
               Submit

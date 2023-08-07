@@ -7,6 +7,7 @@ import AssignDockPoint from "components/Map/Forms/AssignDockPoint";
 import ToggleStorable from "components/Map/Forms/ToggleStorable";
 import ShowPath from "components/Map/Forms/ShowPath";
 import Misaligned from "components/Map/Forms/MisalignedNode";
+import HighlightStorable from "components/Map/Forms/HighlightStorable";
 import Exclude from "components/Map/Forms/ExcludeNode";
 import AddPPSQueue from "components/Map/Forms/AddPPSQueue";
 import AddHighwayQueue from "components/Map/Forms/AddHighwayQueue";
@@ -124,6 +125,7 @@ class RightSidebar extends Component {
               AlignBarcode,
               AssignIOPoints,
               CreateToteLocations,
+              HighlightStorable,
               ManageTtpOverlap,
               ManageStorableSizeInfo,
               manageStorableNeighbour,

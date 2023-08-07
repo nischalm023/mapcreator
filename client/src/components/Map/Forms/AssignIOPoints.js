@@ -18,7 +18,9 @@ const schema = {
                 type: "string",
                 enum: ["north", "west", "south", "east"],
                 enumNames: ["North", "West", "South", "East"],
+
             },
+            default: [],
             uniqueItems: true,
         },
         agent: {
@@ -33,6 +35,7 @@ const schema = {
 const uiSchema = {
     agent: { "ui:readonly": true },
     bot_direction: {
+
         "ui:widget": "checkboxes",
         "ui:options": {
             inline: true,
@@ -48,9 +51,27 @@ const handleRemove = (form, barcodes, nextIOPointId, dispatch) => {
     dispatch(removeIOPoint(nextIOPointId, barcodes, form.bot_direction, form.agent));
 };
 
+const isSelectedBarcodeIoPoint = (selected_barcode,barcodes,ioPoint) => {
+    if(ioPoint !==undefined && selected_barcode.length === 1){
+        if(barcodes[selected_barcode[0]].hasOwnProperty("isIoPoint")){
+            for (const [key, value] of Object.entries(ioPoint)) {
+                if(value["barcode"] === selected_barcode[0]){
+                    return value["bot_direction"]
+                }
+            }
+        }
+    }
+    return []
+};
+
 class AssignIOPoints extends Component {
     render() {
-        const {disabled, barcodes, nextIOPointId, dispatch} = this.props;
+        const {disabled, barcodes, nextIOPointId, dispatch,all_barcodes,ioPoint} = this.props;
+        var selected_barcode_condition = isSelectedBarcodeIoPoint(Object.keys(barcodes),all_barcodes,ioPoint)
+        schema.properties.bot_direction.default = []
+        if(selected_barcode_condition.length>0){
+            schema.properties.bot_direction.default = selected_barcode_condition
+        }
         return ( <BaseJsonForm
             disabled={disabled}
             schema={schema}
@@ -72,6 +93,8 @@ export default connect(
             disabled: Object.keys(state.selection.mapTiles).length === 0,
             barcodes: state.selection.mapTiles,
             nextIOPointId: Math.max(...(state.normalizedMap.entities.map.dummy.ioPointsIds || []), 0) + 1,
+            all_barcodes:state.normalizedMap.entities.barcode,
+            ioPoint:state.normalizedMap.entities.ioPoints
         };
     }
 )(AssignIOPoints);

@@ -239,7 +239,7 @@ export const getDirectionalitySpritesData = createSelector(
   }
 );
 
-const renderStorable = (bot_direction,storable_direction,io_point_x,io_point_y,xScale,yScale) =>{
+const renderStorable = (image_name,bot_direction,storable_direction,io_point_x,io_point_y,xScale,yScale) =>{
     if(bot_direction=="north"){
         if(storable_direction == "east"){
             var x = io_point_x + (constants.STORABLE_OFFSET_X * constants.BARCODE_CLICKABLE_AREA_RATIO)
@@ -276,7 +276,8 @@ const renderStorable = (bot_direction,storable_direction,io_point_x,io_point_y,x
             var y = io_point_y + (constants.STORABLE_OFFSET_X * constants.BARCODE_CLICKABLE_AREA_RATIO) 
         }
     }
-    return {"name":constants.TOTE_STORABLE,"x":x,"y":y,xScale,yScale}
+   
+    return {"name":image_name,"x":x,"y":y,xScale,yScale}
 }
 
 export const getStorableTileSpriteScale = (xWidth,yHeight) => {
@@ -295,6 +296,8 @@ export const getAllSpritesData = createSelector(
   state => state.selection.directionViewMode,
   storable_state => storable_state.normalizedMap.entities.toteStorables,
   state => state.selection.totestorageMode,
+  state => state.selection.toteStorablesHighlight,
+  state => state.selection.storableMapTiles,
   state => state.selection.iopointMode,
   barcode_state => barcode_state.normalizedMap.entities.barcode,
   (_state,props)=> props.tileId,
@@ -308,6 +311,8 @@ export const getAllSpritesData = createSelector(
     directionViewMode,
     storable_state,
     totestorageMode,
+    toteStorablesHighlight,
+    storableMapTiles,
     iopointMode,
     barcode_state,
     props,
@@ -319,7 +324,7 @@ export const getAllSpritesData = createSelector(
       if(storable_state && totestorageMode){
         var storable_list = []
         for (const [key, value] of Object.entries(storable_state)) {
-            if(Object.keys(value["barcode"])[0] === barcode_state[props]["coordinate"]){
+            if(Object.keys(value["barcode"]).includes(barcode_state[props]["coordinate"])){
               var bot_direction = value["bot_direction"]["value"]["value"]
               var storable_direction = value["storable_direction"]["value"]["value"]
               var io_point_x = centreX
@@ -330,9 +335,13 @@ export const getAllSpritesData = createSelector(
               if(bot_direction === "east" || bot_direction === "west"){
                 var [xStorableScale,yStorableScale] = getStorableTileSpriteScale(constants.STORABLE_DEFAULT_HEIGHT,constants.STORABLE_DEFAULT_WIDTH)
               }
-              
               // console.log("xStorableScale,yStorableScale============",xStorableScale,yStorableScale)
-              var storable_dict = renderStorable(bot_direction,storable_direction,io_point_x,io_point_y,xStorableScale,yStorableScale)
+              if(Object.keys(storableMapTiles).includes(barcode_state[props]["coordinate"]) && toteStorablesHighlight){
+                var image_name = constants.QUEUE
+              }else{
+                var image_name = constants.TOTE_STORABLE
+              }
+              var storable_dict = renderStorable(image_name,bot_direction,storable_direction,io_point_x,io_point_y,xStorableScale,yStorableScale)
               storable_list.push(storable_dict)
             }
         }

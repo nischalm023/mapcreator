@@ -89,6 +89,7 @@ export const clickOnViewport = (worldCoordinate, onShiftClickOnMapTile) => (
               delete normalizedMap.entities.barcode[key].unsuccess_overlap_barcode_status
           }
           });
+      state.selection.toteStorablesHighlight=false
     return dispatch(outsideTilesClick);
   } else {
     return Promise.resolve();

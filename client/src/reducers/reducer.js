@@ -156,6 +156,14 @@ export const selectedDistanceTilesReducer = (state = {}, action) => {
   return state;
 };
 
+export const StorableselectedMapTilesReducer = (state = {}, action) => {
+  switch (action.type) {
+    case "CLICK-OUTSIDE-TILES":
+      return {};
+  }
+  return state;
+};
+
 export const selectedMapTilesReducer = (state = {}, action) => {
   switch (action.type) {
     case "CLEAR-MAP":
@@ -208,6 +216,14 @@ const ToteStorageReducer = (state = true, action) => {
   return state;
 };
 
+const ToteStorageHighlightReducer = (state = false, action) => {
+  switch (action.type) {
+    case "HIGHLIGHT-TOTE-STORAGE":
+      return !state;
+  }
+  return state;
+};
+
 const multiQueueModeReducer = (state = false, action) => {
   switch (action.type) {
     case "TOGGLE-MULTI-QUEUE-MODE":
@@ -242,6 +258,7 @@ const directionViewModeReducer = (state = false, action) => {
 
 export const baseSelectionReducer = combineReducers({
   mapTiles: reduceReducers(select, selectedMapTilesReducer),
+  storableMapTiles:StorableselectedMapTilesReducer,
   distanceTiles: selectedDistanceTilesReducer,
   queueMode: queueModeReducer,
   TTPMode: TTPModeReducer,
@@ -250,6 +267,7 @@ export const baseSelectionReducer = combineReducers({
   sectorViewMode: sectorViewModeReducer,
   directionViewMode: directionViewModeReducer,
   iopointMode: IOPointReducer,
+  toteStorablesHighlight:ToteStorageHighlightReducer,
   totestorageMode: ToteStorageReducer,
   
   metaKey: (e = false) => e,
@@ -276,7 +294,8 @@ export const selectionReducer = (
     sectorViewMode: false,
     directionViewMode: false,
     iopointMode: true,
-    totestorageMode:true
+    totestorageMode:true,
+    toteStorablesHighlight:false
   },
   action
 ) => {
@@ -312,17 +331,21 @@ export const selectionReducer = (
     case "CLICK-ON-MAP-TILE":
       var tileId = action.value;
       if (!state.queueMode) {
-        if (state.mapTiles[tileId]) {
+        if (state.mapTiles[tileId] || state.storableMapTiles[tileId]) {
           // delete tile from selected
-          return { ...state, mapTiles: _.omit(state.mapTiles, tileId) };
+          return { ...state, mapTiles: _.omit(state.mapTiles, tileId),storableMapTiles: _.omit(state.storableMapTiles, tileId),toteStorablesHighlight:false };
         } else {
           // using true to signify tile is selected. doesn't really matter what
           // the value is, just interested in the key
-          return { ...state, mapTiles: { ...state.mapTiles, [tileId]: true } };
+          if(state.toteStorablesHighlight){
+            return { ...state, mapTiles: { ...state.mapTiles, [tileId]: true },storableMapTiles:{[tileId]: true },toteStorablesHighlight:false};
+          }else{
+            return { ...state, mapTiles: { ...state.mapTiles, [tileId]: true },storableMapTiles:{ ...state.storableMapTiles, [tileId]: true },toteStorablesHighlight:false};
+          }
         }
       } else {
         // don't do anything if it's already selected
-        if (state.mapTiles[action.value]) {
+        if (state.mapTiles[action.value] || state.storableMapTiles[action.value]) {
           return state;
         }
         var a = _.reduce(
@@ -332,7 +355,7 @@ export const selectionReducer = (
           },
           0
         );
-        return { ...state, mapTiles: { ...state.mapTiles, [tileId]: a + 1 } };
+        return { ...state, mapTiles: { ...state.mapTiles, [tileId]: a + 1 },storableMapTiles: { ...state.storableMapTiles, [tileId]: a + 1 } };
       }
 
     case "CLICK-ON-DISTANCE-TILE":
