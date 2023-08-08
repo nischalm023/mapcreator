@@ -139,10 +139,21 @@ class BaseForm extends Component {
       this.toggle();
     } 
   };
-  addNewRow = (nextToteStorableId, botDirection) => {
+  addNewRow = (nextToteStorableId, botDirection,all_storable_id) => {
     var multiSchema = { ...this.state.multiSchema };
     let nextId = 0;
-    nextId = nextToteStorableId;
+    if(Object.keys(multiSchema).length!==0){
+      for(let key in multiSchema){
+        nextId = Math.max(nextId, multiSchema[key].tote_id.value);
+      }
+      nextId = nextId + 1;
+    }
+    else{
+      nextId = nextToteStorableId;
+    }
+    if(all_storable_id.includes(nextId)){
+      nextId = Math.max(...(all_storable_id), 0) + 1
+    }
     for (let key in multiSchema) {
       let tote = multiSchema[key];
       nextToteStorableId = Math.max(tote.tote_id.value, nextToteStorableId);
@@ -275,6 +286,7 @@ class BaseForm extends Component {
       existingTotes,
       existing_location_list,
       floor_barcodes,
+      all_storable_id,
       ...rest
     } = this.props;
     var multiRows = [];
@@ -436,7 +448,7 @@ class BaseForm extends Component {
               </div>
             </div>}
             {multiRows}
-            <button style={{marginTop:"10px"}} type="button" onClick={() => this.addNewRow(nextToteStorableId, botDirection)} className="btn btn-outline-secondary mr-1">
+            <button style={{marginTop:"10px"}} type="button" onClick={() => this.addNewRow(nextToteStorableId, botDirection,all_storable_id)} className="btn btn-outline-secondary mr-1">
               Add Tote Location
             </button>
             <br/><br/>

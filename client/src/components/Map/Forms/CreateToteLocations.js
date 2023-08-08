@@ -14,7 +14,7 @@ const schema = () => {
 };
 
 
-const CreateToteLocations = ({ onSubmit, disabled, barcode, nextToteStorableId, ioPointBarcode, ioPointId, agent, botDirection, existingTotes,existing_location_list,floor_barcodes}) => (
+const CreateToteLocations = ({ onSubmit, disabled, barcode, nextToteStorableId, ioPointBarcode, ioPointId, agent, botDirection, existingTotes,existing_location_list,floor_barcodes,all_storable_id}) => (
     <CreateToteLocationsForm
         schema={schema()}
         disabled={disabled}
@@ -29,6 +29,7 @@ const CreateToteLocations = ({ onSubmit, disabled, barcode, nextToteStorableId, 
         existingTotes={existingTotes}
         existing_location_list={existing_location_list}
         floor_barcodes={floor_barcodes}
+        all_storable_id={all_storable_id}
     />
 );
 
@@ -123,7 +124,8 @@ export default connect(
             botDirection: botDirection,
             existingTotes: existingTotes,
             existing_location_list:existing_location_list,
-            floor_barcodes
+            floor_barcodes,
+            all_storable_id:state.normalizedMap.entities.map.dummy.toteStorablesIds
         }
     },
     dispatch => ({
