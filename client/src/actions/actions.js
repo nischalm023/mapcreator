@@ -864,6 +864,12 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
     if(error_text!==""){
       return dispatch(setErrorMessage(error_text));
     }
+   } 
+  if(Object.keys(normalizedMap.entities.pps).length !== 0){
+   var nonactive_pps_list = validatePpsPoint(normalizedMap.entities) 
+   if(nonactive_pps_list.length !== 0){
+     return dispatch(setErrorMessage(`PPS IDs ${nonactive_pps_list} are of the type TTP / RTP + TTP and do not have any associated conveyor active points. Please associate active points or change the PPS eligible agents`));
+   }
   }
   // let withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   setSectorsBarcodeMapping(dispatch, getState);

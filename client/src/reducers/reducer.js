@@ -3,6 +3,7 @@ import { combineReducers } from "redux";
 import { createEntityReducer, dummyState } from "./util";
 import reduceReducers from "reduce-reducers";
 import floorReducer from "./floor";
+import select from "./selection";
 import barcodeReducer from "./barcode/index";
 import ppsReducer from "./pps";
 import conveyorReducer from "./conveyor";
@@ -22,6 +23,7 @@ import sectorBarcodeMappingReducer from "./sectorBarcodeMapping";
 import mappingBarcodeCoordReducer from "./mappingBarcodeCoordReducer";
 import sectorMxUPreferencesReducer from "./sectorMxUPreferences";
 import charger from "./charger";
+import ods from "./ods";
 import { successMessageReducer, errorMessageReducer } from "./message";
 import _ from "lodash";
 export var baseBarcodeReducer = createEntityReducer("BARCODE", "coordinate");
@@ -32,6 +34,7 @@ export var baseConveyorReducer = createEntityReducer("CONVEYOR", "conveyor_id");
 export var baseConnectedConveyorReducer = createEntityReducer("CONNECTED_CONVEYOR", "connected_conveyor_id");
 export var baseIopointReducer = createEntityReducer("IO-POINT", "io_point_id");
 export var baseTotestorableReducer = createEntityReducer("TOTE-STORABLE", "next_tote_storable_id");
+export var baseOdsReducer = createEntityReducer("ODS-EXCLUDED", "ods_excluded_id")
 
 export const entitiesReducer = combineReducers({
   elevator: reduceReducers(elevatorReducer, baseElevatorReducer),
@@ -39,7 +42,7 @@ export const entitiesReducer = combineReducers({
   charger: reduceReducers(charger, baseChargerReducer),
   pps: reduceReducers(basePPSReducer, ppsReducer),
   conveyorTile: reduceReducers(baseConveyorReducer, conveyorReducer),
-  odsExcluded: createEntityReducer("ODS-EXCLUDED", "ods_excluded_id"),
+  odsExcluded: reduceReducers(ods, baseOdsReducer),
   dockPoint: createEntityReducer("DOCK-POINT", "dock_point_id"),
   fireEmergency: createEntityReducer("FIRE-EMERGENCY", "fire_emergency_id"),
   ConnectedconveyorTile: reduceReducers(baseConnectedConveyorReducer, connectedConveyorReducer),
@@ -238,7 +241,7 @@ const directionViewModeReducer = (state = false, action) => {
 };
 
 export const baseSelectionReducer = combineReducers({
-  mapTiles: selectedMapTilesReducer,
+  mapTiles: reduceReducers(select, selectedMapTilesReducer),
   distanceTiles: selectedDistanceTilesReducer,
   queueMode: queueModeReducer,
   TTPMode: TTPModeReducer,
