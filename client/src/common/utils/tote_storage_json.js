@@ -15,13 +15,17 @@ function orientationFunction(direction){
     return orientation;
 }
 function getCoordinates(value,barcode){
-    var coordinates =[]  
-    for(let k in barcode ){
-        if(barcode[k].barcode === value.io_point.value){
-            coordinates = `[${barcode[k].coordinate}]`
-            break;
-        }
+    var coordinates =[]
+    var coordinate_val = Object.keys(value.barcode)
+    if(coordinate_val.length!==0){
+        coordinates = `[${coordinate_val}]`
     }
+    // for(let k in barcode ){
+    //     if(barcode[k].barcode === value.io_point.value){
+    //         coordinates = `[${barcode[k].coordinate}]`
+    //         break;
+    //     }
+    // }
     return coordinates
 }
 const getIOPointData = (value,barcode)=>{
