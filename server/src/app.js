@@ -28,6 +28,7 @@ app.get("/api/backtracking",
   const attributes = ["id"];
   var maps = await Map.findAll({
         attributes,
+        
       })
   var mapsJson = maps.map(map => map.toJSON());
   for (var i = 0; i < mapsJson.length; i++) {
@@ -55,8 +56,10 @@ app.get("/api/backtracking",
 app.get("/api/backtracking_conveyor",
   wrap(async(request,response) => {
   const attributes = ["id"];
+  const order = [["createdAt", "DESC"]];
   var maps = await Map.findAll({
         attributes,
+        order
       })
   var mapsJson = maps.map(map => map.toJSON());
   console.log("start=====")
