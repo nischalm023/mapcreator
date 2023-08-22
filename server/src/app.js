@@ -16,7 +16,8 @@ const FormData = require('form-data'); // added this line
 global.fetch = require("node-fetch");
 const upload = multer();
 app.use(cors());
-
+var timeout = require('connect-timeout');
+app.use(timeout(1200000));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb" }));
 
@@ -58,9 +59,11 @@ app.get("/api/backtracking_conveyor",
         attributes,
       })
   var mapsJson = maps.map(map => map.toJSON());
+  console.log("start=====")
   for (var i = 0; i < mapsJson.length; i++) {
     var map =  await Map.findByPk(mapsJson[i]["id"]);
       var map_data = map.toJSON()
+      console.log("map id========",map_data["id"])
        if(map_data["map"] && map_data["map"].hasOwnProperty("conveyors")){
           var conveyors = map_data["map"]["conveyors"]
           if(conveyors.length>0 && conveyors[0]!==null){
