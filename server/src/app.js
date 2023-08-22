@@ -73,8 +73,8 @@ app.get("/api/backtracking_conveyor",
             for (var k = 0; k < conveyors.length; k++) {
                if(!conveyors[k].hasOwnProperty("conveyor_step_id") && conveyors[k].hasOwnProperty("selected_tile")){
                 var conveyor_step_id={}
-                for (var i = 0; i < conveyors[k]["selected_tile"].length; i++) {
-                  conveyor_step_id[conveyors[k]["selected_tile"][i].toString()]=(i+1).toString()
+                for (var l = 0; l < conveyors[k]["selected_tile"].length; l++) {
+                  conveyor_step_id[conveyors[k]["selected_tile"][l].toString()]=(l+1).toString()
                 }
                 conveyors[k]["conveyor_step_id"] = conveyor_step_id
                 console.log("conveyor_step_id========",conveyor_step_id,map_data["id"])
