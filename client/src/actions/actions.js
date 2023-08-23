@@ -303,6 +303,9 @@ export const setToteStorables = (getState) => {
   const normalizedMap = state.normalizedMap;
   var mapId = getMapId(state);
   var toteStorables = {};
+  if(!normalizedMap.entities.map.dummy.hasOwnProperty("toteStorablesIds")){
+    normalizedMap.entities.map.dummy.toteStorablesIds = []
+  }
   return getMap(mapId)
     .then(handleErrors)
     .then((res) => res.json())
@@ -310,6 +313,7 @@ export const setToteStorables = (getState) => {
       if(!map.map.hasOwnProperty("toteStorables")){
         normalizedMap.entities.toteStorables = toteStorables;
         normalizedMap.entities.map.dummy.toteStorables = toteStorables;
+        normalizedMap.entities.map.dummy.toteStorablesIds = [];
       }
     });
 };
