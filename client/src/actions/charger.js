@@ -177,9 +177,7 @@ export const addChargers = formData => (dispatch, getState) => {
   const barcodesDict = state.normalizedMap.entities["barcode"] || {};
   var newBarcodes = [];
   var newChargers = [];
-  var specialTileIds = getNewSpecialCoordinates(state, {
-    n: Object.keys(mapTiles).length
-  });
+  var specialTileIds = getNewSpecialCoordinates(state, {n: Object.keys(mapTiles).length});
   Object.keys(mapTiles).forEach((tileId, idx) => {
     var specialTileId = specialTileIds[idx];
     var update_charger_barcode = createAllChargerBarcodes(dispatch,state,formData, tileId, specialTileId, barcodesDict)

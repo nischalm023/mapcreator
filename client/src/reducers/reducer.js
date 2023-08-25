@@ -11,7 +11,9 @@ import iopointReducer from "./iopoint";
 import connectedConveyorReducer from "./connectedconveyor";
 import totestorableReducer from "./totestorable";
 import DownloadConveyorReducer from "./download_conveyor";
+import HaiTemplateReducer from "./hai_template"
 import currentFloorReducer from "./currentFloor";
+import HaiPortReducer from "./haiPort";
 import barcodeDistanceReducer from "./barcodeDistance";
 import mapReducer from "./map";
 import conveyorVersionReducer from "./conveyorVersion";
@@ -32,10 +34,12 @@ export var basePPSReducer = createEntityReducer("PPS", "pps_id");
 export var baseElevatorReducer = createEntityReducer("ELEVATOR", "elevator_id");
 export var baseChargerReducer = createEntityReducer("CHARGER", "charger_id");
 export var baseConveyorReducer = createEntityReducer("CONVEYOR", "conveyor_id");
+export var baseHaiTemplateReducer = createEntityReducer("HAI_TEMPLATE", "template_id");
 export var baseConnectedConveyorReducer = createEntityReducer("CONNECTED_CONVEYOR", "connected_conveyor_id");
 export var baseIopointReducer = createEntityReducer("IO-POINT", "io_point_id");
 export var baseTotestorableReducer = createEntityReducer("TOTE-STORABLE", "next_tote_storable_id");
 export var baseOdsReducer = createEntityReducer("ODS-EXCLUDED", "ods_excluded_id")
+export var baseHaiPortReducer = createEntityReducer("HAI-PORT", "port_id")
 
 export const entitiesReducer = combineReducers({
   elevator: reduceReducers(elevatorReducer, baseElevatorReducer),
@@ -43,6 +47,8 @@ export const entitiesReducer = combineReducers({
   charger: reduceReducers(charger, baseChargerReducer),
   pps: reduceReducers(basePPSReducer, ppsReducer),
   conveyorTile: reduceReducers(baseConveyorReducer, conveyorReducer),
+  haiPortsTemplate:reduceReducers(baseHaiTemplateReducer,HaiTemplateReducer),
+  haiPortTile:reduceReducers(baseHaiPortReducer,HaiPortReducer),
   odsExcluded: reduceReducers(ods, baseOdsReducer),
   dockPoint: createEntityReducer("DOCK-POINT", "dock_point_id"),
   fireEmergency: createEntityReducer("FIRE-EMERGENCY", "fire_emergency_id"),

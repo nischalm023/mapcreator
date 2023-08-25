@@ -114,3 +114,109 @@ body {
   padding:0px;
 
 }
+.hai-port-box-buttons {
+  border: 1px solid #c5c5c5;
+  border-radius: 4px;
+  padding: 10px;
+  margin: 0 10px;
+  margin-left: -7px;
+  width: 840px;
+}
+.hai-create-button button, .hai-create-button button:focus, .hai-create-button button:hover{
+  background-color:transparent !important;
+  border: none !important;
+  border-bottom: 1px solid yellow !important;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+.hai-create-button {
+  border-bottom: 1px solid #c5c5c5;
+  padding: .5rem 1rem;
+  display:block !important;
+
+
+}
+
+.hai-edit-button button, .hai-edit-button button:focus, .hai-edit-button button:hover{
+  background-color:transparent !important;
+  border: none !important;
+  padding: .75rem 0;
+  color: initial !important;
+}
+.hai-edit-button {
+  padding: 0px;
+
+}
+.hai-edit-button button i{
+  font-size: 1rem;
+}
+
+.hai-delete-button {
+  position: relative;
+  display: inline-block;
+}
+
+.hai-delete-button .tooltiptext {
+  visibility: hidden;
+  width: 315px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -220px;
+}
+
+.hai-delete-button .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+
+.hai-delete-button:hover .tooltiptext {
+  visibility: visible;
+}
+
+.hai-template-edit-button {
+  position: relative;
+  display: inline-block;
+}
+
+.hai-template-edit .tooltiptext {
+  visibility: hidden;
+  width: 315px;
+  background-color: black;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding-left: 10px;
+  position: absolute;
+  z-index: 1;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -260px;
+}
+
+.hai-template-edit .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+
+.hai-template-edit:hover .tooltiptext {
+  visibility: visible;
+}

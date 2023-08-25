@@ -16,9 +16,8 @@ const checkPointLieOnConveyorBelt = (conveyorTile,selectedMapTiles) => {
   for (const [key, value] of Object.entries(conveyorTile)) {
     var selected_tile = convertNestedListToList(value["selected_tile"])
     const entryArray = selectedMapTiles.filter(value => selected_tile.includes(value));
-    const ioPointArray = selectedMapTiles.filter(value => !selected_tile.includes(value));
-    if(entryArray.length==1 && ioPointArray.length==1){
-      return [key,entryArray[0],ioPointArray[0],false]
+    if(entryArray.length==1){
+      return [key,entryArray[0],false]
     }
   }
   return ['','','',true]   
@@ -118,24 +117,22 @@ const checkMultipleEntryV1 = (conveyorTile,conveyor_version) => {
 
 const shouldBeDisabled = (map_tile_value, barcodes, conveyorTile,conveyor_version) => {
   var conveyor_id = ''
-  if(map_tile_value.length==2){
-     var [conveyor_id,entry_point,io_point,point_exist] =checkPointLieOnConveyorBelt(conveyorTile,map_tile_value)
+  if(map_tile_value.length==1){
+     var [conveyor_id,entry_point,point_exist] =checkPointLieOnConveyorBelt(conveyorTile,map_tile_value)
      if(conveyor_id!=''){
         var already_entry_point_exist = checkSameEntryPointOnConveyorBelt(conveyorTile[conveyor_id],entry_point)
         var already_exit_point_exist = checkSameExitPointOnConveyorBelt(conveyorTile[conveyor_id],entry_point) 
         var already_active_point_exist = checkSameActvePointOnConveyorBelt(conveyorTile[conveyor_id],entry_point)
         var already_end_point_exist = checkSameEndPointOnConveyorBelt(conveyorTile[conveyor_id],entry_point)
-        var is_io_point_on_conveyor_belt = checkIOPointOnConveyorBelt(conveyorTile,io_point)
-        var already_exist_io_point = checkDuplicateIOPoint(conveyorTile,io_point)
         var no_multiple_entry_v1 = checkMultipleEntryV1(conveyorTile[conveyor_id],conveyor_version)
         if(!point_exist && !already_entry_point_exist && !already_exit_point_exist && !already_active_point_exist 
-          && !already_end_point_exist && !is_io_point_on_conveyor_belt && !already_exist_io_point && !no_multiple_entry_v1
+          && !already_end_point_exist && !no_multiple_entry_v1
           ){
-          return [conveyor_id,entry_point,io_point,false]
+          return [conveyor_id,entry_point,false]
         }          
      }
   }
-  return [conveyor_id,'','',true]
+  return [conveyor_id,'',true]
 };
 
 
@@ -156,9 +153,7 @@ class AddEntryPoint extends Component {
   handleSubmit = (event,dispatch,conveyor_id,direction,entry_point) => {
         event.preventDefault();
         const formData = {
-            bot_direction:parseInt(this.state.bot_direction),
             direction:parseInt(this.state.direction),
-            entry_io_point:this.state.entry_io_point,
             conveyor_id: conveyor_id,
             conveyor_entry:entry_point,
             entry_height:parseInt(this.state.entry_height)
@@ -167,47 +162,23 @@ class AddEntryPoint extends Component {
         dispatch(selectEntryConveyor(formData));
     };
 
-  setBotDirectionState = (selected_entry_direction) =>{
-    let all_directions = {North: 0, East: 1, South: 2, West: 3}
-    let possibleBotDirections ={}
-    if(parseInt(selected_entry_direction) === 0 || parseInt(selected_entry_direction) === 2){
-        possibleBotDirections["East"] = all_directions["East"]
-        possibleBotDirections["West"] = all_directions["West"]
-      }
-    if(parseInt(selected_entry_direction) === 1 || parseInt(selected_entry_direction) === 3){
-        possibleBotDirections["North"] = all_directions["North"]
-        possibleBotDirections["South"] = all_directions["South"]
-      }
-    this.setState({ bot_direction_options: possibleBotDirections})
-    var possibleBotDirectionsKey = Object.keys(possibleBotDirections)
-    this.setState({ bot_direction: possibleBotDirections[possibleBotDirectionsKey[0]]})
-  }
-
   onClickEntryDirection = (event, selected_tile=null, conveyorTile=null, conveyor_id=null, 
                             floor_barcodes=null, direction=null) => {
     this.setState({ direction: event.target.value})
-    this.setBotDirectionState(event.target.value)
   };
-  onClickBotDirection = (event) => {
-      event.preventDefault();
-      this.setState({ bot_direction: event.target.value })
-    };
     
   toggle = (selected_tile=null,conveyorTile=null, conveyor_id=null, 
-    floor_barcodes=null,direction=null,io_point=null) => {
+    floor_barcodes=null,direction=null) => {
             this.setState({ show: !this.state.show});
             if(direction && floor_barcodes){
               var direction_key = Object.keys(direction)
               this.setState({ direction: direction[direction_key[0]] });
-              this.setBotDirectionState(direction[direction_key[0]])
-              this.setState({ entry_io_point:floor_barcodes[io_point]["barcode"]})
             }
           }
 
   render() {
-    const { error, entryDone ,show,entry_io_point,bot_direction,entry_height} = this.state;
-    // const {conveyor_id,direction,disabled, bot_direction,floor_barcodes,conveyorTile,selected_tile,dispatch} = this.props;
-    const {conveyor_id,direction,disabled,floor_barcodes,conveyorTile,selected_tile,dispatch,io_point,entry_point} = this.props;
+    const { error, entryDone ,show,bot_direction,entry_height} = this.state;
+    const {conveyor_id,direction,disabled,floor_barcodes,conveyorTile,selected_tile,dispatch,entry_point} = this.props;
 
     return (
       <div>
@@ -215,14 +186,13 @@ class AddEntryPoint extends Component {
             show={show}
             disabled={disabled}
             toggle={()=>this.toggle(selected_tile,conveyorTile,conveyor_id, 
-              floor_barcodes,direction,io_point)}
+              floor_barcodes,direction)}
             buttonText="Select Conveyor Entry Point"
             >
             <form onSubmit={(e)=>this.handleSubmit(e,dispatch,conveyor_id,direction,entry_point)}>
                 <legend>Add Entry point Details</legend>
                 <div className="form-group">
                   <label for="direction">Conveyor Entry Direction*</label>
-                  {/* <input id="direction" className="form-control" type="text" value={direction_mapping[direction]}/> */}
                   <select 
                     id="entry-direction" 
                     onChange={(e) => this.onClickEntryDirection(e, selected_tile, conveyorTile, conveyor_id, floor_barcodes, direction)} 
@@ -238,23 +208,6 @@ class AddEntryPoint extends Component {
                       </option>
                     ))}
                   </select>
-                  <br/>
-                  <label for="type">Bot Orientation Direction*</label>
-                    <select onChange={(e)=>this.onClickBotDirection(e)} className="form-control" id="eligible_system" name="eligible_system">
-                      {/* {Object.keys(bot_direction).map((key) => (
-                        <option value={bot_direction[key]}>
-                          {key}
-                        </option>
-                      ))} */}
-                      {Object.keys(this.state.bot_direction_options).map((key) => (
-                        <option value={this.state.bot_direction_options[key]}>
-                          {key}
-                        </option>
-                      ))}
-                    </select>
-                  <br/>
-                  <label for="direction">Conveyor IO Point Barcode*</label>
-                  <input id="direction" className="form-control" type="text" value={entry_io_point} disabled/>
                   <br/>
                   <label for="direction">Conveyor Entry Height*</label>
                   <input id="direction" 
@@ -301,19 +254,15 @@ export default connect(
     if(conveyorTile == undefined || Object.keys(conveyorTile).length==0){
       disabled = true
     }else{
-      var [conveyor_id,entry_point,io_point,disabled] = shouldBeDisabled(map_tile_value, floor_barcodes, conveyorTile, conveyor_version);
+      var [conveyor_id,entry_point,disabled] = shouldBeDisabled(map_tile_value, floor_barcodes, conveyorTile, conveyor_version);
     }
     // find entry direction options
     var direction = getConveyorPointDirection(state, floor_barcodes, map_tile_value, conveyorTile, conveyor_id)
-    // find bot direction options
-    // var bot_direction = getConveyorPointBotDirection(floor_barcodes, map_tile_value, direction, conveyorTile, conveyor_id)
     return {
       conveyor_id:conveyor_id,
       direction:direction,
       disabled:disabled,
       entry_point:entry_point,
-      io_point:io_point,
-      // bot_direction:bot_direction,
       selected_tile:map_tile_value,
       conveyorTile:conveyorTile,
       floor_barcodes:floor_barcodes

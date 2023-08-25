@@ -16,6 +16,7 @@ class ButtonForm extends Component {
       small = false,
       btnClass = "btn-secondary",
       show,
+      extraClassName=null,
       wrapInButtonGroup = true,
       title = undefined,
       bcolor = "orange",
@@ -26,14 +27,14 @@ class ButtonForm extends Component {
       // adding class and role since nested button groups give a cleaner look for some reason
       // making it configurable since single button in a btn-group looks wierd
       <div
-        className={wrapInButtonGroup ? "btn-group" : undefined}
+        className={ extraClassName!==null || wrapInButtonGroup ? `btn-group ${extraClassName}` : undefined}
         role="group"
         style={{ display: "inline-block" }}
       > 
         <button
           key={0}
           type="button"
-          className={`btn ${btnClass} ${
+          className={`btn ${btnClass}  ${
             small ? "btn-sm" : ""
           } tooltip-wrapper btn-group`}
           style={{ textAlign:"-webkit-center", color:bcolor }}

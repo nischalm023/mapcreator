@@ -36,6 +36,14 @@ export default (state = {}, action) => {
       }
       return newState;
     }
+  case "ADD-TEMPLATE": {
+      const { template_id } = action.value;
+      if(!newState.dummy.haiPortsTemplateIds.includes(template_id)){
+        newState.dummy.haiPortsTemplateIds.push(template_id);
+      }
+      return newState;
+    }
+
   case "ADD-CONNECTED-CONVEYOR": {
       const { connected_conveyor_id } = action.value;
       if (!newState.dummy.hasOwnProperty('connectedConveyor')){
@@ -45,6 +53,15 @@ export default (state = {}, action) => {
         newState.dummy.connectedConveyor.push(connected_conveyor_id);
         newState.dummy.current_connected_conveyor_id = [];
         newState.dummy.current_connected_conveyor_id.push(connected_conveyor_id);
+      }
+      return newState;
+    }
+  case "ADD-HAI-PORTS": {
+      if (!newState.dummy.hasOwnProperty('haiPort')){
+        newState.dummy.haiPort = [];
+      }
+      if(!newState.dummy.haiPort.includes(action.value)){
+        newState.dummy.haiPort.push(action.value);
       }
       return newState;
     }
@@ -142,6 +159,16 @@ export default (state = {}, action) => {
               return item !== conveyor_id
           })
         newState.dummy.conveyors = newList
+      }
+      return newState;
+    }
+    case "REMOVE-TEMPLATE": {
+      var template_id = parseInt(action.value)
+      if (newState.dummy.hasOwnProperty('haiPortsTemplateIds')){
+        var newList = newState.dummy.haiPortsTemplateIds.filter(function(item) {
+              return item !== template_id
+          })
+        newState.dummy.haiPortsTemplateIds = newList
       }
       return newState;
     }

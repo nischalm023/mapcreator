@@ -19,13 +19,45 @@ const mergeConveyorData = (mapped_list,conveyorTile) => {
     return merge_output
 }
 
-const createValidationList = (merge_output,conveyorTile) => {
+const createValidationList = (merge_output,conveyorTile,haiPortTile) => {
     var validation_list = []
     for (var i = 0; i < merge_output.length; i++){
         var validate_dict = {"conveyor_id":merge_output[i]}
         for (var j = 0; j < merge_output[i].length; j++){
             if(conveyorTile[merge_output[i][j]]["conveyor_active"].length !== 0 && !validate_dict.hasOwnProperty("active_present")){
                  validate_dict["active_present"] = true
+            }
+            if(conveyorTile[merge_output[i][j]].hasOwnProperty("conveyor_entry") && !validate_dict.hasOwnProperty("conveyor_io_entry_present")){
+                var conveyor_entry_details = conveyorTile[merge_output[i][j]]["conveyor_entry"]
+                for (var k = 0; k < conveyor_entry_details.length; k++) {
+                    var entry_io_exists = false
+                    var conveyor_entry_value = conveyor_entry_details[k]["conveyor_entry"].toString()
+                    for (const [entry_key, entry_value] of Object.entries(haiPortTile)) {
+                        if(entry_value["conveyor_id"] == merge_output[i][j] && entry_value["entity_point"] === conveyor_entry_value){
+                            entry_io_exists = true
+                            break
+                        }
+                    }
+                    if(!conveyor_entry_details[k].hasOwnProperty('conveyor_io_entry') && !entry_io_exists){
+                        validate_dict["conveyor_io_entry_present"] = true
+                    }
+                }
+            }
+            if(conveyorTile[merge_output[i][j]].hasOwnProperty("conveyor_exit") && !validate_dict.hasOwnProperty("conveyor_io_exit_present")){
+                var conveyor_exit_details = conveyorTile[merge_output[i][j]]["conveyor_exit"]
+                for (var k = 0; k < conveyor_exit_details.length; k++) {
+                    var exit_io_exists = false
+                    var conveyor_exit_value = conveyor_exit_details[k]["conveyor_exit"].toString()
+                    for (const [exit_key, exit_value] of Object.entries(haiPortTile)) {
+                        if(exit_value["conveyor_id"] == merge_output[i][j] && exit_value["entity_point"] === conveyor_exit_value){
+                            exit_io_exists = true
+                            break
+                        }
+                    }
+                    if(!conveyor_exit_details[k].hasOwnProperty('conveyor_io_exit') && !exit_io_exists){
+                        validate_dict["conveyor_io_exit_present"] = true
+                    }
+                }
             }
         }
         validation_list.push(validate_dict)
@@ -84,6 +116,7 @@ const createMappedList = (connected_list) => {
 
 const getErrorMessage = (create_validation_list) => {
     let errorMessage = '';
+    let ioErrorMessage = '';
     for (var i = 0; i < create_validation_list.length; i++) {
 
         if(!create_validation_list[i].hasOwnProperty("active_present")){
@@ -92,14 +125,26 @@ const getErrorMessage = (create_validation_list) => {
             }else{
                errorMessage = errorMessage + `\nConveyor ID ${create_validation_list[i]["conveyor_id"].join()} does not have active points defined.` 
             }
-            
         }
-        
+        if(create_validation_list[i].hasOwnProperty("conveyor_io_entry_present")){
+            if(create_validation_list[i]["conveyor_id"].length>1){
+                ioErrorMessage = ioErrorMessage + `\nConnected conveyor system ( ID :${create_validation_list[i]["conveyor_id"].join()} ) does not have entry IO points linked.`
+            }else{
+               ioErrorMessage = ioErrorMessage + `\nConveyor ID ${create_validation_list[i]["conveyor_id"].join()} does not have entry IO points linked.` 
+            }
+        }
+        if(create_validation_list[i].hasOwnProperty("conveyor_io_exit_present")){
+            if(create_validation_list[i]["conveyor_id"].length>1){
+                ioErrorMessage = ioErrorMessage + `\nConnected conveyor system ( ID :${create_validation_list[i]["conveyor_id"].join()} ) does not have exit IO points linked.`
+            }else{
+               ioErrorMessage = ioErrorMessage + `\nConveyor ID ${create_validation_list[i]["conveyor_id"].join()} does not have exit IO points linked.` 
+            }
+        }
     }
-    return errorMessage
+    return [ioErrorMessage,errorMessage]
 }
 
-export const validateConveyorEntity = (connectedConveyorTile,conveyorTile) => {
+export const validateConveyorEntity = (connectedConveyorTile,conveyorTile,haiPortTile) => {
     if(Object.keys(connectedConveyorTile).length !==0){
         var connected_list = createConnectedInput(connectedConveyorTile)
         var mapped_list = createMappedList(connected_list)
@@ -108,8 +153,8 @@ export const validateConveyorEntity = (connectedConveyorTile,conveyorTile) => {
     }
     // this will merge both connected and non connected into one
     var merge_list = mergeConveyorData(mapped_list,conveyorTile)
-    var create_validation_list = createValidationList(merge_list,conveyorTile)
-    var get_error_message = getErrorMessage(create_validation_list)
-    return get_error_message
+    var create_validation_list = createValidationList(merge_list,conveyorTile,haiPortTile)
+    var [ioErrorMessage,get_error_message] = getErrorMessage(create_validation_list)
+    return [ioErrorMessage,get_error_message]
 }
 

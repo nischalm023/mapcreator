@@ -41,6 +41,12 @@ export const STORABLE_Y_SCALE =
   (BARCODE_CLICKABLE_AREA_RATIO * DEFAULT_DISTANCE_BW_BARCODES) /
   TILE_SPRITE_HEIGHT;
 
+export var NORTH = 0;
+export var EAST= 1;
+export var SOUTH = 2;
+export var WEST = 3;
+export var DEFAULT_DISTANCE_HAI_PORT_IO_POINT = 2280;
+export var DEFAULT_VICINITY_HAI_IO_POINT = 1015;
 export var DEFAULT_CONVEYOR_VERSION = 'v2'
 export var CONVEYOR_VERSION = ['v2','v1'] 
 export var STORABLE_OFFSET_X = 580;
@@ -98,6 +104,14 @@ export var ACTIVE_CONVEYOR = "active.png";
 export var END_CONVEYOR = "end.png";
 export var EXIT_CONVEYOR = "exit.png";
 export var ENTRY_CONVEYOR = "entry.png";
+export var EXIT_PORT_BOTTOM = "port-exit-top.png";
+export var EXIT_PORT_TOP = "port-exit-bottom.png";
+export var EXIT_PORT_RIGHT = "port-exit-left.png";
+export var EXIT_PORT_LEFT = "port-exit-right.png";
+export var ENTRY_PORT_BOTTOM = "port-entry-bottom.png";
+export var ENTRY_PORT_TOP = "port-entry-top.png";
+export var ENTRY_PORT_RIGHT = "port-entry-left.png";
+export var ENTRY_PORT_LEFT = "port-entry-right.png";
 // export var IO_POINTS = "io_point.png"
 // export var IO_POINTS = "io_point_img.png"
 export var IO_POINTS = "iopoint.png"
@@ -215,5 +229,13 @@ export const LEGENDSMAP = [
   {
     name: "Conveyor Exit IO Point",
     icon9: "conveyor_io_exit.png"
+  },
+  {
+    name: "Entry Hai Port",
+    icon10: "port-entry-left.png"
+  },
+  {
+    name: "Exit Hai Port",
+    icon11: "port-exit-left.png"
   }
 ];

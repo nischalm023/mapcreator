@@ -5,5 +5,41 @@
 }
 
 .collapsible-content.open {
-  max-height: 600px;
+  max-height: 100%;
+}
+
+.boxed {
+  border: 1px solid #c5c5c5;
+  padding: 10px;
+  width: 220px;
+  height:450px;
+}
+
+.hai-data{
+  border: 1px solid #c5c5c5;
+  padding: 0 0 1rem;
+  margin: 0px;
+  max-height: 100%;
+}
+
+.hai-data .card-body{
+  padding: 0px;
+}
+
+.template-port-data {
+  width: calc(100% - 3.5rem);
+}
+
+.template-port-data .collapsible-content {
+  border: none;
+  padding: 0px;
+}
+
+.template-port-data .card-header {
+  margin-bottom: .25rem;
+}
+.orange-button, .orange-button:focus, .orange-button:hover{
+  background-color: orange !important;
+  border-color: orange !important;
+  box-shadow: none !important;
 }

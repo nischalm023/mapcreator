@@ -159,7 +159,32 @@ export default (state = {}, action) => {
       }
       return Object.assign({}, state, newState);
     }
-
+    case "REMOVE-ENTRY-HAI-PORT-STRIPES": {
+      const { hai_entry_port_list } = action.value;
+      let newState = { ...state };
+      var k = 0;
+      while (k < hai_entry_port_list.length) {
+      if (newState[hai_entry_port_list[k]]) {
+          newState[hai_entry_port_list[k]] = { ...state[hai_entry_port_list[k]], conveyorPortEntry: false};
+          delete newState[hai_entry_port_list[k]].conveyorPortEntry;
+        }
+        k++;
+      }
+      return Object.assign({}, state, newState);
+    }
+    case "REMOVE-EXIT-HAI-PORT-STRIPES": {
+      const { hai_exit_port_list } = action.value;
+      let newState = { ...state };
+      var k = 0;
+      while (k < hai_exit_port_list.length) {
+      if (newState[hai_exit_port_list[k]]) {
+          newState[hai_exit_port_list[k]] = { ...state[hai_exit_port_list[k]], conveyorPortExit: false};
+          delete newState[hai_exit_port_list[k]].conveyorPortExit;
+        }
+        k++;
+      }
+      return Object.assign({}, state, newState);
+    }
     case "HIGHLIGHT-UNSUCCESS-OVERLAP-BAROCDE": {
       const unsuccess_overlap_barcode = action.value[Object.keys(action.value)[0]] 
       const unsuccess_overlap_barcode_status = action.value[Object.keys(action.value)[1]] 
@@ -210,6 +235,46 @@ export default (state = {}, action) => {
       return Object.assign({}, state, newState);
     }
 
+     case "CONVEYOR-TILES-ENTRY-HAI-PORT-STRIPES": {
+      const conveyor_tile_hai_port = action.value.conveyor_tile_hai_port 
+      const entry_port_attribute = action.value.conveyorPortEntry
+      const conveyor_tile_io_point = action.value.conveyor_tile_io_point
+      const entry_io_attribute = action.value.conveyorEntryIO
+      let newState = {};
+      var k = 0;
+      var l = 0 
+      while (k < conveyor_tile_hai_port.length) {
+        newState[conveyor_tile_hai_port[k]] = { ...state[conveyor_tile_hai_port[k]], conveyorPortEntry: entry_port_attribute};
+        k++;
+      }
+      var l = 0;
+      while (l < conveyor_tile_io_point.length) {
+        newState[conveyor_tile_io_point[l]] = { ...state[conveyor_tile_io_point[l]], conveyorEntryIO: entry_io_attribute};
+        l++;
+      }
+      return Object.assign({}, state, newState);
+    }
+
+    case "CONVEYOR-TILES-EXIT-HAI-PORT-STRIPES": {
+      const conveyor_tile_hai_port = action.value.conveyor_tile_hai_port 
+      const exit_port_attribute = action.value.conveyorPortExit
+      const conveyor_tile_io_point = action.value.conveyor_tile_io_point
+      const exit_io_attribute = action.value.conveyorExitIO
+      let newState = {};
+      var k = 0;
+      var l = 0 
+      while (k < conveyor_tile_hai_port.length) {
+        newState[conveyor_tile_hai_port[k]] = { ...state[conveyor_tile_hai_port[k]], conveyorPortExit: exit_port_attribute};
+        k++;
+      }
+      var l = 0;
+      while (l < conveyor_tile_io_point.length) {
+        newState[conveyor_tile_io_point[l]] = { ...state[conveyor_tile_io_point[l]], conveyorExitIO: exit_io_attribute};
+        l++;
+      }
+      return Object.assign({}, state, newState);
+    }
+
     case "HIGHLIGHT-SELECTED-REMOVED-CONVEYOR":{
       const { conveyor_tile, remove_conveyor_tile } = action.value;
 
@@ -250,6 +315,32 @@ export default (state = {}, action) => {
       return { ..._.omit(state, Object.keys(tileIdMap)), ...newState };
     }
 
+  case "DELETE-HAI-BARCODES": {
+      // iterate over all barcodes and just see if their neighbours exist. if not, make the edge [0,0,0]
+      let newState = {};
+      var tileIdMap = action.value;
+      for (let key of tileIdMap) {
+        if (state[key]) {
+          var neighbours = getNeighbouringBarcodesIncludingDisconnected(
+            key,
+            state
+          );
+          for (const [idx, nb] of neighbours.entries()) {
+            if (nb && !tileIdMap[nb.coordinate]) {
+              // its a valid neighbour of the deleted barcode that itself won't be deleted
+              if (!newState[nb.coordinate])
+                newState[nb.coordinate] = state[nb.coordinate];
+              newState[nb.coordinate] = deleteNeighbourFromBarcode(
+                newState[nb.coordinate],
+                (idx + 2) % 4,
+                false
+              );
+            }
+          }
+        }
+      }
+      return { ..._.omit(state, tileIdMap), ...newState };
+    }
     case "MODIFY-DISTANCE-BETWEEN-BARCODES":
       return modifyDistanceBetweenBarcodes(state, action);
 
@@ -347,6 +438,10 @@ export default (state = {}, action) => {
     case "VIEW-OVERLAP-BAROCDES":{
       let newState = action.value
       return { ...state, ...newState };
+    }
+  case "NEW-HAI-EDIT-BAROCDES":{
+      let newState = action.value
+      return newState;
     }
     case "ADD-ELEVATOR":
       return addElevator(state, action);

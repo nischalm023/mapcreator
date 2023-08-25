@@ -57,6 +57,7 @@ export const dummyState = {
       connectedConveyor:[],
       ioPointsIds:[],
       toteStorablesIds:[],
+      haiPort:[],
       downloadConveyor:[],
       elevators: [],
       zones: [],

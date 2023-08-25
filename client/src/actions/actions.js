@@ -268,7 +268,6 @@ export const setConveyorTile = (getState) => {
   const normalizedMap = state.normalizedMap;
   if(normalizedMap.entities.hasOwnProperty("conveyorTile")){
     var conveyorTile = normalizedMap.entities.conveyorTile
-    
     for (const [key, value] of Object.entries(conveyorTile)) {
       var conveyor_data_entry = {}
       var conveyor_data_exit = {}
@@ -322,6 +321,7 @@ export const setConnectedConveyorTile = (getState) => {
   const normalizedMap = state.normalizedMap;
   var mapId = getMapId(state);
   var ConnectedconveyorTile = {};
+
   return getMap(mapId)
     .then(handleErrors)
     .then((res) => res.json())
@@ -329,6 +329,23 @@ export const setConnectedConveyorTile = (getState) => {
       if(!map.map.hasOwnProperty("ConnectedconveyorTile")){
         normalizedMap.entities.ConnectedconveyorTile = ConnectedconveyorTile;
         normalizedMap.entities.map.dummy.ConnectedconveyorTile = ConnectedconveyorTile;
+      }
+    });
+};
+
+export const setHaiPort = (getState) => {
+  const state = getState();
+  const normalizedMap = state.normalizedMap;
+  var mapId = getMapId(state);
+  var hai_port = {};
+
+  return getMap(mapId)
+    .then(handleErrors)
+    .then((res) => res.json())
+    .then((map) => {
+      if(!map.map.hasOwnProperty("haiPort")){
+        normalizedMap.entities.haiPortTile = hai_port;
+        normalizedMap.entities.map.dummy.haiPort = [];
       }
     });
 };
@@ -394,6 +411,47 @@ const setTtpBarcodeFormat = (dispatch,getState) => {
   }
 }
 
+const setGlobalHaiPortValue = (dispatch,getState) =>{
+  const state = getState();
+  const normalizedMap = state.normalizedMap;
+  var mapId = getMapId(state);
+  var globalHaiPortsData = 
+  {"1":{
+         "template_id":1,
+         "template_display_name":"Port Template 1",
+         "port_type":"loader",
+         "tray_count":7,
+         "support_agent":"HAI-TTP-A42D",
+         "length":150,
+         "breadth":50,
+         "height":150,
+         "clone":0
+       },
+  "2":{
+       "template_id":2,
+       "template_display_name":"Port Template 2",
+       "port_type":"unloader",
+       "tray_count":7,
+       "support_agent":"HAI-TTP-A42D",
+       "length":150,
+       "breadth":50,
+       "height":150,
+       "clone":0
+    }
+  };
+  return getMap(mapId)
+    .then(handleErrors)
+    .then((res) => res.json())
+    .then((map) => {
+      if(!map.map.hasOwnProperty("haiPortsTemplate")){
+        normalizedMap.entities.haiPortsTemplate = globalHaiPortsData;
+        normalizedMap.entities.map.dummy.haiPortsTemplate = globalHaiPortsData;
+        normalizedMap.entities.map.dummy.haiPortsTemplateIds = [...new Set(Object.keys(globalHaiPortsData).map(Number))];
+      }
+    });
+
+}
+
 export const fetchMap = (mapId, onSuccess) => (dispatch, getState) => {
   dispatch(clearMap);
   return getMap(parseInt(mapId))
@@ -413,6 +471,8 @@ export const fetchMap = (mapId, onSuccess) => (dispatch, getState) => {
     .then(() => getBarcodeSpacing(dispatch,getState,parseInt(mapId)))
     .then(() => setIOPoints(getState))
     .then(() => setToteStorables(getState))
+    .then(() => setGlobalHaiPortValue(dispatch,getState))
+    .then(() => setHaiPort(getState))
     .then(onSuccess)
     .catch((error) => console.warn(error)); // eslint-disable-line no-console
 };
@@ -780,9 +840,12 @@ export const downloadMap = (singleFloor = false) => (dispatch, getState) => {
   var export_floor_id = getState().exportFloorID
   setSectorsBarcodeMapping(dispatch, getState);
   if(Object.keys(normalizedMap.entities.conveyorTile).length !== 0){
-    var error_text = validateConveyorEntity(normalizedMap.entities.ConnectedconveyorTile,normalizedMap.entities.conveyorTile)
+    var [io_error_text,error_text] = validateConveyorEntity(normalizedMap.entities.ConnectedconveyorTile,normalizedMap.entities.conveyorTile,normalizedMap.entities.haiPortTile)
     if(error_text!==""){
       return dispatch(setErrorMessage(error_text));
+    }
+    if(io_error_text!==""){
+      return dispatch(setErrorMessage(io_error_text));
     }
   }
   if(Object.keys(normalizedMap.entities.pps).length !== 0){
@@ -820,9 +883,12 @@ export const copyJSONToClipboard = (fieldName, singleFloor = false) => (
   const exportedJson = exportMap(normalizedMap, singleFloor, converyor_version,
     export_floor_id);
   if(Object.keys(normalizedMap.entities.conveyorTile).length !== 0){
-    var error_text = validateConveyorEntity(normalizedMap.entities.ConnectedconveyorTile,normalizedMap.entities.conveyorTile)
+    var [io_error_text,error_text] = validateConveyorEntity(normalizedMap.entities.ConnectedconveyorTile,normalizedMap.entities.conveyorTile,normalizedMap.entities.haiPortTile)
     if(error_text!==""){
       return dispatch(setErrorMessage(error_text));
+    }
+    if(io_error_text!==""){
+      return dispatch(setErrorMessage(io_error_text));
     }
   }
   if(Object.keys(normalizedMap.entities.pps).length !== 0){
@@ -925,9 +991,12 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
   var export_floor_id = getState().exportFloorID
 
   if(Object.keys(normalizedMap.entities.conveyorTile).length !== 0){
-    var error_text = validateConveyorEntity(normalizedMap.entities.ConnectedconveyorTile,normalizedMap.entities.conveyorTile)
+    var [io_error_text,error_text] = validateConveyorEntity(normalizedMap.entities.ConnectedconveyorTile,normalizedMap.entities.conveyorTile,normalizedMap.entities.haiPortTile)
     if(error_text!==""){
       return dispatch(setErrorMessage(error_text));
+    }
+    if(io_error_text!==""){
+      return dispatch(setErrorMessage(io_error_text));
     }
    } 
   if(Object.keys(normalizedMap.entities.pps).length !== 0){
@@ -1320,6 +1389,13 @@ export const addWorldCoordinateToMap = (normalizedMap) => {
 export const addWorldCoordinateAdjacencyToMap = (normalizedMap) => {
   var entities = normalizedMap.entities;
   const oldBarcodeDict = entities.barcode;
+  const haiPortTile = normalizedMap.entities.haiPortTile
+  var hai_port_list = []
+  var hai_io_list = []
+  for (const [key_hai, value_hai] of Object.entries(haiPortTile)) {
+    hai_port_list.push(value_hai["port_coordinate"])
+    hai_io_list.push(value_hai["io_coodinate"])
+  }
   const floorInfo = entities.floor;
   var newbarcodeDict = {};
   for (var floorId in floorInfo) {
@@ -1367,7 +1443,11 @@ export const addWorldCoordinateAdjacencyToMap = (normalizedMap) => {
     for (var barcode in currentFloorBarcodeDict) {
       var barcodeInfo = currentFloorBarcodeDict[barcode];
       barcodeInfo["adjacency"] = mappping_coord_with_adjacent_neighbour_dict[barcode]["adjacency"];
-      barcodeInfo["neighbours"] = mappedNeighbour(mappping_coord_with_adjacent_neighbour_dict[barcode]["neighbours"],currentFloorBarcodeDict[barcode]["neighbours"]);
+      var is_hai_barcode = false
+      if(hai_port_list.includes(barcodeInfo["coordinate"]) || hai_io_list.includes(barcodeInfo["coordinate"])){
+        is_hai_barcode = true
+      }
+      barcodeInfo["neighbours"] = mappedNeighbour(mappping_coord_with_adjacent_neighbour_dict[barcode]["neighbours"],currentFloorBarcodeDict[barcode]["neighbours"],is_hai_barcode);
       if(barcodeFormat==DEFAULT_BARCODE_FORMAT){
         if(barcodeInfo.hasOwnProperty("default_barcode") && /^(\d+\.\d+)$/.test(barcodeInfo["default_barcode"])){
           barcodeInfo["barcode"] = barcodeInfo["default_barcode"]

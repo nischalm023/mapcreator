@@ -219,7 +219,7 @@ const AdjustTopTransitPosition1 = (success_overlap_barcode,unsuccess_overlap_bar
 return [success_overlap_barcode,unsuccess_overlap_barcode,gridView]
 }
 
-export const view_overlap_barcode = () => (dispatch, getState) => {
+export const view_overlap_barcode = (barcode,hai_barcode=null,manage_hai_overlap = false) => (dispatch, getState) => {
   const state = getState();
   const {
     normalizedMap: {
@@ -227,7 +227,11 @@ export const view_overlap_barcode = () => (dispatch, getState) => {
     },
   } = state;
   var updated_barcodeDict
-  updated_barcodeDict = JSON.parse(JSON.stringify(barcode));
+  if(manage_hai_overlap){
+    updated_barcodeDict = JSON.parse(JSON.stringify(hai_barcode));
+  }else{
+    updated_barcodeDict = JSON.parse(JSON.stringify(barcode));
+  }
   var unsuccess_overlap_barcode = []
   var success_overlap_barcode_list = []
 
@@ -254,7 +258,10 @@ for (var dir = 0; dir < 4; dir++) {
  		console.log("end>>>>>", dir)
 	}
 }
-console.log("View Overlap Barcodes End")
+if(manage_hai_overlap){
+  return unsuccess_overlap_barcode
+}else{
+  console.log("View Overlap Barcodes End")
   success_overlap_barcode_list = [...new Set(success_overlap_barcode_list)]
   success_overlap_barcode_list = StringtoListFormat(success_overlap_barcode_list)
 
@@ -271,4 +278,6 @@ console.log("View Overlap Barcodes End")
     value: {"barcodeDict":success_overlap_barcode_list,"unsuccess_overlap_barcode_status":0}
   });
   return dispatch(clearTiles);
+}
+
 }

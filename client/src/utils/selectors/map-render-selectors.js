@@ -64,12 +64,12 @@ export const getMainTileSpriteData = createSelector(
   state => state.selection.zoneViewMode,
   state => state.selection.sectorViewMode,
   state => state.normalizedMap.entities.odsExcluded || {},
-
-  (barcode, boundingBox, { xScale, yScale }, zoneViewMode, sectorViewMode, odsExcluded) => {
+  state => state.normalizedMap.entities.haiPortTile || {},
+  (barcode, boundingBox, { xScale, yScale }, zoneViewMode, sectorViewMode, odsExcluded,haiPortTile) => {
     var tileSprite = constants.NORMAL;
     // don't show storables in zone view mode; otherwise their darker color messes with the tint
     if (barcode.store_status && !zoneViewMode && !sectorViewMode) tileSprite = constants.STORABLE;
-    if (barcode.special && !zoneViewMode) tileSprite = constants.SPECIAL;
+    if (barcode.special && !barcode.hasOwnProperty("hai_port_special") && !zoneViewMode) tileSprite = constants.SPECIAL;
     if (barcode.blocked && !zoneViewMode && !sectorViewMode) tileSprite = constants.BLOCKED;
     if ( barcode.path_status > 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.PATH;
     if ( barcode.node_status > 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.QUEUE;
@@ -85,6 +85,28 @@ export const getMainTileSpriteData = createSelector(
         }
       }
     });
+    Object.keys(haiPortTile).forEach((port) => {
+      if(barcode.conveyorPortEntry && !zoneViewMode && !sectorViewMode && barcode.coordinate == haiPortTile[port].port_coordinate){
+        var entry_direction = (haiPortTile[port].direction).toString()
+        switch(entry_direction) {
+          case "0": tileSprite = constants.ENTRY_PORT_TOP; break; 
+          case "1": tileSprite = constants.ENTRY_PORT_RIGHT; break; 
+          case "2": tileSprite = constants.ENTRY_PORT_BOTTOM; break; 
+          case "3": tileSprite = constants.ENTRY_PORT_LEFT; break;
+          default: tileSprite = constants.ENTRY_PORT_TOP;
+        }
+      }
+      if(barcode.conveyorPortExit && !zoneViewMode && !sectorViewMode && barcode.coordinate == haiPortTile[port].port_coordinate){
+        var exit_direction = haiPortTile[port].direction.toString()
+        switch(exit_direction) {
+          case "0": tileSprite = constants.EXIT_PORT_TOP; break; 
+          case "1": tileSprite = constants.EXIT_PORT_RIGHT; break; 
+          case "2": tileSprite = constants.EXIT_PORT_BOTTOM; break; 
+          case "3": tileSprite = constants.EXIT_PORT_LEFT; break;
+          default: tileSprite = constants.EXIT_PORT_TOP;
+        }
+      }
+    });
     if ( barcode.success_overlap_barcode_status === 1 && !zoneViewMode && !sectorViewMode) tileSprite = constants.QUEUE;
     if ( barcode.unsuccess_overlap_barcode_status === 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.ODS_EXCLUDED;
     if ( barcode.highlight_status > 0 && !zoneViewMode && !sectorViewMode) tileSprite = constants.HIGHLIGHT;
@@ -94,6 +116,7 @@ export const getMainTileSpriteData = createSelector(
     if ( barcode.grid_attribute === "conveyor_end" && !zoneViewMode && !sectorViewMode) tileSprite = constants.END_CONVEYOR;
     if ( barcode.grid_attribute === "conveyor_pps_point" && !zoneViewMode && !sectorViewMode) tileSprite = constants.ACTIVE_CONVEYOR;
     if ( barcode.remove_conveyor_tile === 1 && !zoneViewMode && !sectorViewMode) tileSprite = constants.ODS_EXCLUDED;
+    
     return {
       name: tileSprite,
       x: boundingBox.left,

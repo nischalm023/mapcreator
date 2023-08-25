@@ -7,7 +7,7 @@ import { downloadConveyor } from "actions/conveyor";
 const validateConveyorEntity = (conveyorTile) => {
   var failed_list = []
   for (const [key, value] of Object.entries(conveyorTile)) {
-     if(value.conveyor_active.length === 0 || !value.hasOwnProperty("conveyor_exit") || !value.hasOwnProperty("conveyor_entry")){
+     if(value.conveyor_active.length === 0){
         failed_list.push(key)
      }
   }

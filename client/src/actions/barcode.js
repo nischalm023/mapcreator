@@ -331,6 +331,8 @@ const validateRemoveBarcode = (state,mapTiles)=>{
   var ods_list = []
   var conveyors_list = []
   var conveyor_io_point = []
+  var hai_port_point = []
+  var hai_io_point = []
   var storable_io = []
   var elevator_list = []
   var elevator_entry = []
@@ -344,6 +346,7 @@ const validateRemoveBarcode = (state,mapTiles)=>{
   var chargers_state = state.normalizedMap.entities.charger
   var elevator_state = state.normalizedMap.entities.elevator
   var conveyor_state = state.normalizedMap.entities.conveyorTile
+  var hai_state = state.normalizedMap.entities.haiPortTile
   var tote_state = state.normalizedMap.entities.ioPoints
   var mappingBarcodeCoord = state.normalizedMap.entities.mappingBarcodeCoord
   var errorMessage = ''
@@ -376,6 +379,16 @@ const validateRemoveBarcode = (state,mapTiles)=>{
         entry_charger_list.push(barcodes[charger.coordinate]["barcode"])
       }
 
+    }
+    for(let hai_key in hai_state){
+      let hai = hai_state[hai_key]
+      console.log("hai_key",hai)
+      if(hai.port_coordinate == mapTiles[i]){
+        hai_port_point.push(barcodes[mapTiles[i]]["barcode"])
+      }
+      if(hai.io_coodinate === mapTiles[i]){
+        hai_io_point.push(barcodes[mapTiles[i]]["barcode"])
+      }
     }
     for(let conveyor_key in conveyor_state){
       let conveyors = conveyor_state[conveyor_key];
@@ -445,6 +458,12 @@ const validateRemoveBarcode = (state,mapTiles)=>{
   if(conveyor_io_point.length !=0){
     errorMessage = errorMessage + `Barcode: (${conveyor_io_point.join(",")}) has an entity of type (Conveyor IO Point) assign.\n`
   }
+  if(hai_io_point.length !=0){
+    errorMessage = errorMessage + `Barcode: (${hai_io_point.join(",")}) has an entity of type (HAI IO Point) assign.\n`
+  }
+  if(hai_port_point.length !=0){
+    errorMessage = errorMessage + `Barcode: (${hai_port_point.join(",")}) has an entity of type (HAI Port) assign.\n`
+  }
   if(storable_io.length !=0){
     errorMessage = errorMessage + `Barcode: (${storable_io.join(",")}) has an entity of type (Storable IO Point) assign.\n`
   }
@@ -469,6 +488,7 @@ const validateRemoveBarcode = (state,mapTiles)=>{
   if(entry_charger_list.length !=0){
     errorMessage = errorMessage + `Barcode: (${entry_charger_list.join(",")}) has an entity of type (Charger) assign.\n`
   }
+
   if(errorMessage !== ""){
     errorMessage = errorMessage +  `Please dissociate the entity first in order to remove the barcode.`
   }

@@ -41,13 +41,16 @@ import ManageConnectedConveyorSystem from "components/Map/Forms/ManageConnectedC
 import ViewConveyorSystem from "components/Map/Forms/ViewConveyorSystem";
 import AddConveyorEntryPoint from "components/Map/Forms/AddConveyorEntryPoint";
 import AddConveyorExitPoint from "components/Map/Forms/AddConveyorExitPoint";
+import LinkIOPOint from "components/Map/Forms/LinkIOPoint";
 import ConveyorActivePoint from "components/Map/Forms/ConveyorActivePoint";
 import ConveyorEndPoint from "components/Map/Forms/ConveyorEndPoint";
 import ConveyorDownload from "components/Map/Forms/ConveyorDownload";
 import ManageTtpOverlap from "components/Map/Forms/ManageTtpOverlap";
 import ViewOverlapBarcodes from "components/Map/Forms/ViewOverlapBarcodes";
 import ManageStorableSizeInfo from "components/Map/Forms/ManageStorableSizeInfo";
+import ManageConveyorPort from "components/Map/Forms/ManageConveyorPort";
 import manageStorableNeighbour from "components/Map/Forms/multiNeighbourBarcode";
+import AddHaiPort from "components/Map/Forms/AddHaiPort";
 import manageMultipleSizeInfoBarcodeData from "components/Map/Forms/MutipleSizeInfoBarcode";
 
 import {
@@ -144,6 +147,20 @@ class RightSidebar extends Component {
           <div className="row" style={{ margin: "0% 5% 0%", marginTop: "0%" }}>
               {this.props.TTPMode === true ?<AddTTPTransitBarcode />: <AddTransitBarcode />}
           </div>
+          <br/>
+          <div className="conveyor-buttons">
+            <div className="row py-1">
+              <div className="col">
+                <AddHaiPort/>
+              </div>
+            </div>
+            <div className="row py-1">
+              <div className="col">
+                <ManageConveyorPort/>
+              </div>
+            </div>
+          </div>
+          <br/>
           <div className="conveyor-buttons">
             <div className="row">
               <div className="col">
@@ -182,6 +199,11 @@ class RightSidebar extends Component {
             </div>
             <div className="row py-1">
               <div className="col">
+                <LinkIOPOint/>
+              </div>
+            </div>
+            <div className="row py-1">
+              <div className="col">
                 <ConveyorActivePoint/>
               </div>
             </div>
@@ -195,6 +217,7 @@ class RightSidebar extends Component {
                 <ConveyorDownload/>
               </div>
             </div>
+
           </div>
           <br></br>
           <div className="row">

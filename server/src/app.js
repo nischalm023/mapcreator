@@ -158,7 +158,7 @@ app.post(
       res.json(created.id);
     }
     // send only id
-    // res.json(created.id);
+    res.json(created.id);
   })
 );
 

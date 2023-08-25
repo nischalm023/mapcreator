@@ -17,12 +17,11 @@ const checkPointLieOnConveyorBelt = (conveyorTile,selectedMapTiles) => {
   for (const [key, value] of Object.entries(conveyorTile)) {
     var selected_tile = convertNestedListToList(value["selected_tile"])
     const entryArray = selectedMapTiles.filter(value => selected_tile.includes(value));
-    const ioPointArray = selectedMapTiles.filter(value => !selected_tile.includes(value));
-    if(entryArray.length==1 && ioPointArray.length==1){
-      return [key,entryArray[0],ioPointArray[0],false]
+    if(entryArray.length==1){
+      return [key,entryArray[0],false]
     }
   }
-  return ['','','',true]   
+  return ['','',true]   
 };
 
 const checkSameEntryPointOnConveyorBelt = (conveyorTile,exit_point) => {
@@ -74,42 +73,6 @@ const checkSameEndPointOnConveyorBelt = (conveyorTile,exit_point) => {
   return false
 };
 
-const checkIOPointOnConveyorBelt = (conveyorTile,io_point) => {
-  for (const [key, value] of Object.entries(conveyorTile)) {
-    var selected_tile = convertNestedListToList(value["selected_tile"])
-    if(selected_tile.includes(io_point)){
-      return true
-    }
-  return false
-};
-
-}
-
-
-const checkDuplicateIOPoint = (conveyorTile,io_point) => {
-  for (const [key, value] of Object.entries(conveyorTile)) {
-    if(value.hasOwnProperty("conveyor_entry")){
-        var conveyor_entry_details = value["conveyor_entry"]
-        for (var i = 0; i < conveyor_entry_details.length; i++) {
-            var io_coordinate = JSON.parse(conveyor_entry_details[i].conveyor_io_entry)
-            if(io_coordinate.toString() === io_point){
-                return true
-            }
-        }
-      }
-      if(value.hasOwnProperty("conveyor_exit")){
-        var conveyor_exit_details = value["conveyor_exit"]
-        for (var i = 0; i < conveyor_exit_details.length; i++) {
-            var io_coordinate = JSON.parse(conveyor_exit_details[i].conveyor_io_exit)
-            if(io_coordinate.toString() === io_point){
-                return true
-            }
-        }
-      }
-    }
-  return false
-};
-
 const checkMultipleExitV1 = (conveyorTile,conveyor_version) => {
   if (conveyorTile.hasOwnProperty("conveyor_exit") && conveyor_version !== constants.DEFAULT_CONVEYOR_VERSION){
     return true
@@ -119,24 +82,22 @@ const checkMultipleExitV1 = (conveyorTile,conveyor_version) => {
 
 const shouldBeDisabled = (map_tile_value, barcodes, conveyorTile, conveyor_version) => {
   var conveyor_id = ''
-  if(map_tile_value.length==2){
-     var [conveyor_id,exit_point,io_point,point_exist] =checkPointLieOnConveyorBelt(conveyorTile,map_tile_value)
+  if(map_tile_value.length==1){
+     var [conveyor_id,exit_point,point_exist] =checkPointLieOnConveyorBelt(conveyorTile,map_tile_value)
      if(conveyor_id!=''){
         var already_entry_point_exist = checkSameEntryPointOnConveyorBelt(conveyorTile[conveyor_id],exit_point)
         var already_exit_point_exist = checkSameExitPointOnConveyorBelt(conveyorTile[conveyor_id],exit_point) 
         var already_active_point_exist = checkSameActvePointOnConveyorBelt(conveyorTile[conveyor_id],exit_point)
         var already_end_point_exist = checkSameEndPointOnConveyorBelt(conveyorTile[conveyor_id],exit_point)
-        var is_io_point_on_conveyor_belt = checkIOPointOnConveyorBelt(conveyorTile,io_point)
-        var already_exist_io_point = checkDuplicateIOPoint(conveyorTile,io_point)
         var no_multiple_exit_v1 = checkMultipleExitV1(conveyorTile[conveyor_id],conveyor_version)
         if(!point_exist && !already_entry_point_exist && !already_exit_point_exist && !already_active_point_exist 
-          && !already_end_point_exist && !is_io_point_on_conveyor_belt && !already_exist_io_point && !no_multiple_exit_v1
+          && !already_end_point_exist && !no_multiple_exit_v1
           ){
-          return [conveyor_id,exit_point,io_point,false]
+          return [conveyor_id,exit_point,false]
         }          
      }
   }
-  return [conveyor_id,'','',true]
+  return [conveyor_id,'',true]
 };
 
 
@@ -157,9 +118,7 @@ class AddExitPoint extends Component {
   handleSubmit = (event,dispatch,conveyor_id,direction,exit_point) => {
         event.preventDefault();
         const formData = {
-            bot_direction:parseInt(this.state.bot_direction),
             direction:parseInt(this.state.direction),
-            exit_io_point:this.state.exit_io_point,
             conveyor_id: conveyor_id,
             exit_point:exit_point,
             exit_height:parseInt(this.state.exit_height)
@@ -168,32 +127,10 @@ class AddExitPoint extends Component {
         dispatch(selectExitConveyor(formData));
     };
 
-  setBotDirectionState = (selected_entry_direction) =>{
-    let all_directions = {North: 0, East: 1, South: 2, West: 3}
-    let possibleBotDirections ={}
-    if(parseInt(selected_entry_direction) === 0 || parseInt(selected_entry_direction) === 2){
-        possibleBotDirections["East"] = all_directions["East"]
-        possibleBotDirections["West"] = all_directions["West"]
-      }
-    if(parseInt(selected_entry_direction) === 1 || parseInt(selected_entry_direction) === 3){
-        possibleBotDirections["North"] = all_directions["North"]
-        possibleBotDirections["South"] = all_directions["South"]
-      }
-    this.setState({ bot_direction_options: possibleBotDirections})
-    var possibleBotDirectionsKey = Object.keys(possibleBotDirections)
-    this.setState({ bot_direction: possibleBotDirections[possibleBotDirectionsKey[0]]})
-  }
-
   onClickExitDirection = (event, selected_tile=null, conveyorTile=null, conveyor_id=null, 
     floor_barcodes=null, direction=null) => {
     this.setState({ direction: event.target.value})
-    this.setBotDirectionState(event.target.value)
   };
-
-  onClickBotDirection = (event) => {
-      event.preventDefault();
-      this.setState({ bot_direction: event.target.value })
-    };
 
   toggle = (selected_tile=null,conveyorTile=null, conveyor_id=null, 
     floor_barcodes=null,direction=null,io_point=null) => {
@@ -201,22 +138,20 @@ class AddExitPoint extends Component {
             if(direction && floor_barcodes){
               var direction_key = Object.keys(direction)
               this.setState({ direction: direction[direction_key[0]] });
-              this.setBotDirectionState(direction[direction_key[0]])
-              this.setState({ exit_io_point:floor_barcodes[io_point]["barcode"]})
             }
           }
 
   render() {
     
     const { error ,show, exit_io_point,exit_height} = this.state;
-    const {conveyor_id,direction,disabled,floor_barcodes,conveyorTile,selected_tile,dispatch,io_point,exit_point} = this.props;
+    const {conveyor_id,direction,disabled,floor_barcodes,conveyorTile,selected_tile,dispatch,exit_point} = this.props;
     return (
       <div>
           <ButtonForm
             show={show}
             disabled={disabled}
             toggle={()=>this.toggle(selected_tile,conveyorTile,conveyor_id, 
-              floor_barcodes,direction,io_point)}
+              floor_barcodes,direction)}
             buttonText="Select Conveyor Exit Point"
             >
             <form onSubmit={(e)=>this.handleSubmit(e,dispatch,conveyor_id,direction,exit_point)}>
@@ -239,18 +174,6 @@ class AddExitPoint extends Component {
                       </option>
                     ))}
                   </select>
-                  <br/>
-                  <label for="type">Bot Orientation Direction*</label>
-                    <select onChange={(e)=>this.onClickBotDirection(e)} className="form-control" id="eligible_system" name="eligible_system">
-                      {Object.keys(this.state.bot_direction_options).map((key) => (
-                        <option value={this.state.bot_direction_options[key]}>
-                          {key}
-                        </option>
-                      ))}
-                    </select>
-                  <br/>
-                  <label for="direction">Conveyor IO Point Barcode*</label>
-                  <input id="direction" className="form-control" type="text" value={exit_io_point} disabled/>
                   <br/>
                   <label for="direction">Conveyor Exit Height*</label>
                   <input id="direction" 
@@ -297,20 +220,15 @@ export default connect(
     if(conveyorTile == undefined || Object.keys(conveyorTile).length==0){
       disabled = true
     }else{
-      var [conveyor_id,exit_point,io_point,disabled] = shouldBeDisabled(map_tile_value, floor_barcodes, conveyorTile, conveyor_version);
+      var [conveyor_id,exit_point,disabled] = shouldBeDisabled(map_tile_value, floor_barcodes, conveyorTile, conveyor_version);
     }
     // find exit direction options
     var direction = getConveyorExitPointDirection(state, floor_barcodes, map_tile_value, conveyorTile, conveyor_id)
-    // find bot direction options
-    // var bot_direction = getConveyorExitPointBotDirection(floor_barcodes, map_tile_value, direction, conveyorTile, conveyor_id)
-    // var bot_direction = getConveyorPointBotDirection(floor_barcodes, map_tile_value, direction, conveyorTile, conveyor_id)
     return {
       conveyor_id:conveyor_id,
       direction:direction,
       disabled:disabled,
       exit_point:exit_point,
-      io_point:io_point,
-      // bot_direction:bot_direction,
       selected_tile:map_tile_value,
       conveyorTile:conveyorTile,
       floor_barcodes:floor_barcodes

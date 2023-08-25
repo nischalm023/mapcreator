@@ -11,6 +11,9 @@ import toteStorable from "sprites/totestorables.png"
 import conveyorEntryIOPoints from "sprites/conveyor_io_entry.png";
 import toteStorableIOPoints from "sprites/iopoint.png";
 import conveyorExitIOPoints from "sprites/conveyor_io_exit.png";
+import conveyorEntryPort from "sprites/port-entry-left.png";
+import conveyorExitPort from "sprites/port-exit-left.png";
+
 import * as constants from "../../../constants";
 const title = "Legends";
 const LegendsMap = constants.LEGENDSMAP;
@@ -39,6 +42,12 @@ const LegendsCard = () => (
             </div>}
             {e.icon5 && <div>
               <img src={exitConveyor} style={{height: 26, marginTop: 2}} />
+            </div>}
+            {e.icon10 && <div>
+              <img src={conveyorEntryPort} style={{height: 26, marginTop: 2}} />
+            </div>}
+            {e.icon11 && <div>
+              <img src={conveyorExitPort} style={{height: 26, marginTop: 2}} />
             </div>}
             {e.icon6 && <div>
               <img src={toteStorable} style={{height: 26, marginTop: 2}} />

@@ -2,14 +2,14 @@ import React from "react";
 import { view_overlap_barcode } from "actions/view_overlap_barcodes";
 import { connect } from "react-redux";
 
-const PathButton = ({ onClick, disabled }) => (
+const PathButton = ({ onClick, disabled,barcode }) => (
   <button
     disabled={disabled}
     type="button"
     className="btn btn-secondary"
     style={{ textAlign: "-webkit-center", color: "orange" }}
     onClick={() => {
-      onClick();
+      onClick(barcode);
     }}
   >
     View Overlap Barcodes
@@ -18,9 +18,10 @@ const PathButton = ({ onClick, disabled }) => (
 
 export default connect(
   state => ({
-    disabled: state.selection.conveyorMode === true
+    disabled: state.selection.conveyorMode === true,
+    barcode:state.normalizedMap.entities.barcode
   }),
   (dispatch) => ({
-    onClick: () => dispatch(view_overlap_barcode()),
+    onClick: (barcode) => dispatch(view_overlap_barcode(barcode)),
   })
 )(PathButton);

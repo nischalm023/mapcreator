@@ -126,10 +126,23 @@ class Map extends Component {
   }
   handleSaveClick(nMap){
     const {dispatch} = this.props;
-    let error_text = validateConveyorEntity(nMap.entities.ConnectedconveyorTile,nMap.entities.conveyorTile)
+    let [io_error_text,error_text] = validateConveyorEntity(nMap.entities.ConnectedconveyorTile,nMap.entities.conveyorTile,nMap.entities.haiPortTile)
     if(error_text!==""){
       var multiErrorStringRows = [];
       error_text.split("\n").map((key) => (
+        multiErrorStringRows.push(
+          <div>
+            <span key={key}>{key}</span>
+          </div>
+          )
+        ))
+      this.setState({
+        conveyorModalShow : true,
+        failedConveyorsInfo : multiErrorStringRows
+      })
+    }else if(error_text ==="" && io_error_text!==""){
+      var multiErrorStringRows = [];
+      io_error_text.split("\n").map((key) => (
         multiErrorStringRows.push(
           <div>
             <span key={key}>{key}</span>

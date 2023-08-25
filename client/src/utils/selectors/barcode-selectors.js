@@ -80,7 +80,6 @@ export const getExistingBarcodesAndCoordinates = createSelector(
     for (var key in barcodeInfoList) {
       if (barcodeInfoList.hasOwnProperty(key)) {
         barcodes[barcodeInfoList[key].barcode] = true;
-
         coordinates[
           coordinateKeyToTupleOfIntegers(barcodeInfoList[key].coordinate)
         ] = true;

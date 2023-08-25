@@ -22,6 +22,7 @@ const CopyJSONsCard = ({ dispatch }) => (
       ["zone.json", ["zone", false]],
       ["sectors.json", ["sectorBarcodeMapping", true]],
       ["Sector_MxU_Preferences.json", ["sectorMxUPreferences", true]],
+      ["conveyor.json", ["conveyor",true]],
       // for racks.json, using the copySampleRacksJsonToClipboard action instead of copyJSONToClipboard
       // since racks.json is fetched from server API instead of through client side map (this was done so
       // that racks.json is consumable directly using API also)

@@ -484,6 +484,7 @@ export var createFloorFromCoordinateData = ({
     ppses: [],
     ioPointsIds:[],
     toteStorablesIds:[],
+    haiPortsTemplateIds:[],
     odsExcludeds: [],
     dockPoints: [],
     fireEmergencies: [],
@@ -518,7 +519,9 @@ export var createMapFromCoordinateData = (
     conveyors:[],
     connectedConveyor:[],
     toteStorablesIds:[],
+    haiPortsTemplateIds:[],
     ioPointsIds:[],
+    haiPort:[],
     barcodeDistance:parseInt(barcode_distances / 2),
     barcodeSpacing: barcode_distances,
     floors: [

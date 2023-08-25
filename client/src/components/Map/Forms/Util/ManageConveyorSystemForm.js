@@ -19,18 +19,17 @@ class BaseForm extends Component {
         show_error:false,
         error_text:""
     };
-    toggle = (conveyorInfo=null,floor_barcodes=null,conveyor_version=null) => {
-        console.log(">>>>>>> toggled!!",conveyorInfo)
+    toggle = (conveyorInfo=null,floor_barcodes=null,conveyor_version=null,haiPortTile=null) => {
         if(!conveyorInfo){
             this.setState({ show: !this.state.show, formData: {},show_error:false,error_text:"" });
             return;
         }
         let active_point_info = [];
         if(conveyorInfo.conveyor_active){
-            for (const obj of conveyorInfo.conveyor_active){
+            for (const obj_active of conveyorInfo.conveyor_active){
                 active_point_info.push({
-                    active_point_pps: obj.pps_id,
-                    active_point_coordinate: floor_barcodes[obj.conveyor_active_point[0]]["barcode"],
+                    active_point_pps: obj_active.pps_id,
+                    active_point_coordinate: floor_barcodes[obj_active.conveyor_active_point[0]]["barcode"],
                     edit: false,
                     error: ''
                 })
@@ -52,53 +51,79 @@ class BaseForm extends Component {
         let entry_point_info = [];
         if(conveyorInfo.conveyor_entry){
             let all_directions = {North: 0, East: 1, South: 2, West: 3}
-            for (const obj of conveyorInfo.conveyor_entry){
+            for (const obj_entry of conveyorInfo.conveyor_entry){
+                var is_hai_port_entry_exist = false
+                for (const [key_entry_hai, value_entry_hai] of Object.entries(haiPortTile)) {
+                    if(value_entry_hai["entity_point"] === obj_entry.conveyor_entry[0].toString()){
+                        is_hai_port_entry_exist=true
+                        break
+                    }
+                }
+                let entry_bot_direction = 'NA'
+                let entry_io_point_val = 'NA'
                 let possibleBotDirections = []
-                let all_directions = {North: 0, East: 1, South: 2, West: 3}
-                if(parseInt(obj.entry_point_direction) === 0 || parseInt(obj.entry_point_direction) === 2){
-                    possibleBotDirections.push({value: all_directions["East"], label: "East"})
-                    possibleBotDirections.push({value: all_directions["West"], label: "West"})
-                    }
-                if(parseInt(obj.entry_point_direction) === 1 || parseInt(obj.entry_point_direction) === 3){
-                    possibleBotDirections.push({value: all_directions["North"], label: "North"})
-                    possibleBotDirections.push({value: all_directions["South"], label: "South"})
-                    }
+                if(obj_entry.hasOwnProperty('conveyor_io_entry')){
+                    entry_io_point_val = floor_barcodes[JSON.parse(obj_entry.conveyor_io_entry).join(',')]["barcode"]
+                    let all_directions = {North: 0, East: 1, South: 2, West: 3}
+                    if(parseInt(obj_entry.entry_point_direction) === 0 || parseInt(obj_entry.entry_point_direction) === 2){
+                        possibleBotDirections.push({value: all_directions["East"], label: "East"})
+                        possibleBotDirections.push({value: all_directions["West"], label: "West"})
+                        }
+                    if(parseInt(obj_entry.entry_point_direction) === 1 || parseInt(obj_entry.entry_point_direction) === 3){
+                        possibleBotDirections.push({value: all_directions["North"], label: "North"})
+                        possibleBotDirections.push({value: all_directions["South"], label: "South"})
+                        }
+                    entry_bot_direction = obj_entry.bot_orientation_entry
+                }
                 entry_point_info.push({
-                    entry_point_coordinate: floor_barcodes[obj.conveyor_entry[0]]["barcode"],
-                    entry_bot_orientation_direction: obj.bot_orientation_entry,
-                    entry_direction: obj.entry_point_direction,
-                    entry_io_point_coordinate: floor_barcodes[JSON.parse(obj.conveyor_io_entry).join(',')]["barcode"],
+                    entry_point_coordinate: floor_barcodes[obj_entry.conveyor_entry[0]]["barcode"],
+                    entry_bot_orientation_direction: entry_bot_direction,
+                    entry_direction: obj_entry.entry_point_direction,
+                    entry_io_point_coordinate: entry_io_point_val,
                     entry_bot_direction_options:possibleBotDirections,
-                    conveyor_entry_height: obj.conveyor_entry_height,
+                    conveyor_entry_height: obj_entry.conveyor_entry_height,
+                    entry_hai_port_exist:is_hai_port_entry_exist,
                     edit: false,
                     error: ''
                 })
-                }
-                
-            
+            }
         }
         
         let exit_point_info = [];
         if(conveyorInfo.conveyor_exit){
             let all_directions = {North: 0, East: 1, South: 2, West: 3}
-            for (const obj of conveyorInfo.conveyor_exit){
+            for (const exit_obj of conveyorInfo.conveyor_exit){
                 let possibleBotDirections = []
-                let all_directions = {North: 0, East: 1, South: 2, West: 3}
-                if(parseInt(obj.exit_point_direction) === 0 || parseInt(obj.exit_point_direction) === 2){
-                    possibleBotDirections.push({value: all_directions["East"], label: "East"})
-                    possibleBotDirections.push({value: all_directions["West"], label: "West"})
+                let exit_io_point_val = 'NA'
+                let exit_bot_direction = 'NA'
+                for (const [key_exit_hai, value_exit_hai] of Object.entries(haiPortTile)) {
+                    var is_hai_port_exit_exist = false
+                    if(value_exit_hai["entity_point"] === exit_obj.conveyor_exit[0].toString()){
+                        is_hai_port_exit_exist=true
+                        break
                     }
-                if(parseInt(obj.exit_point_direction) === 1 || parseInt(obj.exit_point_direction) === 3){
-                    possibleBotDirections.push({value: all_directions["North"], label: "North"})
-                    possibleBotDirections.push({value: all_directions["South"], label: "South"})
-                    }
+                }
+                if(exit_obj.hasOwnProperty('conveyor_io_exit')){
+                    exit_io_point_val = floor_barcodes[JSON.parse(exit_obj.conveyor_io_exit).join(',')]["barcode"]
+                    let all_directions = {North: 0, East: 1, South: 2, West: 3}
+                    if(parseInt(exit_obj.exit_point_direction) === 0 || parseInt(exit_obj.exit_point_direction) === 2){
+                        possibleBotDirections.push({value: all_directions["East"], label: "East"})
+                        possibleBotDirections.push({value: all_directions["West"], label: "West"})
+                        }
+                    if(parseInt(exit_obj.exit_point_direction) === 1 || parseInt(exit_obj.exit_point_direction) === 3){
+                        possibleBotDirections.push({value: all_directions["North"], label: "North"})
+                        possibleBotDirections.push({value: all_directions["South"], label: "South"})
+                        }
+                    exit_bot_direction = exit_obj.bot_orientation_exit
+                }
                 exit_point_info.push({
-                    exit_point_coordinate: floor_barcodes[obj.conveyor_exit[0]]["barcode"],
-                    exit_bot_orientation_direction: obj.bot_orientation_exit,
-                    exit_direction: obj.exit_point_direction,
-                    exit_io_point_coordinate: floor_barcodes[JSON.parse(obj.conveyor_io_exit).join(',')]["barcode"],
+                    exit_point_coordinate: floor_barcodes[exit_obj.conveyor_exit[0]]["barcode"],
+                    exit_bot_orientation_direction: exit_bot_direction,
+                    exit_direction: exit_obj.exit_point_direction,
+                    exit_io_point_coordinate: exit_io_point_val,
                     exit_bot_direction_options:possibleBotDirections,
-                    conveyor_exit_height: obj.conveyor_exit_height,
+                    conveyor_exit_height: exit_obj.conveyor_exit_height,
+                    exit_hai_port_exist:is_hai_port_exit_exist,
                     edit: false,
                     error: ''
                 })
@@ -195,17 +220,20 @@ class BaseForm extends Component {
             conveyorTile[id] = conveyorInfo
             let possibleBotDirections = []
             let all_directions = {North: 0, East: 1, South: 2, West: 3}
-            if(parseInt(value) === 0 || parseInt(value) === 2){
-                possibleBotDirections.push({value: all_directions["East"], label: "East"})
-                possibleBotDirections.push({value: all_directions["West"], label: "West"})
-                schema.entry_point_info[key].entry_bot_orientation_direction = 1;
+            if(schema.entry_point_info[key].entry_io_point_coordinate !=='NA'){
+                if(parseInt(value) === 0 || parseInt(value) === 2){
+                    possibleBotDirections.push({value: all_directions["East"], label: "East"})
+                    possibleBotDirections.push({value: all_directions["West"], label: "West"})
+                    schema.entry_point_info[key].entry_bot_orientation_direction = 1;
+                }
+                if(parseInt(value) === 1 || parseInt(value) === 3){
+                    possibleBotDirections.push({value: all_directions["North"], label: "North"})
+                    possibleBotDirections.push({value: all_directions["South"], label: "South"})
+                    schema.entry_point_info[key].entry_bot_orientation_direction = 0;
+                }
+                schema.entry_point_info[key].entry_bot_direction_options = possibleBotDirections
             }
-            if(parseInt(value) === 1 || parseInt(value) === 3){
-                possibleBotDirections.push({value: all_directions["North"], label: "North"})
-                possibleBotDirections.push({value: all_directions["South"], label: "South"})
-                schema.entry_point_info[key].entry_bot_orientation_direction = 0;
-            }
-            schema.entry_point_info[key].entry_bot_direction_options = possibleBotDirections
+            
             
             }
         if (field == "entry_bot_orientation_direction") {
@@ -225,19 +253,20 @@ class BaseForm extends Component {
             conveyorTile[id] = conveyorInfo
             let possibleBotDirections = []
             let all_directions = {North: 0, East: 1, South: 2, West: 3}
-            if(parseInt(value) === 0 || parseInt(value) === 2){
-                possibleBotDirections.push({value: all_directions["East"], label: "East"})
-                possibleBotDirections.push({value: all_directions["West"], label: "West"})
-                schema.exit_point_info[key].exit_bot_orientation_direction = 1;
+            if(schema.exit_point_info[key].exit_io_point_coordinate !=='NA'){
+                if(parseInt(value) === 0 || parseInt(value) === 2){
+                    possibleBotDirections.push({value: all_directions["East"], label: "East"})
+                    possibleBotDirections.push({value: all_directions["West"], label: "West"})
+                    schema.exit_point_info[key].exit_bot_orientation_direction = 1;
+                }
+                if(parseInt(value) === 1 || parseInt(value) === 3){
+                    possibleBotDirections.push({value: all_directions["North"], label: "North"})
+                    possibleBotDirections.push({value: all_directions["South"], label: "South"})
+                    schema.exit_point_info[key].exit_bot_orientation_direction = 0;
+                }
+                schema.exit_point_info[key].exit_bot_direction_options = possibleBotDirections
             }
-            if(parseInt(value) === 1 || parseInt(value) === 3){
-                possibleBotDirections.push({value: all_directions["North"], label: "North"})
-                possibleBotDirections.push({value: all_directions["South"], label: "South"})
-                schema.exit_point_info[key].exit_bot_orientation_direction = 0;
-            }
-            schema.exit_point_info[key].exit_bot_direction_options = possibleBotDirections
-            
-            }
+        }
         if (field == "exit_bot_orientation_direction") {
             schema.exit_point_info[key].exit_bot_orientation_direction = parseInt(value);
             schema.exit_point_info[key].error = '';
@@ -330,7 +359,22 @@ class BaseForm extends Component {
             schema.conveyor_display_name_info.edit = !schema.conveyor_display_name_info.edit;
             schema.conveyor_display_name_info.error = '';
         }
-       
+        if(field==="conveyor_entry_height_info"){
+            schema.conveyor_entry_height_info.edit = !schema.conveyor_entry_height_info.edit;
+            schema.conveyor_entry_height_info.error = '';
+        }
+        if(field==="conveyor_exit_height_info"){
+            schema.conveyor_exit_height_info.edit = !schema.conveyor_exit_height_info.edit;
+            schema.conveyor_exit_height_info.error = '';
+        }
+        if(field==="exit_point_info"){
+            schema.exit_point_info.edit = !schema.exit_point_info.edit;
+            schema.exit_point_info.error = '';
+        }
+        if(field==="entry_point_info"){
+            schema.entry_point_info.edit = !schema.entry_point_info.edit;
+            schema.entry_point_info.error = '';
+        }
         this.setState({ schema: schema });
     };
     deleteRow = (field) => {
@@ -348,7 +392,6 @@ class BaseForm extends Component {
     };
 
     onSubmitHandler = (onSubmit, allConveyorIds) => {
-        console.log(">>>>>>> submit clicked!!")
         var schema = { ...this.state.schema };
         var error = false;
         if(schema.conveyor_id_info.conveyor_id===''){
@@ -453,6 +496,7 @@ class BaseForm extends Component {
             onSubmit,
             conveyorInfo,
             allConveyorIds,
+            haiPortTile,
             pps_ids,
             // entry_bot_direction_options,
             // exit_bot_direction_options,
@@ -598,6 +642,7 @@ class BaseForm extends Component {
                             />
                         </div>
                         <div style={{margin:"0px 5px"}}>
+                            {!_this.state.schema.entry_point_info[key].entry_hai_port_exist && _this.state.schema.entry_point_info[key].entry_bot_orientation_direction !=='NA' &&
                             <select 
                                 className="form-control" 
                                 style={{ width: "180px" }} 
@@ -614,9 +659,29 @@ class BaseForm extends Component {
                                         {option.label}
                                     </option>
                                 ))}
-                            </select>
+                            </select>}
+                            {!_this.state.schema.entry_point_info[key].entry_hai_port_exist && _this.state.schema.entry_point_info[key].entry_bot_orientation_direction ==='NA' &&
+                            <input
+                                style={{ width: "180px" }}
+                                className="form-control"
+                                type="text"
+                                disabled
+                                value={'NA'}
+                            />
+                        }
+                            {_this.state.schema.entry_point_info[key].entry_hai_port_exist &&
+                                <input
+                                style={{ width: "180px" }}
+                                className="form-control"
+                                type="text"
+                                disabled
+                                value={'NA'}
+                            />
+                            }
+
                         </div>
                         <div style={{margin:"0px 14px"}}>
+                           
                             <select 
                                 className="form-control" 
                                 style={{ width: "105px" }} 
@@ -634,6 +699,8 @@ class BaseForm extends Component {
                                     </option>
                                 ))}
                             </select>
+                        
+                            
                         </div>
                         <div style={{margin:"0px 5px"}}>
                             <input
@@ -656,13 +723,25 @@ class BaseForm extends Component {
                             />
                         </div>
                         <div style={{margin:"0px 12px"}}>
+                            {!_this.state.schema.entry_point_info[key].entry_hai_port_exist && 
                             <button
                                 className="btn"
                                 type="button"
                                 onClick={() => _this.editEntryPointRow(key)}
                             >
                                 {_this.state.schema.entry_point_info[key].edit?<i className="fa fa-check"/>:<i className="fas fa-edit"/>} 
+                            </button>}
+                            {_this.state.schema.entry_point_info[key].entry_hai_port_exist && 
+                            <button
+                                className="btn hai-delete-button" 
+                                type="button"
+                            >
+                                <span class="tooltiptext">This value is locked since HAI Port is associated to this point.
+                                </span>
+                            <i className="fas fa-edit"/>
                             </button>
+                        }
+                            
                             <button
                                 className="btn"
                                 type="button"
@@ -694,6 +773,7 @@ class BaseForm extends Component {
                             />
                         </div>
                         <div style={{margin:"0px 5px"}}>
+                        {!_this.state.schema.exit_point_info[key].exit_hai_port_exist && _this.state.schema.exit_point_info[key].exit_bot_orientation_direction !=='NA' &&
                             <select 
                                 className="form-control" 
                                 style={{ width: "180px" }} 
@@ -711,9 +791,29 @@ class BaseForm extends Component {
                                     </option>
                                 ))}
                             </select>
+                        }
+                        {!_this.state.schema.exit_point_info[key].exit_hai_port_exist && _this.state.schema.exit_point_info[key].exit_bot_orientation_direction ==='NA' &&
+                            <input
+                                style={{ width: "180px" }}
+                                className="form-control"
+                                type="text"
+                                disabled
+                                value={'NA'}
+                            />
+                        }
+                        {_this.state.schema.exit_point_info[key].exit_hai_port_exist &&
+                                <input
+                                style={{ width: "180px" }}
+                                className="form-control"
+                                type="text"
+                                disabled
+                                value={'NA'}
+                            />
+                            }
                         </div>
                         <div style={{margin:"0px 14px"}}>
-                            <select 
+                            
+                                <select 
                                 className="form-control" 
                                 style={{ width: "105px" }} 
                                 name="exit_direction" 
@@ -752,6 +852,7 @@ class BaseForm extends Component {
                             />
                         </div>
                         <div style={{margin:"0px 12px"}}>
+                        {!_this.state.schema.exit_point_info[key].exit_hai_port_exist && 
                             <button
                                 className="btn"
                                 type="button"
@@ -759,6 +860,17 @@ class BaseForm extends Component {
                             >
                                 {_this.state.schema.exit_point_info[key].edit?<i className="fa fa-check"/>:<i className="fas fa-edit"/>} 
                             </button>
+                        }
+                        {_this.state.schema.exit_point_info[key].exit_hai_port_exist && 
+                            <button
+                                className="btn"
+                                type="button"
+                                title="This value is locked since HAI Port is associated to this point"
+                            >
+                                <i className="fas fa-edit"/>
+                            </button>
+                        }
+                            
                             <button
                                 className="btn"
                                 type="button"
@@ -774,7 +886,12 @@ class BaseForm extends Component {
             })
         }
         return (
-            <ButtonForm {...rest} modalClass="manage-update-conveyor-modal" show={this.state.show} toggle={() => this.toggle(conveyorInfo,floor_barcodes,conveyor_version)} >
+            <ButtonForm 
+                {...rest}
+                modalClass="manage-update-conveyor-modal"
+                show={this.state.show} 
+                toggle={() => this.toggle(conveyorInfo,floor_barcodes,conveyor_version,haiPortTile)} 
+                >
                 {Object.keys(this.state.schema).length!==0 &&
                 <form>
                     <div style={{padding:"0px 20px"}}>

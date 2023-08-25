@@ -42,6 +42,16 @@ export default (state = {}, action) => {
         }
       };
     }
+
+  case "HAI-EDIT-FLOOR": {
+      const floorData = action.value;
+      return {
+        ...state,
+        [floorData.floor_id]: {
+          map_values: floorData.map_values,
+        }
+      };
+    }
     
     case "EDIT-BARCODE": {
       const { coordinate, new_barcode } = action.value;

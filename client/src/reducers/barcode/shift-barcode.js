@@ -4,19 +4,24 @@ import {calculate_corner_world_cordinate} from "actions/actions";
 import {tileToWorldCoordinate} from "utils/selectors/world-coordinate-utils-selectors";
 import _ from "lodash";
 
-const shiftNeighboursAndUpdateSizeinfo = (b1, b2, direction, shiftDistance) => {
+const shiftNeighboursAndUpdateSizeinfo = (b1, b2, direction, shiftDistance,is_hai) => {
   // b1 => direction => b2; b1 shifted by shiftDistance towards b2
   // assuming b1, b2 are already cloned objects
   var oppositeDirection = (direction + 2) % 4;
   var newTotalDistance =
     b1.size_info[direction] + b2.size_info[oppositeDirection] - shiftDistance;
   if (newTotalDistance <= 0) {
-    throw new Error("Cannot shift that much; getting negative distances.");
+    if(is_hai){
+      return ["","",true]
+    }else{
+      throw new Error("Cannot shift that much; getting negative distances.");
+    }
   }
   var d1 = Math.floor(newTotalDistance / 2);
   var d2 = newTotalDistance - d1;
   b1.size_info[direction] = d1;
   b2.size_info[oppositeDirection] = d2;
+  return [b1,b2,false]
 };
 
 const calculateWorldCordinateShiftBarcode = (barcode,distance,direction) => {
@@ -38,33 +43,49 @@ const breakConnectionInDirection = (barcode, direction) => {
   if (barcode.adjacency) barcode.adjacency[direction] = null;
 };
 
-const shiftBarcode = (state, action) => {
-  const { tileId, direction, distance } = action.value;
+export const shiftBarcode = (state, action,is_hai=false) => {
+  if(is_hai){
+    var tileId = action[0]
+    var direction = action[1]
+    var distance = action[2]
+  }else{
+    var { tileId, direction, distance } = action.value;
+  }
 
   var shiftedBarcode = Object.assign({}, state[tileId]);
   if (!shiftedBarcode) return state;
   var nbBarcodes = _.cloneDeep(
     getNeighbouringBarcodesIncludingDisconnected(tileId, state)
   );
+  console.log("nbBarcodes=============",nbBarcodes)
   var oppositeDirection = (direction + 2) % 4;
   var newState = {};
   if (nbBarcodes[direction]) {
-    shiftNeighboursAndUpdateSizeinfo(
+    var [shiftedBarcode,nbBarcodes1,error_status] = shiftNeighboursAndUpdateSizeinfo(
       shiftedBarcode,
       nbBarcodes[direction],
       direction,
-      distance
+      distance,
+      is_hai
     );
+    if(is_hai && error_status){
+      return {}
+    }
     var nbBarcodesWorldCordinate = JSON.parse(nbBarcodes[direction]["world_coordinate"])
     nbBarcodes[direction]["corner_world_cooordinate"]=calculate_corner_world_cordinate(nbBarcodes[direction]["size_info"],[nbBarcodesWorldCordinate[0],nbBarcodesWorldCordinate[1]])
   }
   if (nbBarcodes[oppositeDirection]) {
-    shiftNeighboursAndUpdateSizeinfo(
+
+    var [shiftedBarcode,nbBarcodes2,error_status] = shiftNeighboursAndUpdateSizeinfo(
       shiftedBarcode,
       nbBarcodes[oppositeDirection],
       oppositeDirection,
-      -distance
+      -distance,
+      is_hai
     );
+    if(is_hai && error_status){
+      return {}
+    }
     var nbBarcodesWorldCordinate = JSON.parse(nbBarcodes[oppositeDirection]["world_coordinate"])
     nbBarcodes[oppositeDirection]["corner_world_cooordinate"]=calculate_corner_world_cordinate(nbBarcodes[oppositeDirection]["size_info"],[nbBarcodesWorldCordinate[0],nbBarcodesWorldCordinate[1]])
   }

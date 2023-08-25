@@ -416,6 +416,7 @@ const equal_resize = (barcode, transit_barcode, overlapping_barcode, direction1,
 	}
 	else{
 	        console.log("Re-sizing of Storable barcode not allowed end", overlapping_barcode, transit_barcode)
+          console.log("in function>>>>>>>>>>>>>>>>>equal_resize")
 		    //unsuccess_overlap_barcode.push(overlapping_barcode)
 		    //unsuccess_overlap_barcode.push(transit_barcode)
 	}
@@ -541,6 +542,7 @@ const resize_single_overlap = (barcode, success_overlap_barcode ,success_overlap
 								}
 							} else{
 							        console.log("Re-sizing of Storable barcode not allowed end", overlapping_barcode, transit_barcode)
+                      console.log("in function>>>>>>>>>>>>>>>>>resize_single_overlap")
 	                        	    //unsuccess_overlap_barcode.push(overlapping_barcode)
 		                            //unsuccess_overlap_barcode.push(transit_barcode)
 	                        }
@@ -554,15 +556,20 @@ const resize_single_overlap = (barcode, success_overlap_barcode ,success_overlap
 			return barcode
 }
 
-export const manage_ttp_overlap = () => (dispatch, getState) => {
+export const manage_ttp_overlap = (barcode,hai_barcode=null,manage_hai_overlap = false) => (dispatch, getState) => {
   const state = getState();
-  const {
-    normalizedMap: {
-      entities: { barcode },
-    },
-  } = state;
+  // var {
+  //   normalizedMap: {
+  //     entities: { barcode },
+  //   },
+  // } = state;
   var updated_barcodeDict
-  updated_barcodeDict = JSON.parse(JSON.stringify(barcode));
+  if(manage_hai_overlap){
+    updated_barcodeDict = JSON.parse(JSON.stringify(hai_barcode));
+  }else{
+    updated_barcodeDict = JSON.parse(JSON.stringify(barcode));
+  }
+  
   //var success_overlap_barcode = []
   // var success_overlap_barcode = {}
   var unsuccess_overlap_barcode = []
@@ -710,11 +717,17 @@ console.log("Manage Overlap Barcodes End")
 //    } );
   //success_overlap_barcode_abc = StringtoListFormat(success_overlap_barcode_abc)
   //unsuccess_overlap_barcode = StringtoListFormat(unsuccess_overlap_barcode)
+  if(manage_hai_overlap){
+    return updated_barcodeDict
+  }else{
+    dispatch({
+      type: "MANAGE-OVERLAP-BAROCDE",
+      value: updated_barcodeDict
+    });
+    return dispatch(clearTiles);
 
-  dispatch({
-    type: "MANAGE-OVERLAP-BAROCDE",
-    value: updated_barcodeDict
-  });
+}
+ 
 //  dispatch({
 //    type: "HIGHLIGHT-SUCCESS-OVERLAP-BAROCDE",
 //    value: {"barcodeDict":success_overlap_barcode_abc,"success_overlap_barcode_status":0}
@@ -723,5 +736,4 @@ console.log("Manage Overlap Barcodes End")
 //    type: "HIGHLIGHT-UNSUCCESS-OVERLAP-BAROCDE",
 //    value: {"barcodeDict":unsuccess_overlap_barcode,"unsuccess_overlap_barcode_status":0}
 //  });
-  return dispatch(clearTiles);
 }

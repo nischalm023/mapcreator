@@ -5,6 +5,8 @@ import PPSes from "./PPSes";
 import Elevators from "./Elevators";
 import Summary from "./Summary";
 import LayeredView from "./LayeredView";
+import templateView from "./templateView";
+
 
 var Menu = ({ menuItems,checked_version }) => (
   <div className="row">
@@ -36,6 +38,7 @@ class LeftSidebar extends Component {
       ["fa-charging-station", Chargers],
       ["fa-archive", PPSes],
       ["fa-layer-group",LayeredView],
+      ["fa-book",templateView]
     ];
     var DataToShow = menuItems[activeIdx][1];
     return (

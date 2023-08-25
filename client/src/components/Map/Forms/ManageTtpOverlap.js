@@ -2,14 +2,14 @@ import React from "react";
 import { manage_ttp_overlap } from "actions/manage_ttp_overlap";
 import { connect } from "react-redux";
 
-const PathButton = ({ onClick, disabled }) => (
+const PathButton = ({ onClick, disabled,barcodes }) => (
   <button
     disabled={disabled}
     type="button"
     className="btn btn-secondary"
     style={{ textAlign: "-webkit-center", color: "orange" }}
     onClick={() => {
-      onClick();
+      onClick(barcodes);
     }}
   >
     Resolve Barcode Overlaps
@@ -18,9 +18,10 @@ const PathButton = ({ onClick, disabled }) => (
 
 export default connect(
   state => ({
-    disabled: state.selection.conveyorMode === true
+    disabled: state.selection.conveyorMode === true,
+    barcodes:state.normalizedMap.entities.barcode
   }),
   (dispatch) => ({
-    onClick: () => dispatch(manage_ttp_overlap()),
+    onClick: (barcodes) => dispatch(manage_ttp_overlap(barcodes)),
   })
 )(PathButton);

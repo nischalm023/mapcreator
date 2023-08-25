@@ -15,48 +15,106 @@ function createStepId(conveyor_data,barcode) {
     return conveyor_step_list
 }
 
-function createEntryDetails(conveyor_data,barocde) {
+function createEntryDetails(conveyor_data,barocde,haiPortTile,haiPortsTemplate,conveyor_id) {
     var conveyor_entry_list = []
     if(conveyor_data.hasOwnProperty("conveyor_entry")){
         var conveyor_entry_details = conveyor_data["conveyor_entry"]
         for (var i = 0; i < conveyor_entry_details.length; i++) {
             var entry = conveyor_entry_details[i]["conveyor_entry"].toString()
-            var conveyor_entry_dict = {
-                          "location_id" : conveyor_data["conveyor_step_id"][entry], 
-                          "io_point" : conveyor_entry_details[i]["conveyor_io_entry"],
-                          "height" : conveyor_entry_details[i]["conveyor_entry_height"],
-                          "direction" : conveyor_entry_details[i]["entry_point_direction"],
-                          "bot_orientation" : conveyor_entry_details[i]["bot_orientation_entry"]
-                        }
-        conveyor_entry_list.push(conveyor_entry_dict)
+            if(conveyor_entry_details[i].hasOwnProperty('conveyor_io_entry')){
+                var conveyor_entry_dict = {
+                  "location_id" : conveyor_data["conveyor_step_id"][entry], 
+                  "io_point" : conveyor_entry_details[i]["conveyor_io_entry"],
+                  "height" : conveyor_entry_details[i]["conveyor_entry_height"],
+                  "direction" : conveyor_entry_details[i]["entry_point_direction"],
+                  "io_point_type":["default"],
+                  "bot_orientation" : conveyor_entry_details[i]["bot_orientation_entry"],
+                }
+                conveyor_entry_list.push(conveyor_entry_dict)
+            }
+            
+        }
+        for (const [key, value] of Object.entries(haiPortTile)) {
+            console.log("value",value,haiPortsTemplate)
+            if(parseInt(value["conveyor_id"]) === parseInt(conveyor_id) && haiPortsTemplate[value["template_id"]]["port_type"] === "unloader"){
+                 var conveyor_entry_dict = {
+                  "location_id" : conveyor_data["conveyor_step_id"][value['entity_point']],
+                  "hai_port_id" : value["port_id_value"],
+                  "hai_port_type" : 'Type'+value["template_id"],
+                  "io_point" : `[${value["io_coodinate"].split(",").map((val) => parseInt(val))}]`,
+                  "height" : value["entity_height"],
+                  "direction" : value["direction"],
+                  "io_point_type":["hai_port"],
+                  "bot_orientation" : value["direction"],
+                }
+                conveyor_entry_list.push(conveyor_entry_dict)       
+            }
         }
         
     }
     return conveyor_entry_list
 }
 
-function createExitDetails(conveyor_data,barocde) {
+function createExitDetails(conveyor_data,barocde,haiPortTile,haiPortsTemplate,conveyor_id) {
     var conveyor_exit_list = []
     if(conveyor_data.hasOwnProperty("conveyor_exit")){
         var conveyor_exit_details = conveyor_data["conveyor_exit"]
         for (var i = 0; i < conveyor_exit_details.length; i++) {
             var exit = conveyor_exit_details[i]["conveyor_exit"].toString()
-            var conveyor_exit_dict = {
-                              "location_id" : conveyor_data["conveyor_step_id"][exit], 
-                              "io_point" : conveyor_exit_details[i]["conveyor_io_exit"],
-                              "height" : conveyor_exit_details[i]["conveyor_exit_height"],
-                              "direction" : conveyor_exit_details[i]["exit_point_direction"],
-                              "bot_orientation" : conveyor_exit_details[i]["bot_orientation_exit"]
-                            }
-            conveyor_exit_list.push(conveyor_exit_dict)
+            if(conveyor_exit_details[i].hasOwnProperty('conveyor_io_exit')){
+                var conveyor_exit_dict = {
+                  "location_id" : conveyor_data["conveyor_step_id"][exit], 
+                  "io_point" : conveyor_exit_details[i]["conveyor_io_exit"],
+                  "height" : conveyor_exit_details[i]["conveyor_exit_height"],
+                  "direction" : conveyor_exit_details[i]["exit_point_direction"],
+                  "io_point_type":["default"],
+                  "bot_orientation" : conveyor_exit_details[i]["bot_orientation_exit"]
+                }
+                conveyor_exit_list.push(conveyor_exit_dict)
+            }
+            
         }
-        
+        for (const [key, value] of Object.entries(haiPortTile)) {
+            console.log("see harteeeeeeeeee",key,value)
+            if(parseInt(value["conveyor_id"]) === parseInt(conveyor_id) && haiPortsTemplate[value["template_id"]]["port_type"] === "loader"){
+                 var conveyor_exit_dict = {
+                  "location_id" : conveyor_data["conveyor_step_id"][value['entity_point']],
+                  "hai_port_id" : value["port_id_value"],
+                  "hai_port_type" : 'Type'+value["template_id"],
+                  "io_point" : `[${value["io_coodinate"].split(",").map((val) => parseInt(val))}]`,
+                  "height" : value["entity_height"],
+                  "direction" : value["direction"],
+                  "io_point_type":["hai_port"],
+                  "bot_orientation" : value["direction"],
+                }
+                conveyor_exit_list.push(conveyor_exit_dict)       
+            }
+        }
     }
     return conveyor_exit_list
 }
 
+function createHaiPortList(haiPortTile,haiPortsTemplate,hai_port_types_list) {
+    for (const [key, value] of Object.entries(haiPortsTemplate)) {
+       var length = value["length"]
+       var breadth = value["breadth"]
+       var height =  value["height"]
+       var hai_port_dict = {}
+       hai_port_dict["id"] = 'Type'+value["template_id"]
+       hai_port_dict["display_name"] = value["template_display_name"]
+       hai_port_dict["tray_count"] = value["tray_count"]
+       hai_port_dict["supported_rangers"] = value["support_agent"]
+       hai_port_dict["size_info"] = [length,breadth,height]
+       hai_port_dict["distance_required"]=2280
+       hai_port_types_list.push(hai_port_dict)
+    }
+    return hai_port_types_list
+}
+
 export default (normalizedMap) => {
     var conveyorTile = normalizedMap.entities.conveyorTile
+    var haiPortTile = normalizedMap.entities.haiPortTile
+    var haiPortsTemplate = normalizedMap.entities.haiPortsTemplate
     var connected_tile = normalizedMap.entities.ConnectedconveyorTile
     var barcode = normalizedMap.entities.barcode
     var mapping_dict = {}
@@ -77,6 +135,7 @@ export default (normalizedMap) => {
     for (var i = 0; i < conveyor_element_found.length; i++) {
         mapping_dict[conveyor_element_found[i]]=[]
     }
+    var hai_port_types_list = []
     var conveyor_data_list = []
     for (const [key, value] of Object.entries(mapping_dict)) {
     var conveyor_data_dict = {}
@@ -89,13 +148,16 @@ export default (normalizedMap) => {
         conveyor_data_dict["display_name"] = display_name_value
         conveyor_data_dict["connected_conveyors"] = [...new Set(value.map(Number))];
         var step_details = createStepId(conveyorTile[key]["conveyor_step_id"],barcode)
-        var entry_details = createEntryDetails(conveyorTile[key],barcode)
-        var exit_details = createExitDetails(conveyorTile[key],barcode)
+        var entry_details = createEntryDetails(conveyorTile[key],barcode,haiPortTile,haiPortsTemplate,key)
+        var exit_details = createExitDetails(conveyorTile[key],barcode,haiPortTile,haiPortsTemplate,key)
         conveyor_data_dict["entry_points"]=entry_details
         conveyor_data_dict["conveyor_steps"]=step_details
         conveyor_data_dict["exit_points"]=exit_details
         conveyor_data_list.push(conveyor_data_dict)
     }
-    var version_2 = {"version" : "2.0.0","conveyor_data":conveyor_data_list}
+    if(Object.keys(haiPortTile).length !== 0){
+        hai_port_types_list = createHaiPortList(haiPortTile,haiPortsTemplate,hai_port_types_list)
+    }
+    var version_2 = {"version" : "2.0.0","conveyor_data":conveyor_data_list,"hai_port_types":hai_port_types_list}
     return version_2
 };

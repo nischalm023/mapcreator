@@ -39,7 +39,7 @@ const ManageConveyorSystem = ({ onSubmit, disabled, conveyorInfo, allConveyorIds
                                 pps_ids,
                                 // entry_bot_direction_options, exit_bot_direction_options,
                                 entry_direction_options, exit_direction_options,
-                                floor_barcodes,conveyor_version}) => (
+                                floor_barcodes,conveyor_version,haiPortTile}) => (
     <ManageConveyorSystemForm
         schema={schema()}
         disabled={disabled}
@@ -53,6 +53,7 @@ const ManageConveyorSystem = ({ onSubmit, disabled, conveyorInfo, allConveyorIds
         floor_barcodes={floor_barcodes}
         onSubmit={onSubmit}
         conveyor_version={conveyor_version}
+        haiPortTile={haiPortTile}
         buttonText={"Manage Conveyor System"}
     />
 );
@@ -75,6 +76,7 @@ const getPpsIds = (pps_dict) => {
 export default connect(
     state => {
         let conveyorTiles = state.normalizedMap.entities.conveyorTile;
+        let haiPortTile = state.normalizedMap.entities.haiPortTile;
         let conveyor_version = state.conveyorVersion
         // find conveyor info related to the selected tile
         let conveyorInfo = {};
@@ -145,7 +147,8 @@ export default connect(
             entry_direction_options:entry_direction_options,
             exit_direction_options:exit_direction_options,
             floor_barcodes:floor_barcodes,
-            conveyor_version:conveyor_version
+            conveyor_version:conveyor_version,
+            haiPortTile:haiPortTile,
         }
     },
     dispatch => ({

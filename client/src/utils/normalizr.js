@@ -20,6 +20,8 @@ const queueData = new schema.Entity(
   {},
   { idAttribute: "queue_data_id" }
 );
+const haiPortTile = new schema.Entity("haiPortTile", {}, { idAttribute: "port_id" });
+const haiPortsTemplate = new schema.Entity("haiPortsTemplate", {}, { idAttribute: "template_id" });
 const conveyorTile = new schema.Entity("conveyorTile", {}, { idAttribute: "conveyor_id" });
 const ioPoints = new schema.Entity("ioPoints", {}, { idAttribute: "io_point_id" });
 const ConnectedconveyorTile = new schema.Entity("ConnectedconveyorTile", {}, { idAttribute: "connected_conveyor_id" });
@@ -68,6 +70,8 @@ const mapSchema = new schema.Entity("map", {
   connectedConveyor:[ConnectedconveyorTile],
   ioPointsIds: [ioPoints],
   toteStorablesIds: [toteStorables],
+  haiPortsTemplateIds:[haiPortsTemplate],
+  haiPort:[haiPortTile]
 });
 
 // this is the schema on which normalization will be run.

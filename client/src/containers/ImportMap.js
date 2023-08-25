@@ -5,6 +5,7 @@ import { handleErrors } from "utils/util";
 import { withRouter } from "react-router-dom";
 import SweetAlertError from "components/SweetAlertError";
 import { createMap } from "utils/api";
+import { DEFAULT_CONVEYOR_VERSION } from "../constants";
 import _ from "lodash";
 
 class ImportMap extends Component {
@@ -54,6 +55,7 @@ class ImportMap extends Component {
 //          imported.floors[i].map_values[j].grid_attribute = ''
 //        }
       }
+      imported.conveyorVersion = DEFAULT_CONVEYOR_VERSION
       //Delete PPS Point for non RTP PPS since conveyor json is not uploaded
 //      console.log(">>>>>>>>>>>>>>>>>>>>string",JSON.stringify(imported.floors[i].ppses))
 //      for(let j=0;j<imported.floors[i].ppses.length;j++){
