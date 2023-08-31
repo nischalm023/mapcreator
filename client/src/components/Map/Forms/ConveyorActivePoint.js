@@ -45,7 +45,7 @@ const checkPointLieInMiddleConveyorBelt = (conveyorTile,tileId,barcodes) => {
           var nbTileId = getNeighbourTiles(tileId)
         }
   const filteredArray = selected_tile.filter(value => nbTileId.includes(value));
-  if(filteredArray.length>1){
+  if(filteredArray.length>0){
     return false
   }
   return true
