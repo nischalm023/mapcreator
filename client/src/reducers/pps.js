@@ -6,7 +6,7 @@ const manageOldPpsData = (pps_detail,active_point) => {
         return pps_detail
     }else{
       for (var j = 0; j < pps_detail["pps_points"].length; j++) {
-            if(pps_detail["pps_points"][j]["coordinate"] == active_point){
+            if(JSON.parse(pps_detail["pps_points"][j]["coordinate"]).toString() == active_point){
               pps_detail["pps_points"].splice(j, 1);
               return pps_detail
             }
