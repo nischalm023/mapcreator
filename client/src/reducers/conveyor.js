@@ -20,8 +20,17 @@ export default (state = {}, action) => {
           }
         
         if(state[conveyor_id].hasOwnProperty("conveyor_entry")){
-          var conveyor_entry = state[conveyor_id].conveyor_entry
-          conveyor_entry.push(conveyor_entry_dict)
+          var conveyor_entry_details = state[conveyor_id].conveyor_entry
+          var entry_done = false
+          for (var i = 0; i < conveyor_entry_details.length; i++) {
+            if(conveyor_entry_details[i]["conveyor_entry"][0].toString() === conveyor_entry_dict["conveyor_entry"][0].toString()){
+              entry_done = true
+            }
+          }
+          if(!entry_done){
+            var conveyor_entry = state[conveyor_id].conveyor_entry
+            conveyor_entry.push(conveyor_entry_dict)
+          }
         }else{
           var conveyor_entry = []
           conveyor_entry.push(conveyor_entry_dict)
@@ -44,8 +53,17 @@ export default (state = {}, action) => {
             "conveyor_exit_height":conveyor_exit_height
           }
           if(state[conveyor_id].hasOwnProperty("conveyor_exit")){
-            var conveyor_exit = state[conveyor_id].conveyor_exit
-            conveyor_exit.push(conveyor_exit_dict)
+            var conveyor_exit_details = state[conveyor_id].conveyor_exit
+            var exit_done = false
+            for (var i = 0; i < conveyor_exit_details.length; i++) {
+              if(conveyor_exit_details[i]["conveyor_exit"][0].toString() === conveyor_exit_dict["conveyor_exit"][0].toString()){
+                exit_done = true
+              }
+            }
+            if(!exit_done){
+              var conveyor_exit = state[conveyor_id].conveyor_exit
+              conveyor_exit.push(conveyor_exit_dict)
+            }
           }else{
             var conveyor_exit = []
             conveyor_exit.push(conveyor_exit_dict)
