@@ -18,15 +18,19 @@ function createStepId(conveyor_data,barcode) {
 function createEntryDetails(conveyor_data,barocde) {
     var conveyor_entry_list = []
     if(conveyor_data.hasOwnProperty("conveyor_entry")){
-        var entry = conveyor_data["conveyor_entry"].toString()
-        var conveyor_entry_dict = {
+        var conveyor_entry_details = conveyor_data["conveyor_entry"]
+        for (var i = 0; i < conveyor_entry_details.length; i++) {
+            var entry = conveyor_entry_details[i]["conveyor_entry"].toString()
+            var conveyor_entry_dict = {
                           "location_id" : conveyor_data["conveyor_step_id"][entry], 
-                          "io_point" : conveyor_data["conveyor_io_entry"],
-                          "height" : conveyor_data["conveyor_entry_height"],
-                          "direction" : conveyor_data["entry_point_direction"],
-                          "bot_orientation" : conveyor_data["bot_orientation_entry"]
+                          "io_point" : conveyor_entry_details[i]["conveyor_io_entry"],
+                          "height" : conveyor_entry_details[i]["conveyor_entry_height"],
+                          "direction" : conveyor_entry_details[i]["entry_point_direction"],
+                          "bot_orientation" : conveyor_entry_details[i]["bot_orientation_entry"]
                         }
         conveyor_entry_list.push(conveyor_entry_dict)
+        }
+        
     }
     return conveyor_entry_list
 }
@@ -34,15 +38,19 @@ function createEntryDetails(conveyor_data,barocde) {
 function createExitDetails(conveyor_data,barocde) {
     var conveyor_exit_list = []
     if(conveyor_data.hasOwnProperty("conveyor_exit")){
-        var exit = conveyor_data["conveyor_exit"].toString()
-        var conveyor_exit_dict = {
-                          "location_id" : conveyor_data["conveyor_step_id"][exit], 
-                          "io_point" : conveyor_data["conveyor_io_exit"],
-                          "height" : conveyor_data["conveyor_exit_height"],
-                          "direction" : conveyor_data["exit_point_direction"],
-                          "bot_orientation" : conveyor_data["bot_orientation_exit"]
-                        }
-        conveyor_exit_list.push(conveyor_exit_dict)
+        var conveyor_exit_details = conveyor_data["conveyor_exit"]
+        for (var i = 0; i < conveyor_exit_details.length; i++) {
+            var exit = conveyor_exit_details[i]["conveyor_exit"].toString()
+            var conveyor_exit_dict = {
+                              "location_id" : conveyor_data["conveyor_step_id"][exit], 
+                              "io_point" : conveyor_exit_details[i]["conveyor_io_exit"],
+                              "height" : conveyor_exit_details[i]["conveyor_exit_height"],
+                              "direction" : conveyor_exit_details[i]["exit_point_direction"],
+                              "bot_orientation" : conveyor_exit_details[i]["bot_orientation_exit"]
+                            }
+            conveyor_exit_list.push(conveyor_exit_dict)
+        }
+        
     }
     return conveyor_exit_list
 }

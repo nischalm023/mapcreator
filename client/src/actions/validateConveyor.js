@@ -24,12 +24,6 @@ const createValidationList = (merge_output,conveyorTile) => {
     for (var i = 0; i < merge_output.length; i++){
         var validate_dict = {"conveyor_id":merge_output[i]}
         for (var j = 0; j < merge_output[i].length; j++){
-            if(conveyorTile[merge_output[i][j]].hasOwnProperty("conveyor_exit") && !validate_dict.hasOwnProperty("exit_present")){
-                validate_dict["exit_present"] = true
-            }
-            if(conveyorTile[merge_output[i][j]].hasOwnProperty("conveyor_entry") && !validate_dict.hasOwnProperty("entry_present")){
-                validate_dict["entry_present"] = true
-            }
             if(conveyorTile[merge_output[i][j]]["conveyor_active"].length !== 0 && !validate_dict.hasOwnProperty("active_present")){
                  validate_dict["active_present"] = true
             }
@@ -91,35 +85,8 @@ const createMappedList = (connected_list) => {
 const getErrorMessage = (create_validation_list) => {
     let errorMessage = '';
     for (var i = 0; i < create_validation_list.length; i++) {
-        if(!create_validation_list[i].hasOwnProperty("active_present") && !create_validation_list[i].hasOwnProperty("entry_present") && !create_validation_list[i].hasOwnProperty("exit_present")){
-             if(create_validation_list[i]["conveyor_id"].length>1){
-                 errorMessage = errorMessage + `\nConnected conveyor system ( ID :${create_validation_list[i]["conveyor_id"].join()} ) does not have active, entry and exit points defined.`
-             }else{
-                  errorMessage = errorMessage + `\nConveyor ID ${create_validation_list[i]["conveyor_id"].join()} does not have active, entry and exit points defined.`
-             }
-        }
-        else if(!create_validation_list[i].hasOwnProperty("active_present") && !create_validation_list[i].hasOwnProperty("exit_present")){
-             if(create_validation_list[i]["conveyor_id"].length>1){
-                 errorMessage = errorMessage + `\nConnected conveyor system ( ID :${create_validation_list[i]["conveyor_id"].join()} ) does not have active and exit points defined.`
-             }else{
-                  errorMessage = errorMessage + `\nConveyor ID ${create_validation_list[i]["conveyor_id"].join()} does not have active and exit points defined.`
-             }
-        }
-        else if(!create_validation_list[i].hasOwnProperty("active_present") && !create_validation_list[i].hasOwnProperty("entry_present")){
-             if(create_validation_list[i]["conveyor_id"].length>1){
-                  errorMessage = errorMessage + `\nConnected conveyor system ( ID :${create_validation_list[i]["conveyor_id"].join()} ) does not have active and entry points defined.`
-             }else{
-                 errorMessage = errorMessage + `\nConveyor ID ${create_validation_list[i]["conveyor_id"].join()} does not have active and entry points defined.`
-             }
-        }
-        else if(!create_validation_list[i].hasOwnProperty("entry_present") && !create_validation_list[i].hasOwnProperty("exit_present")){
-             if(create_validation_list[i]["conveyor_id"].length>1){
-                  errorMessage = errorMessage + `\nConnected conveyor system ( ID :${create_validation_list[i]["conveyor_id"].join()} ) does not have entry and exit points defined.`
-             }else{
-                  errorMessage = errorMessage + `\nConveyor ID ${create_validation_list[i]["conveyor_id"].join()} does not have entry and exit points defined.`
-             }
-        }
-        else if(!create_validation_list[i].hasOwnProperty("active_present")){
+
+        if(!create_validation_list[i].hasOwnProperty("active_present")){
             if(create_validation_list[i]["conveyor_id"].length>1){
                 errorMessage = errorMessage + `\nConnected conveyor system ( ID :${create_validation_list[i]["conveyor_id"].join()} ) does not have active points defined.`
             }else{
@@ -127,20 +94,7 @@ const getErrorMessage = (create_validation_list) => {
             }
             
         }
-        else if(!create_validation_list[i].hasOwnProperty("exit_present")){
-             if(create_validation_list[i]["conveyor_id"].length>1){
-                 errorMessage = errorMessage + `\nConnected conveyor system ( ID :${create_validation_list[i]["conveyor_id"].join()} ) does not have exit point defined.`
-             }else{
-                 errorMessage = errorMessage + `\nConveyor ID ${create_validation_list[i]["conveyor_id"].join()} does not have exit point defined.`
-             }
-        }
-        else if(!create_validation_list[i].hasOwnProperty("entry_present")){
-             if(create_validation_list[i]["conveyor_id"].length>1){
-                  errorMessage = errorMessage + `\nConnected conveyor system ( ID :${create_validation_list[i]["conveyor_id"].join()} ) does not have entry point defined.`
-             }else{
-                 errorMessage = errorMessage + `\nConveyor ID ${create_validation_list[i]["conveyor_id"].join()} does not have entry point defined.`
-             }
-        }
+        
     }
     return errorMessage
 }

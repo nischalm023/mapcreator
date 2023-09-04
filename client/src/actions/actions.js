@@ -253,6 +253,43 @@ export const setbarcodeSpacing = (barcodeSpacing) => ({
 export const setConveyorTile = (getState) => {
   const state = getState();
   const normalizedMap = state.normalizedMap;
+  if(normalizedMap.entities.hasOwnProperty("conveyorTile")){
+    var conveyorTile = normalizedMap.entities.conveyorTile
+    var entry_conveyor_state = []
+    var exit_conveyor_state = []
+    for (const [key, value] of Object.entries(conveyorTile)) {
+      var conveyor_data_entry = {}
+      var conveyor_data_exit = {}
+      if(value.hasOwnProperty("conveyor_io_entry") && typeof value["conveyor_io_entry"] === 'string'){
+        conveyor_data_entry["conveyor_io_entry"] = value["conveyor_io_entry"]
+        conveyor_data_entry["conveyor_entry"] = value["conveyor_entry"]
+        conveyor_data_entry["bot_orientation_entry"] = value["bot_orientation_entry"]
+        conveyor_data_entry["conveyor_entry_height"] = value["conveyor_entry_height"]
+        conveyor_data_entry["entry_point_direction"] = value["entry_point_direction"]
+        delete value["conveyor_io_entry"]
+        delete value["conveyor_entry"]
+        delete value["bot_orientation_entry"]
+        delete value["conveyor_entry_height"]
+        delete value["entry_point_direction"]
+        entry_conveyor_state.push(conveyor_data_entry)
+        value["conveyor_entry"] = entry_conveyor_state
+      }
+      if(value.hasOwnProperty("conveyor_io_exit") && typeof value["conveyor_io_exit"] === 'string'){
+        conveyor_data_exit["conveyor_io_exit"] = value["conveyor_io_exit"]
+        conveyor_data_exit["conveyor_exit"] = value["conveyor_exit"]
+        conveyor_data_exit["bot_orientation_exit"] = value["bot_orientation_exit"]
+        conveyor_data_exit["conveyor_exit_height"] = value["conveyor_exit_height"]
+        conveyor_data_exit["exit_point_direction"] = value["exit_point_direction"]
+        delete value["conveyor_io_exit"]
+        delete value["conveyor_exit"]
+        delete value["bot_orientation_exit"]
+        delete value["conveyor_exit_height"]
+        delete value["exit_point_direction"]
+        exit_conveyor_state.push(conveyor_data_exit)
+        value["conveyor_exit"] = exit_conveyor_state
+      }
+    }
+  }
   var mapId = getMapId(state);
   var conveyorTile = {};
   return getMap(mapId)
@@ -718,7 +755,6 @@ const validatePpsPoint = (entities) => {
       nonactive_pps_list.push(pps_dict[i].pps_id)
     }
   }
-  console.log("nonactive_pps_list",nonactive_pps_list)
   return nonactive_pps_list
 }
 

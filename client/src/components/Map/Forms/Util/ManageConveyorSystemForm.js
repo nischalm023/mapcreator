@@ -49,7 +49,62 @@ class BaseForm extends Component {
                 })
             }
         }
+        let entry_point_info = [];
+        if(conveyorInfo.conveyor_entry){
+            let all_directions = {North: 0, East: 1, South: 2, West: 3}
+            for (const obj of conveyorInfo.conveyor_entry){
+                let possibleBotDirections = []
+                let all_directions = {North: 0, East: 1, South: 2, West: 3}
+                if(parseInt(obj.entry_point_direction) === 0 || parseInt(obj.entry_point_direction) === 2){
+                    possibleBotDirections.push({value: all_directions["East"], label: "East"})
+                    possibleBotDirections.push({value: all_directions["West"], label: "West"})
+                    }
+                if(parseInt(obj.entry_point_direction) === 1 || parseInt(obj.entry_point_direction) === 3){
+                    possibleBotDirections.push({value: all_directions["North"], label: "North"})
+                    possibleBotDirections.push({value: all_directions["South"], label: "South"})
+                    }
+                entry_point_info.push({
+                    entry_point_coordinate: floor_barcodes[obj.conveyor_entry[0]]["barcode"],
+                    entry_bot_orientation_direction: obj.bot_orientation_entry,
+                    entry_direction: obj.entry_point_direction,
+                    entry_io_point_coordinate: floor_barcodes[JSON.parse(obj.conveyor_io_entry).join(',')]["barcode"],
+                    entry_bot_direction_options:possibleBotDirections,
+                    conveyor_entry_height: obj.conveyor_entry_height,
+                    edit: false,
+                    error: ''
+                })
+                }
+                
+            
+        }
         
+        let exit_point_info = [];
+        if(conveyorInfo.conveyor_exit){
+            let all_directions = {North: 0, East: 1, South: 2, West: 3}
+            for (const obj of conveyorInfo.conveyor_exit){
+                let possibleBotDirections = []
+                let all_directions = {North: 0, East: 1, South: 2, West: 3}
+                if(parseInt(obj.exit_point_direction) === 0 || parseInt(obj.exit_point_direction) === 2){
+                    possibleBotDirections.push({value: all_directions["East"], label: "East"})
+                    possibleBotDirections.push({value: all_directions["West"], label: "West"})
+                    }
+                if(parseInt(obj.exit_point_direction) === 1 || parseInt(obj.exit_point_direction) === 3){
+                    possibleBotDirections.push({value: all_directions["North"], label: "North"})
+                    possibleBotDirections.push({value: all_directions["South"], label: "South"})
+                    }
+                exit_point_info.push({
+                    exit_point_coordinate: floor_barcodes[obj.conveyor_exit[0]]["barcode"],
+                    exit_bot_orientation_direction: obj.bot_orientation_exit,
+                    exit_direction: obj.exit_point_direction,
+                    exit_io_point_coordinate: floor_barcodes[JSON.parse(obj.conveyor_io_exit).join(',')]["barcode"],
+                    exit_bot_direction_options:possibleBotDirections,
+                    conveyor_exit_height: obj.conveyor_exit_height,
+                    edit: false,
+                    error: ''
+                })
+                }
+        }
+
         let initialSchema = {
             conveyor_id_info : {
                 conveyor_id: conveyorInfo.conveyor_id,
@@ -57,6 +112,8 @@ class BaseForm extends Component {
                 error: ''
             },
             active_point_info: active_point_info,
+            exit_point_info:exit_point_info,
+            entry_point_info:entry_point_info,
             conveyor_step_id_info:conveyor_step_id_list
         };
         if(conveyorInfo.conveyor_display_name){
@@ -98,54 +155,8 @@ class BaseForm extends Component {
                 error: ''
             }
         }
-        if(conveyorInfo.conveyor_exit && conveyorInfo.bot_orientation_exit !== "" 
-                && conveyorInfo.exit_point_direction !== "" && conveyorInfo.conveyor_io_exit!==""){
-            initialSchema["exit_point_info"] = {
-                exit_point_coordinate: floor_barcodes[conveyorInfo.conveyor_exit[0]]["barcode"],
-                exit_bot_orientation_direction: conveyorInfo.bot_orientation_exit,
-                exit_direction: conveyorInfo.exit_point_direction,
-                exit_io_point_coordinate: floor_barcodes[JSON.parse(conveyorInfo.conveyor_io_exit).join(',')]["barcode"],
-                edit: false,
-                error: ''
-            }
-            let possibleBotDirections = []
-            let all_directions = {North: 0, East: 1, South: 2, West: 3}
-            if(parseInt(conveyorInfo.exit_point_direction) === 0 || parseInt(conveyorInfo.exit_point_direction) === 2){
-                possibleBotDirections.push({value: all_directions["East"], label: "East"})
-                possibleBotDirections.push({value: all_directions["West"], label: "West"})
-            }
-            if(parseInt(conveyorInfo.exit_point_direction) === 1 || parseInt(conveyorInfo.exit_point_direction) === 3){
-                possibleBotDirections.push({value: all_directions["North"], label: "North"})
-                possibleBotDirections.push({value: all_directions["South"], label: "South"})
-            }
-            this.setState({
-                exit_bot_direction_options: possibleBotDirections,
-            });
-        }
-        if(conveyorInfo.conveyor_entry && conveyorInfo.bot_orientation_entry !== "" 
-                && conveyorInfo.entry_point_direction !== "" && conveyorInfo.conveyor_io_entry!==""){
-            initialSchema["entry_point_info"] = {
-                entry_point_coordinate: floor_barcodes[conveyorInfo.conveyor_entry[0]]["barcode"],
-                entry_bot_orientation_direction: conveyorInfo.bot_orientation_entry,
-                entry_direction: conveyorInfo.entry_point_direction,
-                entry_io_point_coordinate: floor_barcodes[JSON.parse(conveyorInfo.conveyor_io_entry).join(',')]["barcode"],
-                edit: false,
-                error: ''
-            }
-            let possibleBotDirections = []
-            let all_directions = {North: 0, East: 1, South: 2, West: 3}
-            if(parseInt(conveyorInfo.entry_point_direction) === 0 || parseInt(conveyorInfo.entry_point_direction) === 2){
-                possibleBotDirections.push({value: all_directions["East"], label: "East"})
-                possibleBotDirections.push({value: all_directions["West"], label: "West"})
-            }
-            if(parseInt(conveyorInfo.entry_point_direction) === 1 || parseInt(conveyorInfo.entry_point_direction) === 3){
-                possibleBotDirections.push({value: all_directions["North"], label: "North"})
-                possibleBotDirections.push({value: all_directions["South"], label: "South"})
-            }
-            this.setState({
-                entry_bot_direction_options: possibleBotDirections,
-            });
-        }
+        
+        
         this.setState({
             schema: initialSchema,
             originalConveyorId: conveyorInfo.conveyor_id
@@ -162,76 +173,10 @@ class BaseForm extends Component {
             schema.conveyor_display_name_info.conveyor_display_name = value;
             schema.conveyor_display_name_info.error = '';
         }
-        if (field == "conveyor_entry_height_info") {
-            schema.conveyor_entry_height_info.conveyor_entry_height = value;
-            schema.conveyor_entry_height_info.error = '';
-        }
-        if (field == "conveyor_exit_height_info") {
-            schema.conveyor_exit_height_info.conveyor_exit_height = value;
-            schema.conveyor_exit_height_info.error = '';
-        }
-        let direction_mapping = {"North":0,"East":1,"South":2,"West":3}
-        if (field == "exit_bot_orientation_direction") {
-            schema.exit_point_info.exit_bot_orientation_direction = parseInt(value);
-            schema.exit_point_info.error = '';
-        }
-        if (field == "entry_bot_orientation_direction") {
-            schema.entry_point_info.entry_bot_orientation_direction = parseInt(value);
-            schema.entry_point_info.error = '';
-        }
-        if (field == "exit_direction") {
-            schema.exit_point_info.exit_direction = value
-            schema.exit_point_info.error = '';
-            var id = this.state.originalConveyorId
-            var conveyorTile = {}
-            conveyorTile[id] = conveyorInfo
-            var exitCordinate = [conveyorInfo.conveyor_exit.toString()]
-            var get_exit_io_point = floor_barcodes[(JSON.parse(conveyorInfo.conveyor_io_exit)).toString()]["barcode"]
-            schema.exit_point_info.exit_io_point_coordinate = get_exit_io_point
-            let possibleBotDirections = []
-            let all_directions = {North: 0, East: 1, South: 2, West: 3}
-            if(parseInt(value) === 0 || parseInt(value) === 2){
-                possibleBotDirections.push({value: all_directions["East"], label: "East"})
-                possibleBotDirections.push({value: all_directions["West"], label: "West"})
-                schema.exit_point_info.exit_bot_orientation_direction = 1; 
-            }
-            if(parseInt(value) === 1 || parseInt(value) === 3){
-                possibleBotDirections.push({value: all_directions["North"], label: "North"})
-                possibleBotDirections.push({value: all_directions["South"], label: "South"})
-                schema.exit_point_info.exit_bot_orientation_direction = 0;
-            }
-            this.setState({
-                exit_bot_direction_options: possibleBotDirections,
-            });
-        }
-        if (field == "entry_direction") {
-            schema.entry_point_info.error = '';
-            schema.entry_point_info.entry_direction = value
-            var id = this.state.originalConveyorId
-            var conveyorTile = {}
-            conveyorTile[id] = conveyorInfo
-            var entryCordinate = [conveyorInfo.conveyor_entry.toString()]
-            var get_entry_io_point = floor_barcodes[(JSON.parse(conveyorInfo.conveyor_io_entry)).toString()]["barcode"]
-            schema.entry_point_info.entry_io_point_coordinate = get_entry_io_point
-            let possibleBotDirections = []
-            let all_directions = {North: 0, East: 1, South: 2, West: 3}
-            if(parseInt(value) === 0 || parseInt(value) === 2){
-                possibleBotDirections.push({value: all_directions["East"], label: "East"})
-                possibleBotDirections.push({value: all_directions["West"], label: "West"})
-                schema.entry_point_info.entry_bot_orientation_direction = 1;
-            }
-            if(parseInt(value) === 1 || parseInt(value) === 3){
-                possibleBotDirections.push({value: all_directions["North"], label: "North"})
-                possibleBotDirections.push({value: all_directions["South"], label: "South"})
-                schema.entry_point_info.entry_bot_orientation_direction = 0;
-            }
-            this.setState({
-                entry_bot_direction_options: possibleBotDirections,
-            });
-            }
+        
         this.setState({ schema: schema });
     };
-    changeMultiSchemaHandler = (key, field, value) => {
+    changeMultiSchemaHandler = (key, field, value,floor_barcodes=null,conveyorInfo=null) => {
         var schema = { ...this.state.schema };
         if (field == "active_point_pps") {
             schema.active_point_info[key].active_point_pps = value;
@@ -242,12 +187,113 @@ class BaseForm extends Component {
             schema.conveyor_step_id_info[key].step_id = value;
             schema.conveyor_step_id_info[key].error = '';
         }
+        if (field == "entry_direction") {
+            schema.entry_point_info[key].error = '';
+            schema.entry_point_info[key].entry_direction = value
+            var id = this.state.originalConveyorId
+            var conveyorTile = {}
+            conveyorTile[id] = conveyorInfo
+            let possibleBotDirections = []
+            let all_directions = {North: 0, East: 1, South: 2, West: 3}
+            if(parseInt(value) === 0 || parseInt(value) === 2){
+                possibleBotDirections.push({value: all_directions["East"], label: "East"})
+                possibleBotDirections.push({value: all_directions["West"], label: "West"})
+                schema.entry_point_info[key].entry_bot_orientation_direction = 1;
+            }
+            if(parseInt(value) === 1 || parseInt(value) === 3){
+                possibleBotDirections.push({value: all_directions["North"], label: "North"})
+                possibleBotDirections.push({value: all_directions["South"], label: "South"})
+                schema.entry_point_info[key].entry_bot_orientation_direction = 0;
+            }
+            schema.entry_point_info[key].entry_bot_direction_options = possibleBotDirections
+            
+            }
+        if (field == "entry_bot_orientation_direction") {
+            schema.entry_point_info[key].entry_bot_orientation_direction = parseInt(value);
+            schema.entry_point_info[key].error = '';
+        }
+        if (field == "conveyor_entry_height_info") {
+            schema.entry_point_info[key].conveyor_entry_height = value;
+            schema.entry_point_info[key].error = '';
+
+        }
+        if (field == "exit_direction") {
+            schema.exit_point_info[key].error = '';
+            schema.exit_point_info[key].exit_direction = value
+            var id = this.state.originalConveyorId
+            var conveyorTile = {}
+            conveyorTile[id] = conveyorInfo
+            let possibleBotDirections = []
+            let all_directions = {North: 0, East: 1, South: 2, West: 3}
+            if(parseInt(value) === 0 || parseInt(value) === 2){
+                possibleBotDirections.push({value: all_directions["East"], label: "East"})
+                possibleBotDirections.push({value: all_directions["West"], label: "West"})
+                schema.exit_point_info[key].exit_bot_orientation_direction = 1;
+            }
+            if(parseInt(value) === 1 || parseInt(value) === 3){
+                possibleBotDirections.push({value: all_directions["North"], label: "North"})
+                possibleBotDirections.push({value: all_directions["South"], label: "South"})
+                schema.exit_point_info[key].exit_bot_orientation_direction = 0;
+            }
+            schema.exit_point_info[key].exit_bot_direction_options = possibleBotDirections
+            
+            }
+        if (field == "exit_bot_orientation_direction") {
+            schema.exit_point_info[key].exit_bot_orientation_direction = parseInt(value);
+            schema.exit_point_info[key].error = '';
+        }
+        if (field == "conveyor_exit_height_info") {
+            schema.exit_point_info[key].conveyor_exit_height = value;
+            schema.exit_point_info[key].error = '';
+        }
         this.setState({ schema: schema });
     };
     editActivePointRow = (key) => {
         var schema = { ...this.state.schema };
         schema.active_point_info[key].edit = !schema.active_point_info[key].edit ;
         schema.active_point_info[key].error = '';
+        this.setState({ schema: schema });
+    };
+    editEntryPointRow = (key) => {
+        var schema = { ...this.state.schema };
+        if(schema.entry_point_info[key].edit){
+            if(schema.entry_point_info[key].conveyor_entry_height===''){
+                schema.entry_point_info[key].error= "Conveyor entry height cannot be empty.";
+                }
+            if(parseInt(schema.entry_point_info[key].conveyor_entry_height)<=0){
+                schema.entry_point_info[key].error= "Conveyor entry height cannot be zero or negative.";
+            }
+        }
+        if(schema.entry_point_info[key].error === ""){
+            schema.entry_point_info[key].edit = !schema.entry_point_info[key].edit ;
+            schema.entry_point_info[key].error = '';
+        }
+        this.setState({ schema: schema });
+    };
+    editExitPointRow = (key) => {
+        var schema = { ...this.state.schema };
+        if(schema.exit_point_info[key].edit){
+            if(schema.exit_point_info[key].conveyor_exit_height===''){
+                schema.exit_point_info[key].error= "Conveyor exit height cannot be empty.";
+                }
+            if(parseInt(schema.exit_point_info[key].conveyor_exit_height)<=0){
+                schema.exit_point_info[key].error= "Conveyor exit height cannot be zero or negative.";
+            }
+        }
+        if(schema.exit_point_info[key].error === ""){
+            schema.exit_point_info[key].edit = !schema.exit_point_info[key].edit ;
+            schema.exit_point_info[key].error = '';
+        }
+        this.setState({ schema: schema });
+    };
+    deleteEntryPointRow = (key) => {
+        var schema = { ...this.state.schema };
+        schema.entry_point_info.splice(key, 1)
+        this.setState({ schema: schema });
+    };
+    deleteExitPointRow = (key) => {
+        var schema = { ...this.state.schema };
+        schema.exit_point_info.splice(key, 1)
         this.setState({ schema: schema });
     };
     editStepIdRow = (key) => {
@@ -320,26 +366,7 @@ class BaseForm extends Component {
             error = true;
             schema.conveyor_id_info.error = "Conveyor Id cannot be empty.";
         }
-        if(schema.conveyor_entry_height_info){
-            if(schema.conveyor_entry_height_info.conveyor_entry_height===''){
-            error = true;
-            schema.conveyor_entry_height_info.error= "Conveyor entry height cannot be empty.";
-            }
-            if(parseInt(schema.conveyor_entry_height_info.conveyor_entry_height)<=0){
-                error = true;
-                schema.conveyor_entry_height_info.error= "Conveyor entry height cannot be zero or negative.";
-            }
-        }
-        if(schema.conveyor_exit_height_info){
-            if(schema.conveyor_exit_height_info.conveyor_exit_height===''){
-            error = true;
-            schema.conveyor_exit_height_info.error = "Conveyor exit height cannot be empty.";
-            }
-            if(parseInt(schema.conveyor_exit_height_info.conveyor_exit_height)<=0){
-                error = true;
-                schema.conveyor_exit_height_info.error = "Conveyor exit height cannot be zero or negative.";
-            }
-        }
+
         if(!error){
             // validate if entered conveyor id is unique
             if (this.state.originalConveyorId !== parseInt(schema.conveyor_id_info.conveyor_id) && allConveyorIds.includes(parseInt(schema.conveyor_id_info.conveyor_id))) {
@@ -350,6 +377,22 @@ class BaseForm extends Component {
         if(!error){
             for (let key in schema) {
                 if(key==="active_point_info"){
+                    for(let obj of schema[key]){
+                        if(obj.edit === true){
+                            error = true;
+                            obj.error = "You have unsaved changes. Please confirm them.";
+                        }
+                    }
+                }
+                if(key==="entry_point_info"){
+                    for(let obj of schema[key]){
+                        if(obj.edit === true){
+                            error = true;
+                            obj.error = "You have unsaved changes. Please confirm them.";
+                        }
+                    }
+                }
+                if(key==="exit_point_info"){
                     for(let obj of schema[key]){
                         if(obj.edit === true){
                             error = true;
@@ -430,14 +473,7 @@ class BaseForm extends Component {
             conveyor_version,
             ...rest
         } = this.props;
-        // var entryBotOrientationOptions = []
-        // var exitBotOrientationOptions = []
-        // for(let key in entry_bot_direction_options){
-        //     entryBotOrientationOptions.push({value: entry_bot_direction_options[key], label: key})
-        // }
-        // for(let key in exit_bot_direction_options){
-        //     exitBotOrientationOptions.push({value: exit_bot_direction_options[key], label: key})
-        // }
+       
         var entryDirectionOptions = []
         var exitDirectionOptions = []
         for(let key in entry_direction_options){
@@ -556,9 +592,200 @@ class BaseForm extends Component {
                 );
             })
         }
-
+        var multiEntryPointRows = [];
+        var _this = this;
+        if(Object.keys(_this.state.schema).length!==0){
+            Object.keys(_this.state.schema.entry_point_info).forEach(function (key, index) {
+                multiEntryPointRows.push(
+                <span>
+                    <div key={"entry-point-" + index} class="row" style={{marginBottom:"10px",paddingTop:"5px"}}>
+                        <div style={{margin:"0px 14px"}}>
+                            <input
+                                style={{ width: "150px" }}
+                                className="form-control"
+                                type="text"
+                                disabled
+                                value={_this.state.schema.entry_point_info[key].entry_point_coordinate.toString()}
+                            />
+                        </div>
+                        <div style={{margin:"0px 5px"}}>
+                            <select 
+                                className="form-control" 
+                                style={{ width: "180px" }} 
+                                name="entry_bot_orientation_direction" 
+                                id="entry_bot_orientation_direction"
+                                disabled={!_this.state.schema.entry_point_info[key].edit ? true : false}
+                                defaultValue={_this.state.schema.entry_point_info[key].entry_bot_direction_options.length!==0 && _this.state.schema.entry_point_info[key].entry_bot_direction_options[0]}
+                                value={_this.state.schema.entry_point_info[key].entry_bot_orientation_direction}
+                                
+                                onChange={(e) => _this.changeMultiSchemaHandler(key, "entry_bot_orientation_direction", e.target.value,floor_barcodes,conveyorInfo)}
+                                >
+                                {_this.state.schema.entry_point_info[key].entry_bot_direction_options.map((option, index) => (
+                                    <option key={index} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div style={{margin:"0px 14px"}}>
+                            <select 
+                                className="form-control" 
+                                style={{ width: "105px" }} 
+                                name="entry_direction" 
+                                id="entry_direction"
+                                disabled={(Object.keys(_this.state.schema.entry_point_info).length!==0 && !_this.state.schema.entry_point_info[key].edit)
+                                            ? true : false}
+                                defaultValue={entryDirectionOptions.length !==0 && entryDirectionOptions[0].value} 
+                                value={_this.state.schema.entry_point_info[key].entry_direction}
+                                onChange={(e) => _this.changeMultiSchemaHandler(key,"entry_direction", e.target.value,floor_barcodes,conveyorInfo)}
+                                >
+                                {entryDirectionOptions.map((option, index) => (
+                                    <option key={index} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div style={{margin:"0px 5px"}}>
+                            <input
+                                style={{ width: "125px" }}
+                                className="form-control"
+                                type="text"
+                                disabled
+                                value={_this.state.schema.entry_point_info[key].entry_io_point_coordinate}
+                            />
+                        </div>
+                        <div style={{margin:"0px 5px"}}>
+                            <input
+                                style={{ width: "100px" }}
+                                className="form-control"
+                                type="text"
+                                disabled={!_this.state.schema.entry_point_info[key].edit
+                                            ? true : false}
+                                value={_this.state.schema.entry_point_info[key].conveyor_entry_height}
+                                onChange={(e) => _this.changeMultiSchemaHandler(key,"conveyor_entry_height_info", e.target.value)}
+                            />
+                        </div>
+                        <div style={{margin:"0px 12px"}}>
+                            <button
+                                className="btn"
+                                type="button"
+                                onClick={() => _this.editEntryPointRow(key)}
+                            >
+                                {_this.state.schema.entry_point_info[key].edit?<i className="fa fa-check"/>:<i className="fas fa-edit"/>} 
+                            </button>
+                            <button
+                                className="btn"
+                                type="button"
+                                onClick={() => _this.deleteEntryPointRow(key)}
+                            >
+                                <i className="fa fa-times" />
+                            </button>
+                        </div>
+                        {_this.state.schema.entry_point_info[key].error!=='' && <span style={{color:"red",marginLeft:'15px', marginTop:"10px"}}>{_this.state.schema.entry_point_info[key].error}</span>}
+                    </div>
+                </span>
+                );
+            })
+        }
+        var multiExitPointRows = [];
+        var _this = this;
+        if(Object.keys(_this.state.schema).length!==0){
+            Object.keys(_this.state.schema.exit_point_info).forEach(function (key, index) {
+                multiExitPointRows.push(
+                <span>
+                    <div key={"exit-point-" + index} class="row" style={{marginBottom:"10px",paddingTop:"5px"}}>
+                        <div style={{margin:"0px 14px"}}>
+                            <input
+                                style={{ width: "150px" }}
+                                className="form-control"
+                                type="text"
+                                disabled
+                                value={_this.state.schema.exit_point_info[key].exit_point_coordinate.toString()}
+                            />
+                        </div>
+                        <div style={{margin:"0px 5px"}}>
+                            <select 
+                                className="form-control" 
+                                style={{ width: "180px" }} 
+                                name="exit_bot_orientation_direction" 
+                                id="exit_bot_orientation_direction"
+                                disabled={!_this.state.schema.exit_point_info[key].edit ? true : false}
+                                defaultValue={_this.state.schema.exit_point_info[key].exit_bot_direction_options.length!==0 && _this.state.schema.exit_point_info[key].exit_bot_direction_options[0]}
+                                value={_this.state.schema.exit_point_info[key].exit_bot_orientation_direction}
+                                
+                                onChange={(e) => _this.changeMultiSchemaHandler(key, "exit_bot_orientation_direction", e.target.value,floor_barcodes,conveyorInfo)}
+                                >
+                                {_this.state.schema.exit_point_info[key].exit_bot_direction_options.map((option, index) => (
+                                    <option key={index} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div style={{margin:"0px 14px"}}>
+                            <select 
+                                className="form-control" 
+                                style={{ width: "105px" }} 
+                                name="exit_direction" 
+                                id="exit_direction"
+                                disabled={(Object.keys(_this.state.schema.exit_point_info).length!==0 && !_this.state.schema.exit_point_info[key].edit)
+                                            ? true : false}
+                                defaultValue={exitDirectionOptions.length !==0 && exitDirectionOptions[0].value} 
+                                value={_this.state.schema.exit_point_info[key].exit_direction}
+                                onChange={(e) => _this.changeMultiSchemaHandler(key,"exit_direction", e.target.value,floor_barcodes,conveyorInfo)}
+                                >
+                                {exitDirectionOptions.map((option, index) => (
+                                    <option key={index} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div style={{margin:"0px 5px"}}>
+                            <input
+                                style={{ width: "125px" }}
+                                className="form-control"
+                                type="text"
+                                disabled
+                                value={_this.state.schema.exit_point_info[key].exit_io_point_coordinate}
+                            />
+                        </div>
+                        <div style={{margin:"0px 5px"}}>
+                            <input
+                                style={{ width: "100px" }}
+                                className="form-control"
+                                type="text"
+                                disabled={!_this.state.schema.exit_point_info[key].edit
+                                            ? true : false}
+                                value={_this.state.schema.exit_point_info[key].conveyor_exit_height}
+                                onChange={(e) => _this.changeMultiSchemaHandler(key,"conveyor_exit_height_info", e.target.value)}
+                            />
+                        </div>
+                        <div style={{margin:"0px 12px"}}>
+                            <button
+                                className="btn"
+                                type="button"
+                                onClick={() => _this.editExitPointRow(key)}
+                            >
+                                {_this.state.schema.exit_point_info[key].edit?<i className="fa fa-check"/>:<i className="fas fa-edit"/>} 
+                            </button>
+                            <button
+                                className="btn"
+                                type="button"
+                                onClick={() => _this.deleteExitPointRow(key)}
+                            >
+                                <i className="fa fa-times" />
+                            </button>
+                        </div>
+                        {_this.state.schema.exit_point_info[key].error!=='' && <span style={{color:"red",marginLeft:'15px', marginTop:"10px"}}>{_this.state.schema.exit_point_info[key].error}</span>}
+                    </div>
+                </span>
+                );
+            })
+        }
         return (
-            <ButtonForm {...rest} modalClass="manage-conveyor-modal" show={this.state.show} toggle={() => this.toggle(conveyorInfo,floor_barcodes,conveyor_version)} >
+            <ButtonForm {...rest} modalClass="manage-update-conveyor-modal" show={this.state.show} toggle={() => this.toggle(conveyorInfo,floor_barcodes,conveyor_version)} >
                 {Object.keys(this.state.schema).length!==0 &&
                 <form>
                     <div style={{padding:"0px 20px"}}>
@@ -621,67 +848,6 @@ class BaseForm extends Component {
                         <br/>
                         </span>
                         }
-                        {(_this.state.schema.conveyor_entry_height_info) &&
-                        <span>
-                        <div class="row">
-                            <div className="col-5 col-lg-5 col-sm-5 col-md-5">
-                                Conveyor Entry Height : 
-                            </div>
-                            <div className="col-6 col-lg-6 col-sm-6 col-md-6">
-                                <input
-                                    style={{ width: "100%" }}
-                                    className="form-control"
-                                    type="number"
-                                    value={this.state.schema.conveyor_entry_height_info.conveyor_entry_height}
-                                    onChange={(e) => this.changeSchemaHandler("conveyor_entry_height_info", e.target.value)}
-                                    disabled={!this.state.schema.conveyor_entry_height_info.edit ? true : false}
-                                />
-                            </div>
-                            <div className="col-1 col-lg-1 col-sm-1 col-md-1">
-                                <button
-                                    className="btn"
-                                    type="button"
-                                    onClick={() => _this.editRow("conveyor_entry_height_info")}
-                                >
-                                    {_this.state.schema.conveyor_entry_height_info.edit?<i className="fa fa-check"/>:<i className="fas fa-edit"/>} 
-                                </button>
-                            </div>
-                            {_this.state.schema.conveyor_entry_height_info.error!=='' && <span style={{color:"red",marginLeft:'15px', marginTop:"10px"}}>{_this.state.schema.conveyor_entry_height_info.error}</span>}
-                        </div>
-                        <br/>
-                        </span>
-                        }
-                        {(_this.state.schema.conveyor_exit_height_info) &&
-                        <span>
-                        <div class="row">
-
-                            <div className="col-5 col-lg-5 col-sm-5 col-md-5">
-                                Conveyor Exit Height : 
-                            </div>
-                            <div className="col-6 col-lg-6 col-sm-6 col-md-6">
-                                <input
-                                    style={{ width: "100%" }}
-                                    className="form-control"
-                                    type="number"
-                                    value={this.state.schema.conveyor_exit_height_info.conveyor_exit_height}
-                                    onChange={(e) => this.changeSchemaHandler("conveyor_exit_height_info", e.target.value)}
-                                    disabled={!this.state.schema.conveyor_exit_height_info.edit ? true : false}
-                                />
-                            </div>
-                            <div className="col-1 col-lg-1 col-sm-1 col-md-1">
-                                <button
-                                    className="btn"
-                                    type="button"
-                                    onClick={() => _this.editRow("conveyor_exit_height_info")}
-                                >
-                                    {_this.state.schema.conveyor_exit_height_info.edit?<i className="fa fa-check"/>:<i className="fas fa-edit"/>} 
-                                </button>
-                            </div>
-                            {_this.state.schema.conveyor_exit_height_info.error!=='' && <span style={{color:"red",marginLeft:'15px', marginTop:"10px"}}>{_this.state.schema.conveyor_exit_height_info.error}</span>}
-                        </div>
-                        <br/>
-                        </span>
-                        }
                         {_this.state.schema.end_point_info &&
                             <span>
                                 <div class="row">
@@ -725,126 +891,7 @@ class BaseForm extends Component {
                         {_this.state.schema.active_point_info.length !== 0 && 
                         <span><br/></span>
                         }
-                        {(_this.state.schema.exit_point_info && Object.keys(_this.state.schema.exit_point_info).length !== 0) &&
-                            <div class="row" style={{paddingBottom:"5px"}}>
-                                <div style={{margin:"0px 14px"}}>
-                                    Exit Point Barcode
-                                </div>
-                                <div style={{margin:"0px 25px"}}> 
-                                    Bot Orientation Direction
-                                </div>
-                                <div>
-                                    Exit Direction
-                                </div>
-                                <div style={{margin:"0px 85px"}}>
-                                    IO Point Barcode
-                                </div>
-                            </div>
-                        }
-                        {(_this.state.schema.exit_point_info && Object.keys(_this.state.schema.exit_point_info).length !== 0) &&
-                            <span>
-                                <div class="row">
-                                    <div style={{margin:"0px 14px"}}>
-                                        <input
-                                            style={{ width: "150px" }}
-                                            className="form-control"
-                                            type="text"
-                                            disabled
-                                            value={this.state.schema.exit_point_info.exit_point_coordinate.toString()}
-                                        />
-                                    </div>
-                                    <div style={{margin:"0px 5px"}}> 
-                                        {/* <select 
-                                            className="form-control" 
-                                            style={{ width: "180px" }} 
-                                            name="exit_bot_orientation_direction" 
-                                            id="exit_bot_orientation_direction"
-                                            disabled={(Object.keys(this.state.schema.exit_point_info).length!==0 && !this.state.schema.exit_point_info.edit)
-                                                        ? true : false}
-                                            defaultValue={exitBotOrientationOptions.length !==0 && exitBotOrientationOptions[0].value} 
-                                            value={_this.state.schema.exit_point_info.exit_bot_orientation_direction}
-                                            onChange={(e) => this.changeSchemaHandler("exit_bot_orientation_direction", e.target.value,floor_barcodes,conveyorInfo)}
-                                            >
-                                            {exitBotOrientationOptions.map((option, index) => (
-                                                <option key={index} value={option.value}>
-                                                    {option.label}
-                                                </option>
-                                            ))}
-                                        </select> */}
-                                        <select 
-                                            className="form-control" 
-                                            style={{ width: "180px" }} 
-                                            name="exit_bot_orientation_direction" 
-                                            id="exit_bot_orientation_direction"
-                                            disabled={(Object.keys(this.state.schema.exit_point_info).length!==0 && !this.state.schema.exit_point_info.edit)
-                                                        ? true : false}
-                                            defaultValue={this.state.exit_bot_direction_options.length !==0 && this.state.exit_bot_direction_options[0].value} 
-                                            value={_this.state.schema.exit_point_info.exit_bot_orientation_direction}
-                                            onChange={(e) => this.changeSchemaHandler("exit_bot_orientation_direction", e.target.value,floor_barcodes,conveyorInfo)}
-                                            >
-                                            {this.state.exit_bot_direction_options.map((option, index) => (
-                                                <option key={index} value={option.value}>
-                                                    {option.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div style={{margin:"0px 14px"}}>
-                                        {/* <input
-                                            style={{ width: "160px" }}
-                                            className="form-control"
-                                            type="string"
-                                            disabled
-                                            value={this.state.schema.exit_point_info.exit_direction}
-                                        /> */}
-                                        <select 
-                                            className="form-control" 
-                                            style={{ width: "160px" }} 
-                                            name="exit_direction" 
-                                            id="exit_direction"
-                                            disabled={(Object.keys(this.state.schema.exit_point_info).length!==0 && !this.state.schema.exit_point_info.edit)
-                                                        ? true : false}
-                                            defaultValue={exitDirectionOptions.length !==0 && exitDirectionOptions[0].value} 
-                                            value={_this.state.schema.exit_point_info.exit_direction}
-                                            onChange={(e) => this.changeSchemaHandler("exit_direction", e.target.value,floor_barcodes,conveyorInfo)}
-                                            >
-                                            {exitDirectionOptions.map((option, index) => (
-                                                <option key={index} value={option.value}>
-                                                    {option.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div style={{margin:"0px 5px"}}>
-                                        <input
-                                            style={{ width: "180px" }}
-                                            className="form-control"
-                                            type="text"
-                                            disabled
-                                            value={this.state.schema.exit_point_info.exit_io_point_coordinate}
-                                        />
-                                    </div>
-                                    <div style={{margin:"0px 12px"}}>
-                                        <button
-                                            className="btn"
-                                            type="button"
-                                            onClick={() => _this.editRow("exit_point_info")}
-                                        >
-                                            {_this.state.schema.exit_point_info.edit?<i className="fa fa-check"/>:<i className="fas fa-edit"/>} 
-                                        </button>
-                                        <button
-                                            className="btn"
-                                            type="button"
-                                            onClick={() => _this.deleteRow("exit_point_info")}
-                                        >
-                                            <i className="fa fa-times" />
-                                        </button>
-                                    </div>
-                                    {_this.state.schema.exit_point_info.error!=='' && <span style={{color:"red",marginLeft:'15px', marginTop:"10px"}}>{_this.state.schema.exit_point_info.error}</span>}
-                                </div>
-                            <br/>
-                            </span>
-                        }
+                       
                         {(_this.state.schema.entry_point_info && Object.keys(_this.state.schema.entry_point_info).length !== 0) &&
                             <div class="row" style={{paddingBottom:"5px"}}>
                                 <div style={{margin:"0px 14px"}}>
@@ -856,114 +903,41 @@ class BaseForm extends Component {
                                 <div style={{margin:"0px 10px"}}>
                                     Entry Direction
                                 </div>
-                                <div style={{margin:"0px 65px"}}>
+                                <div style={{margin:"0px 0px 0px 10px"}}>
                                     IO Point Barcode
+                                </div>
+                                <div style={{margin:"0px 0px 0px 15px"}}>
+                                    Entry Height
                                 </div>
                             </div>
                         }
-                        {(_this.state.schema.entry_point_info && Object.keys(_this.state.schema.entry_point_info).length !== 0) &&
-                            <span>
-                                <div class="row">
-                                    <div style={{margin:"0px 14px"}}>
-                                        <input
-                                            style={{ width: "150px" }}
-                                            className="form-control"
-                                            type="text"
-                                            disabled
-                                            value={this.state.schema.entry_point_info.entry_point_coordinate.toString()}
-                                        />
-                                    </div>
-                                    <div style={{margin:"0px 5px"}}>
-                                        {/* <select 
-                                            className="form-control" 
-                                            style={{ width: "180px" }} 
-                                            name="entry_bot_orientation_direction" 
-                                            id="entry_bot_orientation_direction"
-                                            disabled={!this.state.schema.entry_point_info.edit ? true : false}
-                                            defaultValue={entryBotOrientationOptions.length!==0 && entryBotOrientationOptions[0]}
-                                            value={_this.state.schema.entry_point_info.entry_bot_orientation_direction}
-                                            onChange={(e) => this.changeSchemaHandler("entry_bot_orientation_direction", e.target.value,floor_barcodes,conveyorInfo)}
-                                            >
-                                            {entryBotOrientationOptions.map((option, index) => (
-                                                <option key={index} value={option.value}>
-                                                    {option.label}
-                                                </option>
-                                            ))}
-                                        </select> */}
-                                        <select 
-                                            className="form-control" 
-                                            style={{ width: "180px" }} 
-                                            name="entry_bot_orientation_direction" 
-                                            id="entry_bot_orientation_direction"
-                                            disabled={!this.state.schema.entry_point_info.edit ? true : false}
-                                            defaultValue={this.state.entry_bot_direction_options.length!==0 && this.state.entry_bot_direction_options[0]}
-                                            value={_this.state.schema.entry_point_info.entry_bot_orientation_direction}
-                                            onChange={(e) => this.changeSchemaHandler("entry_bot_orientation_direction", e.target.value,floor_barcodes,conveyorInfo)}
-                                            >
-                                            {this.state.entry_bot_direction_options.map((option, index) => (
-                                                <option key={index} value={option.value}>
-                                                    {option.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div style={{margin:"0px 14px"}}>
-                                        {/* <input
-                                            style={{ width: "160px" }}
-                                            className="form-control"
-                                            type="string"
-                                            disabled
-                                            value={this.state.schema.entry_point_info.entry_direction}
-                                        /> */}
-                                        <select 
-                                            className="form-control" 
-                                            style={{ width: "160px" }} 
-                                            name="entry_direction" 
-                                            id="entry_direction"
-                                            disabled={(Object.keys(this.state.schema.entry_point_info).length!==0 && !this.state.schema.entry_point_info.edit)
-                                                        ? true : false}
-                                            defaultValue={entryDirectionOptions.length !==0 && entryDirectionOptions[0].value} 
-                                            value={_this.state.schema.entry_point_info.entry_direction}
-                                            onChange={(e) => this.changeSchemaHandler("entry_direction", e.target.value,floor_barcodes,conveyorInfo)}
-                                            >
-                                            {entryDirectionOptions.map((option, index) => (
-                                                <option key={index} value={option.value}>
-                                                    {option.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div style={{margin:"0px 5px"}}>
-                                        <input
-                                            style={{ width: "180px" }}
-                                            className="form-control"
-                                            type="text"
-                                            disabled
-                                            value={this.state.schema.entry_point_info.entry_io_point_coordinate}
-                                        />
-                                    </div>
-                                    <div style={{margin:"0px 12px"}}>
-                                        <button
-                                            className="btn"
-                                            type="button"
-                                            onClick={() => _this.editRow("entry_point_info")}
-                                        >
-                                            {_this.state.schema.entry_point_info.edit?<i className="fa fa-check"/>:<i className="fas fa-edit"/>} 
-                                        </button>
-                                        <button
-                                            className="btn"
-                                            type="button"
-                                            onClick={() => _this.deleteRow("entry_point_info")}
-                                        >
-                                            <i className="fa fa-times" />
-                                        </button>
-                                    </div>
-                                    {_this.state.schema.entry_point_info.error!=='' && <span style={{color:"red",marginLeft:'15px', marginTop:"10px"}}>{_this.state.schema.entry_point_info.error}</span>}
-                                </div>
-                            <br/>    
-                            </span>
+                        {multiEntryPointRows}
+                        {_this.state.schema.entry_point_info.length !== 0 && 
+                        <span><br/></span>
                         }
-                        
+                        {(_this.state.schema.exit_point_info && Object.keys(_this.state.schema.exit_point_info).length !== 0) &&
+                            <div class="row" style={{paddingBottom:"5px"}}>
+                                <div style={{margin:"0px 14px"}}>
+                                    Exit Point Barcode
+                                </div>
+                                <div style={{margin:"0px 25px"}}>
+                                    Bot Orientation Direction
+                                </div>
+                                <div style={{margin:"0px 10px 0px 0px"}}>
+                                    Exit Direction
+                                </div>
+                                <div style={{margin:"0px 0px 0px 20px"}}>
+                                    IO Point Barcode
+                                </div>
+                                <div style={{margin:"0px 0px 0px 15px"}}>
+                                    Exit Height
+                                </div>
+                            </div>
+                        }
+                        {multiExitPointRows}
+                        {_this.state.schema.exit_point_info.length !== 0 && 
+                        <span><br/></span>
+                        }
                         {(_this.state.schema.conveyor_step_id_info && Object.keys(_this.state.schema.conveyor_step_id_info).length !== 0) &&
                             <div className="conveyor-manage-select-buttons">
                                 <div class="row">

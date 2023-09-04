@@ -16,23 +16,6 @@ const checkPointLieOnConveyorBelt = (conveyorTile,selectedMapTiles) => {
   return ['',true]   
 };
 
-const IsSelectedTileActivePointOrEndPoint = (conveyorTile,map_tile_value) => {
-  if(conveyorTile.hasOwnProperty("conveyor_end")){
-        return true
-      }
-  if(conveyorTile["conveyor_active"].length>0){
-    var conveyor_active_list = []
-    for (var i = 0; i < conveyorTile["conveyor_active"].length; i++) {
-      conveyor_active_list.push(conveyorTile["conveyor_active"][i]["conveyor_active_point"])
-    }
-    var conveyor_active = convertNestedListToList(conveyor_active_list)
-    if(map_tile_value.some(item => conveyor_active.includes(item))){
-      return true
-    }
-  }
-  return false
-};
-
 const checkPointLieInMiddleConveyorBelt = (conveyorTile,tileId,barcodes) => {
   var selected_tile = convertNestedListToList(conveyorTile)
   if (barcodes[tileId].hasOwnProperty('adjacency')) {
@@ -48,6 +31,54 @@ const checkPointLieInMiddleConveyorBelt = (conveyorTile,tileId,barcodes) => {
   return true
 };
 
+const checkSameEntryPointOnConveyorBelt = (conveyorTile,end_point) => {
+  if(conveyorTile.hasOwnProperty("conveyor_entry")){
+      var conveyor_entry_details = conveyorTile.conveyor_entry
+      for (var i = 0; i < conveyor_entry_details.length; i++) {
+          var entry_coordinate = conveyor_entry_details[i].conveyor_entry[0].toString()
+          if(entry_coordinate === end_point){
+              return true
+          }
+      }
+  }
+  return false
+};
+
+const checkSameExitPointOnConveyorBelt = (conveyorTile,end_point) => {
+  if(conveyorTile.hasOwnProperty("conveyor_exit")){
+      var conveyor_exit_details = conveyorTile.conveyor_exit
+      for (var i = 0; i < conveyor_exit_details.length; i++) {
+          var exit_coordinate = conveyor_exit_details[i].conveyor_exit[0].toString()
+          if(exit_coordinate === end_point){
+              return true
+          }
+      }
+  }
+  return false
+};
+
+const checkSameActvePointOnConveyorBelt = (conveyorTile,end_point) => {
+  if(conveyorTile.conveyor_active.length!==0){
+      var conveyor_active_details = conveyorTile.conveyor_active
+      for (var i = 0; i < conveyor_active_details.length; i++) {
+          var active_coordinate = conveyor_active_details[i].conveyor_active_point[0]
+          if(active_coordinate === end_point){
+              return true
+          }
+      }
+  }
+  return false
+};
+
+const checkSameEndPointOnConveyorBelt = (conveyorTile,end_point) => {
+  if(conveyorTile.hasOwnProperty("conveyor_end")){
+      var conveyor_end_details = conveyorTile.conveyor_end[0].toString()
+      if(conveyor_end_details === end_point){
+              return true
+        }
+  }
+  return false
+};
 
 const shouldBeDisabled = (map_tile_value, barcodes, conveyorTile) => {
   var conveyor_id = ''
@@ -55,8 +86,12 @@ const shouldBeDisabled = (map_tile_value, barcodes, conveyorTile) => {
      var [conveyor_id,point_exist] =checkPointLieOnConveyorBelt(conveyorTile,map_tile_value)
      if(conveyor_id!=''){
       var middle_point= checkPointLieInMiddleConveyorBelt(conveyorTile[conveyor_id][["selected_tile"]],map_tile_value[0],barcodes)
-      var point_already_exist = IsSelectedTileActivePointOrEndPoint(conveyorTile[conveyor_id],map_tile_value)
-      if(!point_exist && !middle_point && !point_already_exist){
+      var already_entry_point_exist = checkSameEntryPointOnConveyorBelt(conveyorTile[conveyor_id],map_tile_value[0])
+      var already_exit_point_exist = checkSameExitPointOnConveyorBelt(conveyorTile[conveyor_id],map_tile_value[0]) 
+      var already_active_point_exist = checkSameActvePointOnConveyorBelt(conveyorTile[conveyor_id],map_tile_value[0])
+      var already_end_point_exist = checkSameEndPointOnConveyorBelt(conveyorTile[conveyor_id],map_tile_value[0])
+      if(!point_exist && !middle_point && !already_entry_point_exist && !already_exit_point_exist
+        && !already_active_point_exist && !already_end_point_exist){
         return [conveyor_id,false]
       }
      }

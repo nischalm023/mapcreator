@@ -7,6 +7,7 @@ import {
   getConveyorPointBotDirection,
   getIoPoint
 } from "actions/conveyor";
+import * as constants from "../../../constants";
 import { connect } from "react-redux";
 import { getBarcodes } from "../../../utils/selectors";
 import ButtonForm from "./Util/ButtonForm";
@@ -15,107 +16,130 @@ import {getNeighbourTiles } from "utils/util";
 const checkPointLieOnConveyorBelt = (conveyorTile,selectedMapTiles) => {
   for (const [key, value] of Object.entries(conveyorTile)) {
     var selected_tile = convertNestedListToList(value["selected_tile"])
-    const exitArray = selectedMapTiles.filter(value => selected_tile.includes(value));
+    const entryArray = selectedMapTiles.filter(value => selected_tile.includes(value));
     const ioPointArray = selectedMapTiles.filter(value => !selected_tile.includes(value));
-    if(exitArray.length==1 && ioPointArray.length==1){
-      return [key,exitArray[0],ioPointArray[0],false]
+    if(entryArray.length==1 && ioPointArray.length==1){
+      return [key,entryArray[0],ioPointArray[0],false]
     }
   }
   return ['','','',true]   
 };
 
-const checkPointAlreadyExistOnConveyorBelt = (conveyorTile) => {
-  if(conveyorTile.hasOwnProperty("conveyor_exit")){
-    return true
+const checkSameEntryPointOnConveyorBelt = (conveyorTile,exit_point) => {
+  if(conveyorTile.hasOwnProperty("conveyor_entry")){
+      var conveyor_entry_details = conveyorTile.conveyor_entry
+      for (var i = 0; i < conveyor_entry_details.length; i++) {
+          var entry_coordinate = conveyor_entry_details[i].conveyor_entry[0].toString()
+          if(entry_coordinate === exit_point){
+              return true
+          }
+      }
   }
   return false
 };
 
-const checkIOPointNotLieOnConveyorBelt = (conveyorTile,io_point) => {
+const checkSameExitPointOnConveyorBelt = (conveyorTile,exit_point) => {
+  if(conveyorTile.hasOwnProperty("conveyor_exit")){
+      var conveyor_exit_details = conveyorTile.conveyor_exit
+      for (var i = 0; i < conveyor_exit_details.length; i++) {
+          var exit_coordinate = conveyor_exit_details[i].conveyor_exit[0].toString()
+          if(exit_coordinate === exit_point){
+              return true
+          }
+      }
+  }
+  return false
+};
+
+const checkSameActvePointOnConveyorBelt = (conveyorTile,exit_point) => {
+  if(conveyorTile.conveyor_active.length!==0){
+      var conveyor_active_details = conveyorTile.conveyor_active
+      for (var i = 0; i < conveyor_active_details.length; i++) {
+          var active_coordinate = conveyor_active_details[i].conveyor_active_point[0]
+          if(active_coordinate === exit_point){
+              return true
+          }
+      }
+  }
+  return false
+};
+
+const checkSameEndPointOnConveyorBelt = (conveyorTile,exit_point) => {
+  if(conveyorTile.hasOwnProperty("conveyor_end")){
+      var conveyor_end_details = conveyorTile.conveyor_end[0].toString()
+      if(conveyor_end_details === exit_point){
+              return true
+        }
+  }
+  return false
+};
+
+const checkIOPointOnConveyorBelt = (conveyorTile,io_point) => {
   for (const [key, value] of Object.entries(conveyorTile)) {
     var selected_tile = convertNestedListToList(value["selected_tile"])
     if(selected_tile.includes(io_point)){
       return true
     }
-  }
   return false
 };
 
+}
 
-const checkExistPointConveyorBelt = (conveyorTile,map_tile_value) => {
-  if(conveyorTile.hasOwnProperty("conveyor_entry") && conveyorTile["conveyor_entry"].toString()==map_tile_value){
+
+const checkDuplicateIOPoint = (conveyorTile,io_point) => {
+  for (const [key, value] of Object.entries(conveyorTile)) {
+    if(value.hasOwnProperty("conveyor_entry")){
+        var conveyor_entry_details = value["conveyor_entry"]
+        for (var i = 0; i < conveyor_entry_details.length; i++) {
+            var io_coordinate = JSON.parse(conveyor_entry_details[i].conveyor_io_entry)
+            if(io_coordinate.toString() === io_point){
+                return true
+            }
+        }
+      }
+      if(value.hasOwnProperty("conveyor_exit")){
+        var conveyor_exit_details = value["conveyor_exit"]
+        for (var i = 0; i < conveyor_exit_details.length; i++) {
+            var io_coordinate = JSON.parse(conveyor_exit_details[i].conveyor_io_exit)
+            if(io_coordinate.toString() === io_point){
+                return true
+            }
+        }
+      }
+    }
+  return false
+};
+
+const checkMultipleExitV1 = (conveyorTile,conveyor_version) => {
+  if (conveyorTile.hasOwnProperty("conveyor_exit") && conveyor_version !== constants.DEFAULT_CONVEYOR_VERSION){
     return true
   }
   return false
-};
+}
 
-// const IfExitPointLieOnPheriphery = (barcode,tileId,conveyorTile) => {
-//   if(barcode[tileId].hasOwnProperty('adjacency')){
-//     var nbTileId = convertNestedListToList(barcode[tileId]["adjacency"])
-//   }else{
-//     var nbTileId = getNeighbourTiles(tileId)
-//   }
-//   var selectedConveyorTiles = convertNestedListToList(conveyorTile["selected_tile"])
-//   var result = selectedConveyorTiles.filter(o => nbTileId.some(e => JSON.stringify(e) == JSON.stringify(o)));
-//   if(result.length===1){
-//     return false
-//   }else{
-//     return true
-//   }
-// };
-
-const checkPointLieOnEdgeInConveyorBelt = (conveyorTile,tileId,barcodes) => {
-  var selected_tile = convertNestedListToList(conveyorTile)
-  if (barcodes[tileId].hasOwnProperty('adjacency')) {
-          var nbTileId = convertNestedListToList(barcodes[tileId]["adjacency"])
-        }
-        else {
-          var nbTileId = getNeighbourTiles(tileId)
-        }
-  const filteredArray = selected_tile.filter(value => nbTileId.includes(value));
-  if(filteredArray.length===1){
-    return false
-  }
-  return true
-};
-
-const checkPointAlreadyExist = (conveyorTile,io_point) => {
-  for (const [key, value] of Object.entries(conveyorTile)) {
-    if(value.hasOwnProperty("conveyor_io_exit")){
-      var io_point_exist = JSON.parse(value["conveyor_io_exit"])
-      if(io_point_exist.toString() === io_point){
-        return true
-      }
-    }
-    if(value.hasOwnProperty("conveyor_io_entry")){
-      var io_point_entry = JSON.parse(value["conveyor_io_entry"])
-      if(io_point_entry.toString() === io_point){
-        return true
-      }
-    }
-  }
-  return false
-};
-
-
-const shouldBeDisabled = (map_tile_value, barcodes, conveyorTile) => {
+const shouldBeDisabled = (map_tile_value, barcodes, conveyorTile, conveyor_version) => {
   var conveyor_id = ''
   if(map_tile_value.length==2){
      var [conveyor_id,exit_point,io_point,point_exist] =checkPointLieOnConveyorBelt(conveyorTile,map_tile_value)
      if(conveyor_id!=''){
-      var io_point_not_lie_on_conveyor_belt = checkIOPointNotLieOnConveyorBelt(conveyorTile,io_point)
-      var io_point_exist = checkPointAlreadyExist(conveyorTile,io_point)
-      var already_point_exist = checkPointAlreadyExistOnConveyorBelt(conveyorTile[conveyor_id])
-      // var edge_point_exist = checkPointLieOnEdgeInConveyorBelt(conveyorTile[conveyor_id]["selected_tile"],exit_point,barcodes)
-      var check_entry_exist_point_match = checkExistPointConveyorBelt(conveyorTile[conveyor_id],exit_point)
-      // var exit_periphery_check = IfExitPointLieOnPheriphery(barcodes,map_tile_value,conveyorTile[conveyor_id])
-      if(!io_point_exist && !io_point_not_lie_on_conveyor_belt && !point_exist && !already_point_exist && !check_entry_exist_point_match){
-        return [conveyor_id,exit_point,io_point,false]
-      }
+        var already_entry_point_exist = checkSameEntryPointOnConveyorBelt(conveyorTile[conveyor_id],exit_point)
+        var already_exit_point_exist = checkSameExitPointOnConveyorBelt(conveyorTile[conveyor_id],exit_point) 
+        var already_active_point_exist = checkSameActvePointOnConveyorBelt(conveyorTile[conveyor_id],exit_point)
+        var already_end_point_exist = checkSameEndPointOnConveyorBelt(conveyorTile[conveyor_id],exit_point)
+        var is_io_point_on_conveyor_belt = checkIOPointOnConveyorBelt(conveyorTile,io_point)
+        var already_exist_io_point = checkDuplicateIOPoint(conveyorTile,io_point)
+        var no_multiple_exit_v1 = checkMultipleExitV1(conveyorTile[conveyor_id],conveyor_version)
+        if(!point_exist && !already_entry_point_exist && !already_exit_point_exist && !already_active_point_exist 
+          && !already_end_point_exist && !is_io_point_on_conveyor_belt && !already_exist_io_point && !no_multiple_exit_v1
+          ){
+          return [conveyor_id,exit_point,io_point,false]
+        }          
      }
   }
   return [conveyor_id,'','',true]
 };
+
+
 let direction_mapping = {0:"North",1:"East",2:"South",3:"West"}
 // TODO: support negative tile id i.e. when trying to go above 0,0 etc.
 // TODO: support customizing edges of new barcode
@@ -260,7 +284,7 @@ export default connect(
     var current_floor = state.currentFloor
     var floor_value = state.normalizedMap.entities.floor
     var conveyorTile = state.normalizedMap.entities.conveyorTile
-
+    var conveyor_version = state.conveyorVersion
     var current_floor_value = floor_value[current_floor]
     var floor_barcodes = {};
     var conveyor_id = ''
@@ -273,7 +297,7 @@ export default connect(
     if(conveyorTile == undefined || Object.keys(conveyorTile).length==0){
       disabled = true
     }else{
-      var [conveyor_id,exit_point,io_point,disabled] = shouldBeDisabled(map_tile_value, floor_barcodes, conveyorTile);
+      var [conveyor_id,exit_point,io_point,disabled] = shouldBeDisabled(map_tile_value, floor_barcodes, conveyorTile, conveyor_version);
     }
     // find exit direction options
     var direction = getConveyorExitPointDirection(state, floor_barcodes, map_tile_value, conveyorTile, conveyor_id)

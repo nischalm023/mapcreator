@@ -17,39 +17,55 @@ const checkPointLieOnConveyorBelt = (conveyorTile,selectedMapTiles) => {
   return ['','',true]   
 };
 
-const IsSelectedTileActivePointOrEndPoint = (conveyorTile,map_tile_value) => {
-  if(conveyorTile.hasOwnProperty("conveyor_end") && 
-      map_tile_value.includes(conveyorTile["conveyor_end"].toString()))
-      {
-        return true
+const checkSameEntryPointOnConveyorBelt = (conveyorTile,active_point) => {
+  if(conveyorTile.hasOwnProperty("conveyor_entry")){
+      var conveyor_entry_details = conveyorTile.conveyor_entry
+      for (var i = 0; i < conveyor_entry_details.length; i++) {
+          var entry_coordinate = conveyor_entry_details[i].conveyor_entry[0].toString()
+          if(entry_coordinate === active_point){
+              return true
+          }
       }
-  if(conveyorTile["conveyor_active"].length>0){
-    var conveyor_active_list = []
-    for (var i = 0; i < conveyorTile["conveyor_active"].length; i++) {
-      conveyor_active_list.push(conveyorTile["conveyor_active"][i]["conveyor_active_point"])
-    }
-    var conveyor_active = convertNestedListToList(conveyor_active_list)
-    if(map_tile_value.some(item => conveyor_active.includes(item))){
-      return true
-    }
   }
   return false
 };
 
-const checkPointLieInMiddleConveyorBelt = (conveyorTile,tileId,barcodes) => {
-  var selected_tile = convertNestedListToList(conveyorTile)
-  if (barcodes[tileId].hasOwnProperty('adjacency')) {
-          var nbTileId = convertNestedListToList(barcodes[tileId]["adjacency"])
-        }
-        else {
-          var nbTileId = getNeighbourTiles(tileId)
-        }
-  const filteredArray = selected_tile.filter(value => nbTileId.includes(value));
-  if(filteredArray.length>0){
-    return false
+const checkSameExitPointOnConveyorBelt = (conveyorTile,active_point) => {
+  if(conveyorTile.hasOwnProperty("conveyor_exit")){
+      var conveyor_exit_details = conveyorTile.conveyor_exit
+      for (var i = 0; i < conveyor_exit_details.length; i++) {
+          var exit_coordinate = conveyor_exit_details[i].conveyor_exit[0].toString()
+          if(exit_coordinate === active_point){
+              return true
+          }
+      }
   }
-  return true
+  return false
 };
+
+const checkSameActvePointOnConveyorBelt = (conveyorTile,active_point) => {
+  if(conveyorTile.conveyor_active.length!==0){
+      var conveyor_active_details = conveyorTile.conveyor_active
+      for (var i = 0; i < conveyor_active_details.length; i++) {
+          var active_coordinate = conveyor_active_details[i].conveyor_active_point[0]
+          if(active_coordinate === active_point){
+              return true
+          }
+      }
+  }
+  return false
+};
+
+const checkSameEndPointOnConveyorBelt = (conveyorTile,active_point) => {
+  if(conveyorTile.hasOwnProperty("conveyor_end")){
+      var conveyor_end_details = conveyorTile.conveyor_end[0].toString()
+      if(conveyor_end_details === active_point){
+              return true
+        }
+  }
+  return false
+};
+
 
 const checkPpsEligibleSystem = (pps_dict,map_tile_value) => {
   for (const [key, value] of Object.entries(pps_dict)) {
@@ -72,9 +88,12 @@ const shouldBeDisabled = (map_tile_value, barcodes, conveyorTile,pps_dict) => {
      var [conveyor_id,active_point_coordinate,point_exist] =checkPointLieOnConveyorBelt(conveyorTile,map_tile_value)
      if(conveyor_id!=''){
       var [pps_id,pps_coordinate,pps_eligible] = checkPpsEligibleSystem(pps_dict,map_tile_value)
-      var middle_point= checkPointLieInMiddleConveyorBelt(conveyorTile[conveyor_id][["selected_tile"]],active_point_coordinate,barcodes)
-      var point_already_exist = IsSelectedTileActivePointOrEndPoint(conveyorTile[conveyor_id],map_tile_value)
-      if(!point_exist && !pps_eligible && !middle_point && !point_already_exist){
+      var already_entry_point_exist = checkSameEntryPointOnConveyorBelt(conveyorTile[conveyor_id],active_point_coordinate)
+      var already_exit_point_exist = checkSameExitPointOnConveyorBelt(conveyorTile[conveyor_id],active_point_coordinate) 
+      var already_active_point_exist = checkSameActvePointOnConveyorBelt(conveyorTile[conveyor_id],active_point_coordinate)
+      var already_end_point_exist = checkSameEndPointOnConveyorBelt(conveyorTile[conveyor_id],active_point_coordinate)
+      if(!point_exist && !pps_eligible && !already_entry_point_exist 
+        && !already_exit_point_exist && !already_active_point_exist && !already_end_point_exist){
         return [conveyor_id,pps_id,pps_coordinate,active_point_coordinate,false]
       }
      }

@@ -134,24 +134,28 @@ export default (state = {}, action) => {
     }
 
     case "REMOVE-CONVEYOR-EXIT-IO-POINT-STRIPES": {
-      const { conveyor_io_exit_point } = action.value;
-      const conveyor_tile = (JSON.parse(conveyor_io_exit_point)).toString()
+      const { diff_exit_io_point } = action.value;
       let newState = { ...state };
       var k = 0;
-      if (newState[conveyor_tile]) {
-          newState[conveyor_tile] = { ...state[conveyor_tile], conveyorExitIO: false};
-          delete newState[conveyor_tile].conveyorExitIO;
+      while (k < diff_exit_io_point.length) {
+      if (newState[diff_exit_io_point[k]]) {
+          newState[diff_exit_io_point[k]] = { ...state[diff_exit_io_point[k]], conveyorExitIO: false};
+          delete newState[diff_exit_io_point[k]].conveyorExitIO;
+        }
+        k++;
       }
       return Object.assign({}, state, newState);
     }
     case "REMOVE-CONVEYOR-ENTRY-IO-POINT-STRIPES": {
-      const { conveyor_io_entry_point } = action.value;
-      const conveyor_tile = (JSON.parse(conveyor_io_entry_point)).toString()
+      const { diff_entry_io_point } = action.value;
       let newState = { ...state };
       var k = 0;
-      if (newState[conveyor_tile]) {
-          newState[conveyor_tile] = { ...state[conveyor_tile], conveyorEntryIO: false};
-          delete newState[conveyor_tile].conveyorEntryIO;
+      while (k < diff_entry_io_point.length) {
+      if (newState[diff_entry_io_point[k]]) {
+          newState[diff_entry_io_point[k]] = { ...state[diff_entry_io_point[k]], conveyorEntryIO: false};
+          delete newState[diff_entry_io_point[k]].conveyorEntryIO;
+        }
+        k++;
       }
       return Object.assign({}, state, newState);
     }

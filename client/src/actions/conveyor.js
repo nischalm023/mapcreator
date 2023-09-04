@@ -768,20 +768,29 @@ export const removeConveyor = (
               type: "CONVEYOR-TILES-STRIPES",
               value: {conveyor_tile,"conveyor_selected_status":0}
                 })
-          if(conveyorTile[conveyor_id].hasOwnProperty("conveyor_io_entry")){
-            var conveyor_io_entry_point = conveyorTile[conveyor_id]["conveyor_io_entry"]
+          if(conveyorTile[conveyor_id].hasOwnProperty("conveyor_entry")){
+            var diff_entry_io_point = []
+            var conveyor_entry_data = conveyorTile[conveyor_id].conveyor_entry
+            for (var i = 0; i < conveyor_entry_data.length; i++) {
+              diff_entry_io_point.push(JSON.parse(conveyor_entry_data[i]["conveyor_io_entry"]).toString())
+            }
             dispatch({
               type: "REMOVE-CONVEYOR-ENTRY-IO-POINT-STRIPES",
-              value: {conveyor_io_entry_point}
+              value: {diff_entry_io_point}
                 })
           }
-          if(conveyorTile[conveyor_id].hasOwnProperty("conveyor_io_exit")){
-            var conveyor_io_exit_point = conveyorTile[conveyor_id]["conveyor_io_exit"]
+          if(conveyorTile[conveyor_id].hasOwnProperty("conveyor_exit")){
+            var diff_exit_io_point = []
+            var conveyor_exit_data = conveyorTile[conveyor_id].conveyor_exit
+            for (var i = 0; i < conveyor_exit_data.length; i++) {
+              diff_exit_io_point.push(JSON.parse(conveyor_exit_data[i]["conveyor_io_exit"]).toString())
+            }
             dispatch({
               type: "REMOVE-CONVEYOR-EXIT-IO-POINT-STRIPES",
-              value: {conveyor_io_exit_point}
+              value: {diff_exit_io_point}
                 })
           }
+          
           dispatch({
               type: "REMOVE-SELECTED-CONVEYOR-ID",
               value: {conveyor_id}
@@ -824,16 +833,99 @@ export const updateConveyor = (formData) => (dispatch, getState) => {
   let originalConveyorId = formData.originalConveyorId;
   let activePointDiff = []
   var ConveyorData = state.normalizedMap.entities.conveyorTile[originalConveyorId];
-  // update conveyor details based on form
-  if(formData.schema.conveyor_entry_height_info){
-    ConveyorData.conveyor_entry_height = parseInt(formData.schema.conveyor_entry_height_info.conveyor_entry_height);
-  }
-  if(formData.schema.conveyor_entry_height_info){
-    ConveyorData.conveyor_entry_height = parseInt(formData.schema.conveyor_entry_height_info.conveyor_entry_height);
-  }
+
   if(formData.schema.conveyor_display_name_info){
     ConveyorData.conveyor_display_name = formData.schema.conveyor_display_name_info.conveyor_display_name;
   }
+  if(ConveyorData.hasOwnProperty("conveyor_entry")){
+    var getNewEntryList = []
+    for (var i = 0; i < formData.schema.entry_point_info.length; i++) {
+      getNewEntryList.push(mappingBarcodeCoord[formData.schema.entry_point_info[i]["entry_point_coordinate"]])
+    }
+    var getAllEntryCoordinateList = []
+    for (var i = 0; i < ConveyorData.conveyor_entry.length; i++) {
+      getAllEntryCoordinateList.push((ConveyorData.conveyor_entry[i]["conveyor_entry"][0]).toString())
+    }
+    let stateDiff = getAllEntryCoordinateList.filter(x => !getNewEntryList.includes(x));
+    if(stateDiff){
+      var conveyor_tile = StringtoListFormat(stateDiff)
+      var diff_entry_io_point = []
+      for (var i = 0; i < stateDiff.length; i++) {
+        var entry_io = ConveyorData.conveyor_entry.find(item => (item.conveyor_entry[0]).toString() === stateDiff[i])
+        diff_entry_io_point.push(JSON.parse(entry_io["conveyor_io_entry"]).toString())
+      }
+      dispatch({
+        type: "REMOVE-CONVEYOR-ENTRY-IO-POINT-STRIPES",
+        value: { diff_entry_io_point},
+      });
+      dispatch({
+        type: "CONVEYOR-TILES-STRIPES",
+        value: { conveyor_tile, grid_attribute: "conveyor_track" } ,
+      });
+    }
+  }
+  if(formData.schema.entry_point_info.length === 0 && ConveyorData.hasOwnProperty("conveyor_entry")){
+       delete ConveyorData.conveyor_entry
+     }
+  else if(formData.schema.entry_point_info.length !== 0  && ConveyorData.hasOwnProperty("conveyor_entry")){
+    var new_entry = []
+    delete ConveyorData.conveyor_entry
+    for (var i = 0; i < formData.schema.entry_point_info.length; i++) {
+      var entry_edit_dict = {}
+      entry_edit_dict["bot_orientation_entry"]=parseInt(formData.schema.entry_point_info[i].entry_bot_orientation_direction)
+      entry_edit_dict["conveyor_entry"]=[mappingBarcodeCoord[formData.schema.entry_point_info[i].entry_point_coordinate].split(",").map((val) => parseInt(val))]
+      entry_edit_dict["conveyor_entry_height"]=parseInt(formData.schema.entry_point_info[i].conveyor_entry_height)
+      entry_edit_dict["conveyor_io_entry"]=`[${mappingBarcodeCoord[formData.schema.entry_point_info[i].entry_io_point_coordinate]}]`
+      entry_edit_dict["entry_point_direction"]=parseInt(formData.schema.entry_point_info[i].entry_direction)
+      new_entry.push(entry_edit_dict)
+    }
+    ConveyorData.conveyor_entry = new_entry
+  }
+  if(ConveyorData.hasOwnProperty("conveyor_exit")){
+    var getNewExitList = []
+    for (var i = 0; i < formData.schema.exit_point_info.length; i++) {
+      getNewExitList.push(mappingBarcodeCoord[formData.schema.exit_point_info[i]["exit_point_coordinate"]])
+    }
+    var getAllExitCoordinateList = []
+    for (var i = 0; i < ConveyorData.conveyor_exit.length; i++) {
+      getAllExitCoordinateList.push((ConveyorData.conveyor_exit[i]["conveyor_exit"][0]).toString())
+    }
+    let stateDiff = getAllExitCoordinateList.filter(x => !getNewExitList.includes(x));
+    if(stateDiff){
+      var conveyor_tile = StringtoListFormat(stateDiff)
+      var diff_exit_io_point = []
+      for (var i = 0; i < stateDiff.length; i++) {
+        var exit_io = ConveyorData.conveyor_exit.find(item => (item.conveyor_exit[0]).toString() === stateDiff[i])
+        diff_exit_io_point.push(JSON.parse(exit_io["conveyor_io_exit"]).toString())
+      }
+      dispatch({
+        type: "REMOVE-CONVEYOR-EXIT-IO-POINT-STRIPES",
+        value: { diff_exit_io_point},
+      });
+      dispatch({
+        type: "CONVEYOR-TILES-STRIPES",
+        value: { conveyor_tile, grid_attribute: "conveyor_track" } ,
+      });
+    }
+  }
+  if(formData.schema.exit_point_info.length === 0 && ConveyorData.hasOwnProperty("conveyor_exit")){
+       delete ConveyorData.conveyor_exit
+     }
+  else if(formData.schema.exit_point_info.length !== 0  && ConveyorData.hasOwnProperty("conveyor_exit")){
+    var new_exit = []
+    delete ConveyorData.conveyor_exit
+    for (var i = 0; i < formData.schema.exit_point_info.length; i++) {
+      var exit_edit_dict = {}
+      exit_edit_dict["bot_orientation_exit"]=parseInt(formData.schema.exit_point_info[i].exit_bot_orientation_direction)
+      exit_edit_dict["conveyor_exit"]=[mappingBarcodeCoord[formData.schema.exit_point_info[i].exit_point_coordinate].split(",").map((val) => parseInt(val))]
+      exit_edit_dict["conveyor_exit_height"]=parseInt(formData.schema.exit_point_info[i].conveyor_exit_height)
+      exit_edit_dict["conveyor_io_exit"]=`[${mappingBarcodeCoord[formData.schema.exit_point_info[i].exit_io_point_coordinate]}]`
+      exit_edit_dict["exit_point_direction"]=parseInt(formData.schema.exit_point_info[i].exit_direction)
+      new_exit.push(exit_edit_dict)
+    }
+    ConveyorData.conveyor_exit = new_exit
+  }
+
   if(ConveyorData.conveyor_active.length !== 0){
     var getNewActiveList = []
     for (var i = 0; i < formData.schema.active_point_info.length; i++) {
@@ -916,68 +1008,36 @@ export const updateConveyor = (formData) => (dispatch, getState) => {
     delete ConveyorData.conveyor_end;
   }
   
-  // if form does not have conveyor_exit info but state has, 
-  // then delete conveyor_exit info from state and remove exit point highlight.
-  // if form has conveyor_exit info and state also has, 
-  // then update conveyor_exit info from state.
-  if(ConveyorData.hasOwnProperty("conveyor_exit")){
-    conveyor_tile = ConveyorData.conveyor_exit
-    var conveyor_io_exit_point = ConveyorData.conveyor_io_exit;
-    if(!formData.schema.hasOwnProperty("exit_point_info")){
-      dispatch({
-        type: "CONVEYOR-TILES-STRIPES",
-        value: { conveyor_tile, grid_attribute: "conveyor_track" } ,
-      });
-      dispatch({
-        type: "REMOVE-CONVEYOR-EXIT-IO-POINT-STRIPES",
-        value: { conveyor_io_exit_point},
-      });
-
-    }
-  }
-  if(!formData.schema.exit_point_info && ConveyorData.hasOwnProperty("conveyor_exit")){
-       delete ConveyorData.bot_orientation_exit;
-       delete ConveyorData.exit_point_direction;
-       delete ConveyorData.conveyor_io_exit;
-       delete ConveyorData.conveyor_exit;
-       delete ConveyorData.conveyor_exit_height
-     }
-  else if(ConveyorData.hasOwnProperty("conveyor_exit")){
-       ConveyorData.bot_orientation_exit = parseInt(formData.schema.exit_point_info.exit_bot_orientation_direction);
-       ConveyorData.exit_point_direction = parseInt(formData.schema.exit_point_info.exit_direction);
-       ConveyorData.conveyor_io_exit = `[${mappingBarcodeCoord[formData.schema.exit_point_info.exit_io_point_coordinate]}]`;
-  }
+  // if(!formData.schema.exit_point_info && ConveyorData.hasOwnProperty("conveyor_exit")){
+  //      delete ConveyorData.bot_orientation_exit;
+  //      delete ConveyorData.exit_point_direction;
+  //      delete ConveyorData.conveyor_io_exit;
+  //      delete ConveyorData.conveyor_exit;
+  //      delete ConveyorData.conveyor_exit_height
+  //    }
+  // else if(ConveyorData.hasOwnProperty("conveyor_exit")){
+  //      ConveyorData.bot_orientation_exit = parseInt(formData.schema.exit_point_info.exit_bot_orientation_direction);
+  //      ConveyorData.exit_point_direction = parseInt(formData.schema.exit_point_info.exit_direction);
+  //      ConveyorData.conveyor_io_exit = `[${mappingBarcodeCoord[formData.schema.exit_point_info.exit_io_point_coordinate]}]`;
+  // }
 
   // if form does not have conveyor_entry info but state has, 
   // then delete conveyor_entry info from state and remove entry point highlight.
   // if form has conveyor_entry info and state also has, 
   // then update conveyor_entry info from state.
-  if(ConveyorData.hasOwnProperty("conveyor_entry")){
-    conveyor_tile = ConveyorData.conveyor_entry
-    var conveyor_io_entry_point = ConveyorData.conveyor_io_entry;
-    if(!formData.schema.hasOwnProperty("entry_point_info")){
-      dispatch({
-        type: "CONVEYOR-TILES-STRIPES",
-        value: { conveyor_tile, grid_attribute: "conveyor_track" } ,
-      });
-      dispatch({
-        type: "REMOVE-CONVEYOR-ENTRY-IO-POINT-STRIPES",
-        value: { conveyor_io_entry_point},
-      });
-    }
-  }
-  if(!formData.schema.entry_point_info && ConveyorData.hasOwnProperty("conveyor_entry")){
-       delete ConveyorData.bot_orientation_entry;
-       delete ConveyorData.entry_point_direction;
-       delete ConveyorData.conveyor_io_entry;
-       delete ConveyorData.conveyor_entry;
-       delete ConveyorData.conveyor_entry_height
-     }
-  else if(ConveyorData.hasOwnProperty("conveyor_entry")){
-       ConveyorData.bot_orientation_entry = parseInt(formData.schema.entry_point_info.entry_bot_orientation_direction);
-       ConveyorData.entry_point_direction = parseInt(formData.schema.entry_point_info.entry_direction);
-       ConveyorData.conveyor_io_entry = `[${mappingBarcodeCoord[formData.schema.entry_point_info.entry_io_point_coordinate]}]`
-     }  
+  
+  // if(!formData.schema.entry_point_info && ConveyorData.hasOwnProperty("conveyor_entry")){
+  //      delete ConveyorData.bot_orientation_entry;
+  //      delete ConveyorData.entry_point_direction;
+  //      delete ConveyorData.conveyor_io_entry;
+  //      delete ConveyorData.conveyor_entry;
+  //      delete ConveyorData.conveyor_entry_height
+  //    }
+  // else if(ConveyorData.hasOwnProperty("conveyor_entry")){
+  //      ConveyorData.bot_orientation_entry = parseInt(formData.schema.entry_point_info.entry_bot_orientation_direction);
+  //      ConveyorData.entry_point_direction = parseInt(formData.schema.entry_point_info.entry_direction);
+  //      ConveyorData.conveyor_io_entry = `[${mappingBarcodeCoord[formData.schema.entry_point_info.entry_io_point_coordinate]}]`
+  //    }  
   if(ConveyorData.hasOwnProperty("conveyor_step_id")){
     var form_step_data = formData.schema.conveyor_step_id_info
     for(var i=0;i<form_step_data.length;i++){
