@@ -10,8 +10,12 @@ class BaseForm extends Component {
         show_error:false,
         error_text:""
     };
-    toggle = () => {
-       this.setState({ show: !this.state.show,show_error:false,error_text:"",step_dict:{}});
+    toggle = (step_dict_initial=null) => {
+        var step_dict = this.state.step_dict
+        if(step_dict_initial !== undefined && step_dict_initial!==null && Object.keys(step_dict_initial).length !==0){
+            var step_dict = step_dict_initial
+        }
+       this.setState({ show: !this.state.show,show_error:false,error_text:"",step_dict:step_dict});
     }
 
     
@@ -63,12 +67,14 @@ class BaseForm extends Component {
             buttonText,
             floor_barcodes,
             disabled,
+            step_dict_initial,
             ...rest
         } = this.props;
         const { show,conveyor_display_name,step_dict} = this.state;
         let _this=this
         var multiStepPointRows = [];
         selected_tile.forEach(function (key, index) {
+                var step_val = (index+1).toString()
                 multiStepPointRows.push(<div key={"active-point-" + index} class="row" style={{marginBottom:"5px" , width:"560px"}}>
                     <div className="col-5 col-lg-5 col-sm-5 col-md-5">
                         <input className="form-control" type="tex" id={"quantity_"+index} disabled value={floor_barcodes[key]["barcode"]}/>
@@ -77,7 +83,9 @@ class BaseForm extends Component {
                         <input
                             id={"step_id_"+index}
                             style={{width:"220px"}}
-                            onChange={(e)=>_this.onChangeStepId(key,e.target.value,step_dict)}
+                            defaultValue={step_dict_initial[key]}
+                            value={step_dict_initial[key]}
+                            onChange={(e)=>_this.onChangeStepId(key,e.target.value,step_dict_initial)}
                             className="form-control"
                             type="text" 
                             name="quantity"
@@ -91,7 +99,7 @@ class BaseForm extends Component {
             <ButtonForm 
                 buttonText={buttonText}
                 show={show}
-                toggle={()=>this.toggle()}
+                toggle={()=>this.toggle(step_dict_initial)}
                 disabled={disabled}
                 modalClass="select-conveyor-modal"
             >

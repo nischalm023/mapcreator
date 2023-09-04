@@ -12,7 +12,7 @@ const schema = () => {
     };
 };
 
-const ConveyorCheckboxMode = ({ onSubmit, disabled, nextConveyorId,map_tile_value,floor_barcodes}) => (
+const ConveyorCheckboxMode = ({ onSubmit, disabled, nextConveyorId,map_tile_value,floor_barcodes,step_dict_initial}) => (
     <SelectConveyorSystemForm
         schema={schema()}
         disabled={disabled}
@@ -20,6 +20,7 @@ const ConveyorCheckboxMode = ({ onSubmit, disabled, nextConveyorId,map_tile_valu
         selected_tile={map_tile_value}
         onSubmit={onSubmit}
         floor_barcodes={floor_barcodes}
+        step_dict_initial={step_dict_initial}
         buttonText={"Add Conveyor System"}
     />
 );
@@ -68,12 +69,17 @@ export default connect(
         var selectedMapTiles = state.selection.mapTiles
         var map_tile_value = Object.keys(selectedMapTiles)
         var disabled = shouldBeDisabled(map_tile_value,floor_barcodes,conveyorTiles)
+        var step_dict_initial = {}
+        map_tile_value.forEach(function (key, index) {
+            step_dict_initial[key] = (index+1).toString()
+        })
         return {
             disabled: disabled,
             nextConveyorId:
             Math.max(...(state.normalizedMap.entities.map.dummy.conveyors || []), 0) + 1,
             map_tile_value:map_tile_value,
-            floor_barcodes:floor_barcodes
+            floor_barcodes:floor_barcodes,
+            step_dict_initial:step_dict_initial,
         }
     },
     dispatch => ({
