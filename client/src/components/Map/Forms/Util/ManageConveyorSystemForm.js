@@ -260,8 +260,10 @@ class BaseForm extends Component {
             if(schema.entry_point_info[key].conveyor_entry_height===''){
                 schema.entry_point_info[key].error= "Conveyor entry height cannot be empty.";
                 }
-            if(parseInt(schema.entry_point_info[key].conveyor_entry_height)<=0){
+            else if(parseInt(schema.entry_point_info[key].conveyor_entry_height)<=0){
                 schema.entry_point_info[key].error= "Conveyor entry height cannot be zero or negative.";
+            }else{
+                schema.entry_point_info[key].error ="";
             }
         }
         if(schema.entry_point_info[key].error === ""){
@@ -276,8 +278,10 @@ class BaseForm extends Component {
             if(schema.exit_point_info[key].conveyor_exit_height===''){
                 schema.exit_point_info[key].error= "Conveyor exit height cannot be empty.";
                 }
-            if(parseInt(schema.exit_point_info[key].conveyor_exit_height)<=0){
+            else if(parseInt(schema.exit_point_info[key].conveyor_exit_height)<=0){
                 schema.exit_point_info[key].error= "Conveyor exit height cannot be zero or negative.";
+            }else{
+                schema.exit_point_info[key].error = "";
             }
         }
         if(schema.exit_point_info[key].error === ""){
@@ -326,22 +330,7 @@ class BaseForm extends Component {
             schema.conveyor_display_name_info.edit = !schema.conveyor_display_name_info.edit;
             schema.conveyor_display_name_info.error = '';
         }
-        if(field==="conveyor_entry_height_info"){
-            schema.conveyor_entry_height_info.edit = !schema.conveyor_entry_height_info.edit;
-            schema.conveyor_entry_height_info.error = '';
-        }
-        if(field==="conveyor_exit_height_info"){
-            schema.conveyor_exit_height_info.edit = !schema.conveyor_exit_height_info.edit;
-            schema.conveyor_exit_height_info.error = '';
-        }
-        if(field==="exit_point_info"){
-            schema.exit_point_info.edit = !schema.exit_point_info.edit;
-            schema.exit_point_info.error = '';
-        }
-        if(field==="entry_point_info"){
-            schema.entry_point_info.edit = !schema.entry_point_info.edit;
-            schema.entry_point_info.error = '';
-        }
+       
         this.setState({ schema: schema });
     };
     deleteRow = (field) => {
