@@ -91,6 +91,8 @@ export const addIOPoint = (io_point_id, barcodes, bot_direction, agent) => (disp
                 eligibleBarcodes.push(state.normalizedMap.entities.barcode[selected_barcode[0]].barcode);
         }
     }else{
+        let IoPointsData = [];
+        let IoPointsIds = [];
         for (let key in barcodes) {
         // check if barcode is an IO Point already
         if(state.normalizedMap.entities.barcode[key].isIoPoint){
@@ -123,22 +125,9 @@ export const addIOPoint = (io_point_id, barcodes, bot_direction, agent) => (disp
                     "bot_direction": bot_direction,
                     "agent": agent
                 }
-                dispatch({
-                    type: "ADD-IO-POINT",
-                    value: IOPointData
-                });
-                dispatch({
-                    type: "IO-POINT-HIGHLIGHT",
-                    value: IOPointData
-                });
-                dispatch(
-                    addEntitiesToFloor({
-                        currentFloor,
-                        floorKey: "ioPointsIds",
-                        entities: [{"io_point_id":currentIoPointId}],
-                        idField: "io_point_id"
-                    })
-                );
+                IoPointsData.push(IOPointData);
+                IoPointsIds.push({"io_point_id":currentIoPointId});
+               
                 eligibleBarcodes.push(state.normalizedMap.entities.barcode[key].barcode);
             }
         }
@@ -150,26 +139,29 @@ export const addIOPoint = (io_point_id, barcodes, bot_direction, agent) => (disp
                 "bot_direction": bot_direction,
                 "agent": agent
             }
-            dispatch({
-                type: "ADD-IO-POINT",
-                value: IOPointData
-            });
-            dispatch({
-                type: "IO-POINT-HIGHLIGHT",
-                value: IOPointData
-            });
-            dispatch(
-                addEntitiesToFloor({
-                    currentFloor,
-                    floorKey: "ioPointsIds",
-                    entities: [{"io_point_id":io_point_id+i}],
-                    idField: "io_point_id"
-                })
-            );
+            IoPointsData.push(IOPointData);
+            IoPointsIds.push({"io_point_id":io_point_id+i})
+            
             eligibleBarcodes.push(state.normalizedMap.entities.barcode[key].barcode);
         }
         i++;
     }
+    dispatch({
+        type: "CREATE-MULTIPLE-IO-POINT",
+        value: IoPointsData
+    });
+    dispatch({
+        type: "MULTIPLE-IO-POINT-HIGHLIGHT",
+        value: IoPointsData
+    });
+    dispatch(
+                addEntitiesToFloor({
+                    currentFloor,
+                    floorKey: "ioPointsIds",
+                    entities: IoPointsIds,
+                    idField: "io_point_id"
+                })
+            );
     }
     
     dispatch(clearTiles);
@@ -296,6 +288,8 @@ export const createStorable = (data, barcode, ioPointId, nextToteStorableId, fin
         type: "HIGHLIGHT-TOTE-STORAGE",
         });
     if(selectedIoPoint.length === 1){
+        let toteStorableDatas = [];
+        let toteStorableIds = [];
         for(let key in data.multiSchema){
             var eachStorableData = {
                 "barcode": barcode,
@@ -311,28 +305,35 @@ export const createStorable = (data, barcode, ioPointId, nextToteStorableId, fin
                 "tote_location": data.multiSchema[key].tote_location,
                 "tote_type": data.multiSchema[key].tote_type
             }
-            dispatch({
-                type: "ADD-TOTE-STORABLE",
-                value: eachStorableData
-                });
-                dispatch(
-                    addEntitiesToFloor({
-                        currentFloor,
-                        floorKey: "toteStorablesIds", 
-                        entities: [{"next_tote_storable_id":data.multiSchema[key].tote_id.value}], 
-                        idField: "next_tote_storable_id" 
-                    })
-                 );
-            // if tote already exists, update it
-            // else if tote does not exist, add it
+            toteStorableDatas.push(eachStorableData);
+            toteStorableIds.push({"next_tote_storable_id":data.multiSchema[key].tote_id.value});
+            
             
         }
+        if(toteStorableDatas.length>0){
+            dispatch({
+                        type: "CREATE-MULTIPLE-TOTE-STORABLE",
+                        value: toteStorableDatas
+                        });
+        }
+        if(toteStorableIds.length>0){
+            dispatch(
+                            addEntitiesToFloor({
+                                currentFloor,
+                                floorKey: "toteStorablesIds", 
+                                entities: toteStorableIds, 
+                                idField: "next_tote_storable_id" 
+                            })
+                         );
+                        }                 
     }else{
         var next_tote_id = Math.max(...(state.normalizedMap.entities.map.dummy.toteStorablesIds || []), 0) + 1
         var io_point_dict = {}
         for (const [key2, value] of Object.entries(ioPoints)) {
             io_point_dict[value["barcode"]] = value["io_point_id"]
         }
+        let toteStorableDatas = [];
+        let toteStorableIds = [];
         for (var i = 0; i < selectedIoPoint.length; i++) {
             var io_has_no_storable = false
             for(let _key in data.multiSchema){
@@ -366,18 +367,8 @@ export const createStorable = (data, barcode, ioPointId, nextToteStorableId, fin
                                     "tote_location": get_location_data.tote_location,
                                     "tote_type": get_location_data.tote_type
                                 }
-                                dispatch({
-                                    type: "ADD-TOTE-STORABLE",
-                                    value: eachStorableData
-                                    });
-                                    // dispatch(
-                                    //     addEntitiesToFloor({
-                                    //         currentFloor,
-                                    //         floorKey: "toteStorablesIds", 
-                                    //         entities: [{"next_tote_storable_id":get_location_data.tote_id.value}], 
-                                    //         idField: "next_tote_storable_id" 
-                                    //     })
-                                    //  );
+                                toteStorableDatas.push(eachStorableData);
+                                
                             }
                         }
                     }
@@ -398,18 +389,20 @@ export const createStorable = (data, barcode, ioPointId, nextToteStorableId, fin
                     "tote_location": { type: "string", title: "Tote Location", value: tote_location_value},
                     "tote_type": data.multiSchema[_key].tote_type
                     }
-                    dispatch({
-                        type: "ADD-TOTE-STORABLE",
-                        value: eachStorableData
-                        });
-                    dispatch(
-                            addEntitiesToFloor({
-                                currentFloor,
-                                floorKey: "toteStorablesIds", 
-                                entities: [{"next_tote_storable_id":next_tote_id}], 
-                                idField: "next_tote_storable_id" 
-                            })
-                         );
+                    toteStorableDatas.push(eachStorableData);
+                    // dispatch({
+                    //     type: "ADD-TOTE-STORABLE",
+                    //     value: eachStorableData
+                    //     });
+                    toteStorableIds.push({"next_tote_storable_id":next_tote_id});
+                    // dispatch(
+                    //         addEntitiesToFloor({
+                    //             currentFloor,
+                    //             floorKey: "toteStorablesIds", 
+                    //             entities: [{"next_tote_storable_id":next_tote_id}], 
+                    //             idField: "next_tote_storable_id" 
+                    //         })
+                    //      );
                     next_tote_id = next_tote_id + 1
                 }
 
@@ -418,6 +411,23 @@ export const createStorable = (data, barcode, ioPointId, nextToteStorableId, fin
              }
 
         }
+        if(toteStorableDatas.length>0){
+            dispatch({
+                        type: "CREATE-MULTIPLE-TOTE-STORABLE",
+                        value: toteStorableDatas
+                        });
+        }
+        if(toteStorableIds.length>0){
+            dispatch(
+                            addEntitiesToFloor({
+                                currentFloor,
+                                floorKey: "toteStorablesIds", 
+                                entities: toteStorableIds, 
+                                idField: "next_tote_storable_id" 
+                            })
+                         );
+        }
+                    
     }
         
     // run in loop for removed totes from multischema ie existing - final 
@@ -432,25 +442,30 @@ export const createStorable = (data, barcode, ioPointId, nextToteStorableId, fin
         }
     }
     if(selectedIoPoint.length === 1){
+        let removeToteStorableData = [];
         for(let key in totesToBeRemoved){
             let tote = totesToBeRemoved[key];
-            var eachStorableData = {
-                "next_tote_storable_id": tote.tote_id.value,
-            }
-            dispatch({
-                type: "REMOVE-SELECTED-TOTE-STORABLE", // remove from global state
-                value: eachStorableData
-            });
-            dispatch({
-                type: "REMOVE-TOTE-STORABLE", // remove from dummy
-                value: eachStorableData
-            });
-            dispatch({
-                type: "DELETE-TOTE-STORABLE-BY-ID", // remove from floor
-                value: tote.tote_id.value
-            });
+            removeToteStorableData.push(tote.tote_id.value);
+            
         }
+        if(removeToteStorableData.length>0){
+            dispatch({
+                type: "REMOVE-SELECTED-MULTIPLE-TOTE-STORABLE", // remove from global state
+                value: removeToteStorableData
+            });
+            dispatch({
+                type: "REMOVE-MULTIPLE-TOTE-STORABLE", // remove from dummy
+                value: removeToteStorableData
+            });
+            dispatch({
+                    type: "REMOVE-MULTIPLE-TOTE-STORABLE-BY-ID", // remove from floor
+                    value: removeToteStorableData
+                });
+        }
+
     }else{
+        let removeToteStorableData = [];
+        
         for(let a in totesToBeRemoved){
             let tote_data = totesToBeRemoved[a];
             for (var l = 0; l < io_locationId_mapping.length; l++){
@@ -458,27 +473,29 @@ export const createStorable = (data, barcode, ioPointId, nextToteStorableId, fin
                     if(loc_data.includes(tote_data.tote_location.value)){
                         for (var m = 0; m < loc_data.length; m++) {
                             var tote_location_data = getLocationData(toteStorables,loc_data[m])
-                            var multiEachStorableData = {
-                                    "next_tote_storable_id": tote_location_data.tote_id.value,
-                                }
-                            dispatch({
-                                type: "REMOVE-SELECTED-TOTE-STORABLE", // remove from global state
-                                value: multiEachStorableData
-                            });
-                            dispatch({
-                                type: "REMOVE-TOTE-STORABLE", // remove from dummy
-                                value: multiEachStorableData
-                            });
-                            dispatch({
-                                type: "DELETE-TOTE-STORABLE-BY-ID", // remove from floor
-                                value: tote_location_data.tote_id.value
-                            });
+                            
+                                removeToteStorableData.push(tote_location_data.tote_id.value);
+                            
 
                         }
 
                     }
             }
 
+        }
+        if(removeToteStorableData.length>0){
+            dispatch({
+                type: "REMOVE-SELECTED-MULTIPLE-TOTE-STORABLE", // remove from global state
+                value: removeToteStorableData
+            });
+            dispatch({
+                type: "REMOVE-MULTIPLE-TOTE-STORABLE", // remove from dummy
+                value: removeToteStorableData
+            });
+            dispatch({
+                    type: "REMOVE-MULTIPLE-TOTE-STORABLE-BY-ID", // remove from floor
+                    value: removeToteStorableData
+                });
         }
     }
     

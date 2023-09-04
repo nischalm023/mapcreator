@@ -101,11 +101,20 @@ export default (state = {}, action) => {
       });
       return newState;
     }
-    case "DELETE-TOTE-STORABLE-BY-ID": {
+    case "REMOVE-TOTE-STORABLE-BY-ID": {
       var newState = _.clone(state);
       Object.keys(newState).forEach(floorId => {
         _.remove(newState[floorId].toteStorablesIds, function (tote) {
           return tote === action.value;
+        });
+      });
+      return newState;
+    }
+    case "REMOVE-MULTIPLE-TOTE-STORABLE-BY-ID": {
+      var newState = _.clone(state);
+      Object.keys(newState).forEach(floorId => {
+        _.remove(newState[floorId].toteStorablesIds, function (tote) {
+          return action.value.includes(tote);
         });
       });
       return newState;

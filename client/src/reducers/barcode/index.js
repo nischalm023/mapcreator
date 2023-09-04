@@ -90,6 +90,21 @@ export default (state = {}, action) => {
       }
       return Object.assign({}, state, newState);
     }
+    case "MULTIPLE-IO-POINT-HIGHLIGHT": {
+      const io_points = action.value;
+      let newState = {};
+      io_points.map(io_point=>{
+        const conveyor_tile = [io_point.barcode.split(',').map(Number)];
+        var k = 0;
+
+        while (k < conveyor_tile.length) {
+          newState[conveyor_tile[k]] = { ...state[conveyor_tile[k]], isIoPoint: true};
+          k++;
+        }
+      })
+      
+      return Object.assign({}, state, newState);
+    }
     case "HIGHLIGHT-SUCCESS-OVERLAP-BAROCDE": {
       const success_overlap_barcode = action.value[Object.keys(action.value)[0]] 
       const success_overlap_barcode_status = action.value[Object.keys(action.value)[1]] 
