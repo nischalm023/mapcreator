@@ -67,6 +67,7 @@ export default (normalizedMap) => {
             mapping_list.push(value["conveyor_id_destination"].toString())
             mapping_dict[value["conveyor_id_source"]] = mapping_list
         }else{
+            mapping_list = mapping_dict[value["conveyor_id_source"]]
             mapping_list.push(value["conveyor_id_destination"].toString())
             mapping_dict[value["conveyor_id_source"]] = mapping_list
         }
