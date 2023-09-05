@@ -255,11 +255,12 @@ export const setConveyorTile = (getState) => {
   const normalizedMap = state.normalizedMap;
   if(normalizedMap.entities.hasOwnProperty("conveyorTile")){
     var conveyorTile = normalizedMap.entities.conveyorTile
-    var entry_conveyor_state = []
-    var exit_conveyor_state = []
+    
     for (const [key, value] of Object.entries(conveyorTile)) {
       var conveyor_data_entry = {}
       var conveyor_data_exit = {}
+      var entry_conveyor_state = []
+      var exit_conveyor_state = []
       if(value.hasOwnProperty("conveyor_io_entry") && typeof value["conveyor_io_entry"] === 'string'){
         conveyor_data_entry["conveyor_io_entry"] = value["conveyor_io_entry"]
         conveyor_data_entry["conveyor_entry"] = value["conveyor_entry"]
