@@ -105,3 +105,12 @@ body {
   margin-left: -10px;
   width: 840px;
 }
+.assign-io-point-modal .panel-danger {
+  display: none;
+}
+
+.assign-io-point-modal .form-group.has-error .error-detail {
+  list-style-type: none;
+  padding:0px;
+
+}

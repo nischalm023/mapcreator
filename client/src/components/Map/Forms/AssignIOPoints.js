@@ -9,7 +9,7 @@ import "./uploadMaptoGsb.css";
 const schema = {
     title: "Assign/Manage Storable IO Points",
     type: "object",
-    required: ["bot_direction", "agent"],
+    required: ["bot_direction","agent"],
     properties: {
         bot_direction: {
             type: "array",
@@ -20,7 +20,7 @@ const schema = {
                 enumNames: ["North", "West", "South", "East"],
 
             },
-            default: [],
+            default:undefined,
             uniqueItems: true,
         },
         agent: {
@@ -43,7 +43,17 @@ const uiSchema = {
     },
 };
 
+function transformErrors(errors) {
+  return errors.map(error => {
+    if (error.name === "required") {
+      error.message = "This is a mandatory field"
+    }
+    return error;
+  });
+}
+
 const handleSubmit = (form, barcodes, nextIOPointId, dispatch) => {
+
     dispatch(addIOPoint(nextIOPointId, barcodes, form.formData.bot_direction, form.formData.agent));
 };
 
@@ -68,7 +78,7 @@ class AssignIOPoints extends Component {
     render() {
         const {disabled, barcodes, nextIOPointId, dispatch,all_barcodes,ioPoint} = this.props;
         var selected_barcode_condition = isSelectedBarcodeIoPoint(Object.keys(barcodes),all_barcodes,ioPoint)
-        schema.properties.bot_direction.default = []
+        schema.properties.bot_direction.default = undefined
         if(selected_barcode_condition.length>0){
             schema.properties.bot_direction.default = selected_barcode_condition
         }
@@ -78,10 +88,12 @@ class AssignIOPoints extends Component {
             uiSchema={uiSchema}
             onSubmit={handleSubmit}
             onRemove={handleRemove}
+            modalClass={"assign-io-point-modal"}
             buttonText={"Assign/Manage Storable IO Points"}
             barcodes={barcodes}
             nextIOPointId={nextIOPointId}
             dispatch={dispatch}
+            transformErrors={transformErrors}
             style={{ marginLeft: "20%", textAlign: "-webkit-center", color: "orange" }}
         />)
     }

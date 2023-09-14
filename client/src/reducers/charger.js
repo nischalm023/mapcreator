@@ -15,13 +15,17 @@ export default (state = {}, action) => {
       return {...state, ...newState};
     }
     case "EDIT-CHARGER-BARCODE": {
-      var charger_location = action.value.charger_location
-      var new_barcode = action.value.new_barcode
-      var charger_id = action.value.charger_id
+      var chargers = action.value
       var newState = _.cloneDeep(state);
-      newState[charger_id].entry_point_location = new_barcode;
-      newState[charger_id].reinit_point_location = new_barcode;
-      newState[charger_id].charger_location = charger_location;
+
+      for(var i = 0 ;i<chargers.length;i++){
+        var new_barcode = chargers[i].new_barcode
+        var charger_id = chargers[i].charger_id
+        var charger_location = chargers[i].charger_location
+        newState[charger_id].entry_point_location = new_barcode;
+        newState[charger_id].reinit_point_location = new_barcode;
+        newState[charger_id].charger_location = charger_location;
+      }
       return {...state, ...newState};
     }
   }

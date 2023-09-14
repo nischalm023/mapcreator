@@ -72,7 +72,7 @@ export const getWorldCoordUsingNeighbour = (
   }
 };
 
-export const getTileIdToWorldCoordMapFunc = barcodes => {
+export const getTileIdToWorldCoordMapFunc = (barcodes,is_distance_modify_button=false) => {
   var tileIdToWorldCoordinateMapInitial = {};
   var neighbourWithValidWorldCoordinate = {};
   const startBarcode = Object.keys(barcodes)[0];
@@ -84,7 +84,7 @@ export const getTileIdToWorldCoordMapFunc = barcodes => {
   while (totalBarcodesWithDefinedWorldCoord < totalBarcodes) {
     for (var barcode in barcodes) {
       var barcodeInfoDict = barcodes[barcode];
-      if(barcodeInfoDict.hasOwnProperty("world_coordinate")){
+      if(barcodeInfoDict.hasOwnProperty("world_coordinate") && !is_distance_modify_button){
         var worldCoordinateValue = JSON.parse(barcodeInfoDict["world_coordinate"])
         worldCoordinate = {"x":worldCoordinateValue[0],"y":worldCoordinateValue[1]}
         totalBarcodesWithDefinedWorldCoord =

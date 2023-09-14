@@ -325,12 +325,167 @@ const addNewMultipleBarcode = formData => (dispatch, getState) => {
   return Promise.resolve();
 };
 
+const validateRemoveBarcode = (state,mapTiles)=>{
+  var barcodes = state.normalizedMap.entities.barcode
+  var pps_list = []
+  var ods_list = []
+  var conveyors_list = []
+  var conveyor_io_point = []
+  var storable_io = []
+  var elevator_list = []
+  var elevator_entry = []
+  var elevator_exit = []
+  var charger_list = []
+  var special_charger_list = []
+  var entry_charger_list = []
+  var pps_queue = []
+  var pps_state = state.normalizedMap.entities.pps
+  var ods_state = state.normalizedMap.entities.odsExcluded
+  var chargers_state = state.normalizedMap.entities.charger
+  var elevator_state = state.normalizedMap.entities.elevator
+  var conveyor_state = state.normalizedMap.entities.conveyorTile
+  var tote_state = state.normalizedMap.entities.ioPoints
+  var mappingBarcodeCoord = state.normalizedMap.entities.mappingBarcodeCoord
+  var errorMessage = ''
+  for (var i = 0; i < mapTiles.length; i++) {
+    for(let pps_key in pps_state){
+      let pps = pps_state[pps_key];
+      if(pps.coordinate===mapTiles[i]){
+        pps_list.push(barcodes[pps.coordinate]["barcode"])
+      }
+      if(pps.queue_barcodes.includes(barcodes[mapTiles[i]]["barcode"])){
+        pps_queue.push(barcodes[pps.coordinate]["barcode"])
+      }
+    }
+    for(let ods_key in ods_state){
+      let ods = ods_state[ods_key];
+      if(ods.coordinate===mapTiles[i]){
+        ods_list.push(barcodes[ods.coordinate]["barcode"])
+      }
+    }
+    for(let charger_key in chargers_state){
+      let charger = chargers_state[charger_key];
+      var entry_charger_point = barcodes[mappingBarcodeCoord[charger.entry_point_location]]["adjacency"][charger.charger_direction].toString()
+      if(charger.coordinate===mapTiles[i]){
+        charger_list.push(barcodes[charger.coordinate]["barcode"])
+      }
+      if(charger.entry_point_location===barcodes[mapTiles[i]]["barcode"]){
+        special_charger_list.push(barcodes[charger.coordinate]["barcode"])
+      }
+      if(entry_charger_point === mapTiles[i]){
+        entry_charger_list.push(barcodes[charger.coordinate]["barcode"])
+      }
+
+    }
+    for(let conveyor_key in conveyor_state){
+      let conveyors = conveyor_state[conveyor_key];
+      if(Object.keys(conveyors.conveyor_step_id).includes(mapTiles[i])){
+        conveyors_list.push(barcodes[mapTiles[i]]["barcode"])
+      }
+      if(conveyors.hasOwnProperty("conveyor_entry")){
+        var conveyor_entry_details = conveyors.conveyor_entry
+        for (var entry = 0; entry < conveyor_entry_details.length; entry++) {
+          if(conveyor_entry_details[entry].hasOwnProperty("conveyor_io_entry")){
+            if(JSON.parse(conveyor_entry_details[entry].conveyor_io_entry).toString() === mapTiles[i]){
+              conveyor_io_point.push(barcodes[mapTiles[i]]["barcode"])
+            }
+          }
+          
+        }
+      }
+      if(conveyors.hasOwnProperty("conveyor_exit")){
+        var conveyor_exit_details = conveyors.conveyor_exit
+        for (var exit = 0; exit < conveyor_exit_details.length; exit++) {
+          if(conveyor_exit_details[exit].hasOwnProperty("conveyor_io_exit")){
+            if(JSON.parse(conveyor_exit_details[exit].conveyor_io_exit).toString() === mapTiles[i]){
+              conveyor_io_point.push(barcodes[mapTiles[i]]["barcode"])
+            }
+          }
+        }
+      }
+    }
+    for(let io_key in tote_state){
+      let tote_io = tote_state[io_key];
+      if(tote_io.barcode===mapTiles[i]){
+        storable_io.push(barcodes[mapTiles[i]]["barcode"])
+      }
+    }
+    for(let elevator_key in elevator_state){
+      let elevator = elevator_state[elevator_key]
+      if(elevator.position === barcodes[mapTiles[i]]["barcode"]){
+        elevator_list.push(barcodes[mapTiles[i]]["barcode"])
+      }
+      if(elevator.hasOwnProperty("entry_barcodes")){
+        var elevator_entry_details = elevator.entry_barcodes
+        for (var e_entry = 0; e_entry < elevator_entry_details.length; e_entry++) {
+          if(elevator_entry_details[e_entry].barcode === barcodes[mapTiles[i]]["barcode"]){
+              elevator_entry.push(barcodes[mapTiles[i]]["barcode"])
+          }
+        }
+      }
+      if(elevator.hasOwnProperty("exit_barcodes")){
+        var elevator_exit_details = elevator.exit_barcodes
+        for (var e_exit = 0; e_exit < elevator_exit_details.length; e_exit++) {
+          if(elevator_exit_details[e_exit].barcode === barcodes[mapTiles[i]]["barcode"]){
+              elevator_exit.push(barcodes[mapTiles[i]]["barcode"])
+          }
+        }
+      }
+    }
+  }
+  if(pps_list.length !=0){
+    errorMessage = errorMessage + `Barcode: (${pps_list.join(",")}) has an entity of type (PPS) assign.\n`
+  }
+  if(ods_list.length !=0){
+    errorMessage = errorMessage + `Barcode: (${ods_list.join(",")}) has an entity of type (ODS Exclude) assign.\n`
+  }
+  if(conveyors_list.length !=0){
+    errorMessage = errorMessage + `Barcode: (${conveyors_list.join(",")}) has an entity of type (Conveyor) assign.\n`
+  }
+  if(conveyor_io_point.length !=0){
+    errorMessage = errorMessage + `Barcode: (${conveyor_io_point.join(",")}) has an entity of type (Conveyor IO Point) assign.\n`
+  }
+  if(storable_io.length !=0){
+    errorMessage = errorMessage + `Barcode: (${storable_io.join(",")}) has an entity of type (Storable IO Point) assign.\n`
+  }
+  if(elevator_list.length !=0){
+    errorMessage = errorMessage + `Barcode: (${elevator_list.join(",")}) has an entity of type (Elevator) assign.\n`
+  }
+  if(elevator_entry.length !=0){
+    errorMessage = errorMessage + `Barcode: (${elevator_entry.join(",")}) has (Elevator Entry) assign.\n`
+  }
+  if(elevator_exit.length !=0){
+    errorMessage = errorMessage + `Barcode: (${elevator_exit.join(",")}) has (Elevator Exit) assign.\n`
+  }
+  if(pps_queue.length !=0){
+    errorMessage = errorMessage + `Barcode: (${pps_queue.join(",")}) has an entity of type (PPS Queue) assign.\n`
+  }
+  if(charger_list.length !=0){
+    errorMessage = errorMessage + `Barcode: (${charger_list.join(",")}) has an entity of type (Charger) assign.\n`
+  }
+  if(special_charger_list.length !=0){
+    errorMessage = errorMessage + `Barcode: (${special_charger_list.join(",")}) has an entity of type (Charger) assign.\n`
+  }
+  if(entry_charger_list.length !=0){
+    errorMessage = errorMessage + `Barcode: (${entry_charger_list.join(",")}) has an entity of type (Charger) assign.\n`
+  }
+  if(errorMessage !== ""){
+    errorMessage = errorMessage +  `Please dissociate the entity first in order to remove the barcode.`
+  }
+  return errorMessage
+
+}
+
 const removeBarcodes = (dispatch, getState) => {
   const {
     selection: { mapTiles },
     currentFloor
   } = getState();
-  // remove from floor
+  var state = getState()
+  var error_message = validateRemoveBarcode(state,Object.keys(mapTiles))
+  if(error_message !== ""){
+    return dispatch(setErrorMessage(error_message)); 
+  }
   dispatch({
     type: "REMOVE-ENTITIES-FROM-FLOOR",
     value: {
@@ -344,6 +499,7 @@ const removeBarcodes = (dispatch, getState) => {
     type: "DELETE-BARCODES",
     value: mapTiles || {}
   });
+  
   // clear tiles
   dispatch(clearTiles);
 };

@@ -835,10 +835,10 @@ export const editSpecialBarcode = ({ coordinate, new_barcode }) => ({
   value: { coordinate, new_barcode },
 });
 
-export const editChargerBarcode = (charger_location, new_barcode,charger_id ) => {
+export const editChargerBarcode = (charger_new_info) => {
   return({
     type: "EDIT-CHARGER-BARCODE",
-    value: { charger_location, new_barcode,charger_id },
+    value: charger_new_info,
   })
 };
 
@@ -1446,15 +1446,20 @@ export const ConvertEntitiesInBarcodeFormat = (dispatch,getState) => {
     })
   }
   if(chargerDict !=undefined && Object.keys(chargerDict).length !== 0){
+    var charger_new_info = []
     Object.keys(chargerDict).forEach(function(charger_id) {
       var reinitPoint = chargerDict[charger_id]["reinit_point_location"]
       var chargerLocation = chargerDict[charger_id]["charger_location"]
       if(barcodeMapping.hasOwnProperty(reinitPoint) && barcodeMapping.hasOwnProperty(chargerLocation)){
         var charger_location = BarcodeDict[barcodeMapping[chargerLocation]]["barcode"]
         var new_barcode = BarcodeDict[barcodeMapping[reinitPoint]]["barcode"]
-        dispatch(editChargerBarcode(charger_location,new_barcode,charger_id))
+        charger_new_info.push({charger_location:charger_location,new_barcode:new_barcode,charger_id:charger_id})
       }
     })
+    if(charger_new_info.length !==0){
+      dispatch(editChargerBarcode(charger_new_info))
+    }
+
   }
   if(elevatorDict !=undefined && Object.keys(elevatorDict).length !== 0){
     Object.keys(elevatorDict).forEach(function(elevator_id) {

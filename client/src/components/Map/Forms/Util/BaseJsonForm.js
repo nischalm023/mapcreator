@@ -20,6 +20,7 @@ class BaseForm extends Component {
       barcodes = null,
       nextIOPointId = '',
       dispatch = dispatch,
+      transformErrors = undefined,
       ...rest
     } = this.props;
     const { formData } = this.state;
@@ -28,6 +29,7 @@ class BaseForm extends Component {
       <ButtonForm {...rest} show={this.state.show} toggle={this.toggle} >
         <Form
           schema={schema}
+          transformErrors={transformErrors}
           uiSchema={uiSchema}
           onSubmit={formData => {
             barcodes ? onSubmit(formData, barcodes, nextIOPointId, dispatch) : onSubmit(formData) ;
