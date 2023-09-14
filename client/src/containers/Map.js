@@ -230,6 +230,7 @@ class Map extends Component {
     const solutionVersion = params.get('gsb_solution_version') ? params.get('gsb_solution_version') : null;
     const requestedUser = params.get('requested_user') ? params.get('requested_user') : null;
     const checked_version = params.get('checked_version');
+    const gsbUser = params.get('gsb_user') ? params.get('gsb_user') : null;
     return (
       <div>
         <div style={{ float: "left" }}>
@@ -270,7 +271,7 @@ class Map extends Component {
                   {
                     gsb 
                       ? 
-                    <UploadMapDetailsToGsb solutionId={solutionId} agentId={agentId} functionalAreaId={functionalAreaId} uid={uid} mapId={mapId} /> 
+                    <UploadMapDetailsToGsb solutionId={solutionId} agentId={agentId} functionalAreaId={functionalAreaId} uid={uid} mapId={mapId} gsbUser={gsbUser}/> 
                       : 
                     "" 
                   }

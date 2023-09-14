@@ -122,8 +122,9 @@ const Form = withFormik({
     let gsbAgentId = params.get('gsb_agent_id');
     let gsbFunctionalAreaId = params.get('functional_area_id');
     let uid = params.get('uid');
+    let gsbUser = params.get('gsb_user');
     // API call to save Map created in DB
-    createMap(map, name, gsb, uid, 'manual', gsbSolutionId, gsbAgentId, gsbFunctionalAreaId)
+    createMap(map, name, gsb, uid, 'manual', gsbSolutionId, gsbAgentId, gsbFunctionalAreaId, gsbUser)
       .then(handleErrors)
       .then(res => res.json())
       .then(id => {
@@ -151,6 +152,7 @@ class CreateMap extends Component {
     let gsbFunctionalAreaId = params.get('functional_area_id');
     let gsbAgentName = params.get("gsb_agent_name")
     let uid = params.get('uid');
+    let gsbUser = params.get('gsb_user');
     return (
       <div className="container">
         <div className="row">
@@ -168,7 +170,7 @@ class CreateMap extends Component {
               onServerError={error => this.setState({ error })}
               onSuccess={id => {
                 if(gsb){
-                  return history.push(`/map/${id}?gsb=true&gsb_solution_id=${gsbSolutionId}&gsb_agent_id=${gsbAgentId}&functional_area_id=${gsbFunctionalAreaId}&uid=${uid}&gsb_agent_name=${gsbAgentName}`)
+                  return history.push(`/map/${id}?gsb=true&gsb_solution_id=${gsbSolutionId}&gsb_agent_id=${gsbAgentId}&functional_area_id=${gsbFunctionalAreaId}&uid=${uid}&gsb_agent_name=${gsbAgentName}&gsb_user=${gsbUser}`)
                 } else {
                   return history.push(`/map/${id}`)
                 }

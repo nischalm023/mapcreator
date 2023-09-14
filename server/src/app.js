@@ -96,7 +96,7 @@ app.post(
     // expect internal representation json here.
     // should be correct but validating anyway
     var validate = getLoadedAjv().getSchema("map");
-    const { map, name, gsb, uid, source, solution_id, agent_id, fa_id } = req.body;
+    const { map, name, gsb, uid, source, solution_id, agent_id, fa_id, gsb_user } = req.body;
     console.log("Create API hit made via. GSB application", gsb);
     if (!validate(map)) {
       throw new Error(JSON.stringify(validate.errors));
@@ -129,15 +129,33 @@ app.post(
           "map_tool_id": created.id,
           "uid": uid, 
           "title": name, 
-          "source": source
-        })}
-      );
-      if (response.status !== 200){
-        throw new Error("GSB call upon click of Submit button failed");
-      }
+          "source": source,
+          "username": gsb_user
+        })
+      }).then((res) => {
+        if(res.status!==200){
+          return res.json()
+        }else{
+          return {'success': true}
+        }
+        
+      }).then((url_response) => {
+        if(url_response['success']){
+          res.json(created.id);
+        }else{
+          if(url_response['non_field_errors'] !==undefined){
+            throw new Error(url_response['non_field_errors'][0])
+          }else{
+            throw new Error("GSB call upon click of Submit button failed");
+          }  
+        }
+        // res.send({ status:"200", message: 'Successfully get files from GSB',data:url_response })    
+        
+      })
+      
     }
     // send only id
-    res.json(created.id);
+    // res.json(created.id);
   })
 );
 
@@ -254,7 +272,7 @@ app.post('/api/uploadMapDetailsToGsb', upload.array('files'), async (req, res) =
   let formData = new FormData();
   let data = req.body;
   let api = UPLOAD_MAP_TO_GSB_API.format(data.gsb_solution_id, data.functional_area_id, data.gsb_agent_id);
-  let gsbKeyList = ["map_tool_id","gsb_solution_id","gsb_agent_id","functional_area_id","uid"];
+  let gsbKeyList = ["map_tool_id","gsb_solution_id","gsb_agent_id","functional_area_id","uid", "username"];
   gsbKeyList.forEach((gsbKey) => {
     formData.append(gsbKey, data[gsbKey]);
     delete data[gsbKey]
@@ -273,12 +291,33 @@ app.post('/api/uploadMapDetailsToGsb', upload.array('files'), async (req, res) =
     const response = await fetch(api, {
       method: 'POST',
       body: formData
-    });
-    if (response.status === 200) {
-      return res.json({ message: 'Successfully uploaded map details and files to GSB' });
-    } else {
-      return res.status(500).json({ message: 'Failed to send'})
-    }
+    }).then((res) => {
+      if(res.status!==200){
+        return res.json()
+      }else{
+        return {'success': true}
+      }
+      
+    }).then((url_response) => {
+      if(url_response['success']){
+        return res.json({ message: 'Successfully uploaded map details and files to GSB' });
+      }else{
+        if(url_response['non_field_errors'] !==undefined){
+          return res.status(500).json({ message: url_response['non_field_errors'][0]})
+        }else{
+          return res.status(500).json({ message: 'Failed to send'})
+        }  
+      }
+      // res.send({ status:"200", message: 'Successfully get files from GSB',data:url_response })    
+      
+      });
+        
+    // });
+    // if (response.status === 200) {
+    //   return res.json({ message: 'Successfully uploaded map details and files to GSB' });
+    // } else {
+    //   return res.status(500).json({ message: 'Failed to send'})
+    // }
   }
   catch (err) {
       console.log(err)
@@ -376,7 +415,7 @@ app.post('/api/exportDataToGsb', upload.array('files'), async (req, res) => {
   let api = EXPORT_DATA_TO_GSB_API.format(data.gsb_solution_id, data.functional_area_id, data.gsb_agent_id);
   let solutionVersionId = data.gsb_solution_version;
   let gsbKeyList = ["map_tool_id","gsb_solution_id","gsb_agent_id","functional_area_id", "gsb_solution_version",
-  "requested_user","title"];
+  "requested_user","title","username"];
   gsbKeyList.forEach((gsbKey) => {
     formData.append(gsbKey, data[gsbKey]);
     delete data[gsbKey]

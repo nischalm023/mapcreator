@@ -194,7 +194,9 @@ export const setSectorsMxUPreferences = (getState) => {
     .then((map) => {
       sectorMxUPreferences = map.map.sectorMxUPreferences;
       if (sectorMxUPreferences !== undefined || sectorMxUPreferences!==null || sectorMxUPreferences[undefined] != undefined) {
-        setSectorsMxUPreferences(getState);
+        // setSectorsMxUPreferences(getState);
+        normalizedMap.entities.sectorMxUPreferences = {};
+        normalizedMap.entities.map.dummy.sectorMxUPreferences = {};
       }
       normalizedMap.entities.sectorMxUPreferences = sectorMxUPreferences;
       normalizedMap.entities.map.dummy.sectorMxUPreferences = sectorMxUPreferences;
@@ -892,7 +894,7 @@ export const requestValidation = (id, email, map_updated_time) => (
     .catch((error) => dispatch(setErrorMessage(error)));
 };
 
-export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid) => (
+export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid, gsbUser) => (
   dispatch,
   getState
 ) => {
@@ -986,6 +988,7 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
   data.append('total_sectors', Object.keys(sectorToColorMap).length);
   data.append('total_storables', storables);
   data.append('total_barcodes', Object.keys(barcodes).length);
+  data.append('username', gsbUser);
 
   updateMap(id, updatedMapObj.map)
     .then(handleErrors)

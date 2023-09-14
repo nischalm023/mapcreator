@@ -44,6 +44,7 @@ class ImportMap extends Component {
     let gsbFunctionalAreaId = params.get('functional_area_id');
     let gsbAgentName = params.get("gsb_agent_name")
     let uid = params.get('uid');
+    let gsbUser  = params.get('gsb_user');
     for(let i=0;i<imported.floors.length;i++){
       for(let j=0;j<imported.floors[i].map_values.length;j++){
         if(imported.floors[i].map_values[j].isIoPoint){
@@ -76,12 +77,12 @@ class ImportMap extends Component {
 //        }
 //      }
     }
-    createMap(imported, name, gsb, uid, 'import', gsbSolutionId, gsbAgentId, gsbFunctionalAreaId)
+    createMap(imported, name, gsb, uid, 'import', gsbSolutionId, gsbAgentId, gsbFunctionalAreaId, gsbUser)
       .then(handleErrors)
       .then(res => res.json())
       .then(id => {
         if(gsb){
-          return history.push(`/map/${id}?gsb=true&gsb_solution_id=${gsbSolutionId}&gsb_agent_id=${gsbAgentId}&functional_area_id=${gsbFunctionalAreaId}&uid=${uid}&gsb_agent_name=${gsbAgentName}`)
+          return history.push(`/map/${id}?gsb=true&gsb_solution_id=${gsbSolutionId}&gsb_agent_id=${gsbAgentId}&functional_area_id=${gsbFunctionalAreaId}&uid=${uid}&gsb_agent_name=${gsbAgentName}&gsb_user=${gsbUser}`)
         } else {
           return history.push(`/map/${id}`)
         }

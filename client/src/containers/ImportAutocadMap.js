@@ -20,9 +20,10 @@ class ImportMap extends Component {
     let gsbFunctionalAreaId = params.get('functional_area_id');
     let uid = params.get('uid');
     let name  = params.get('name');
+    let gsbUser  = params.get('gsb_user');
     if(gsb){
       this.setState({ loading: true });
-      this.getAutocadFileFromGsb(gsb,gsbSolutionId,gsbAgentId,gsbFunctionalAreaId,uid);
+      this.getAutocadFileFromGsb(gsb,gsbSolutionId,gsbAgentId,gsbFunctionalAreaId,uid, gsbUser);
     }
   };
   handleChange = (evt) => {
@@ -51,12 +52,13 @@ class ImportMap extends Component {
     let gsbAgentName = params.get("gsb_agent_name")
     let uid = params.get('uid');
     const name = params.get('name');
-    createMap(imported, name, gsb, uid, 'autocad_import', gsbSolutionId, gsbAgentId, gsbFunctionalAreaId)
+    let gsbUser  = params.get('gsb_user');
+    createMap(imported, name, gsb, uid, 'autocad_import', gsbSolutionId, gsbAgentId, gsbFunctionalAreaId, gsbUser)
       .then(handleErrors)
       .then((res) => res.json())
       .then(id => {
         if(gsb){
-          return history.push(`/map/${id}?gsb=true&gsb_solution_id=${gsbSolutionId}&gsb_agent_id=${gsbAgentId}&functional_area_id=${gsbFunctionalAreaId}&uid=${uid}&gsb_agent_name=${gsbAgentName}`)
+          return history.push(`/map/${id}?gsb=true&gsb_solution_id=${gsbSolutionId}&gsb_agent_id=${gsbAgentId}&functional_area_id=${gsbFunctionalAreaId}&uid=${uid}&gsb_agent_name=${gsbAgentName}&gsb_user=${gsbUser}`)
         } else {
           return history.push(`/map/${id}`)
         }
@@ -75,10 +77,10 @@ class ImportMap extends Component {
       return { message: 'Failed to fetch data','status': 400 };
     };
   }
-  getAutocadFileFromGsb = (gsb,gsbSolutionId,gsbAgentId,gsbFunctionalAreaId,uid,name) => {
+  getAutocadFileFromGsb = (gsb,gsbSolutionId,gsbAgentId,gsbFunctionalAreaId,uid,name, gsbUser) => {
     let imported;
     var data = {'gsb': gsb, 'gsb_solution_id': gsbSolutionId, 'gsb_agent_id': gsbAgentId,'gsb_functional_area_id': gsbFunctionalAreaId,
-    'gsb_uid': uid , 'name':name
+    'gsb_uid': uid , 'name':name, 'username':gsbUser
   }
     var xls_file_url = requestAutocadFileFromGsb(data)
                       .then((res) => res.json())

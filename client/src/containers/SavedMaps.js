@@ -62,6 +62,7 @@ class SavedMaps extends Component {
     // data.append('uid', gsbUid);
     data.append('requested_user', requestedUser);
     data.append('gsb_solution_version', solutionVersion);
+    data.append('username', requestedUser);
     let mapData = {};
     this.props.dispatch(
       fetchMap(
