@@ -1404,13 +1404,16 @@ export const updateAndCheckChargerNeighbour = (dispatch,getState) =>{
   }
   var reinit_coordinate = charger_adjacency_list[charger_direction]
   var reinit_coordinate_adjacency = convertNestedListToList(barcode_dict[charger_adjacency_list[charger_direction]]["adjacency"])
-  for (var dir = 0; dir < 4; dir++) {
-    if (dir === charger_direction  && charger_adjacency_list[dir]) {
-        barcode_dict[reinit_coordinate]["neighbours"][dir] = [1,1,0]
-        barcode_dict[reinit_coordinate_adjacency[dir]]["neighbours"][(charger_direction + 2) % 4] = [1,1,0]
+  for (var _dir = 0; _dir < 4; _dir++) {
+    if (_dir === charger_direction  && charger_adjacency_list[dir]) {
+        barcode_dict[reinit_coordinate]["neighbours"][_dir] = [1,1,0]
+        barcode_dict[reinit_coordinate_adjacency[_dir]]["neighbours"][(charger_direction + 2) % 4] = [1,1,0]
         
-    }else if (dir === (charger_direction + 2) % 4 && charger_adjacency_list[dir]){
+    }else if (_dir === (charger_direction + 2) % 4){
       barcode_dict[reinit_coordinate]["neighbours"][(charger_direction + 2) % 4] = [1,1,0]
+    }else if(_dir !== (charger_direction + 2) % 4 && _dir !== charger_direction && reinit_coordinate_adjacency[_dir]){
+      barcode_dict[reinit_coordinate]["neighbours"][_dir] = [1,0,0]
+      barcode_dict[reinit_coordinate_adjacency[_dir]]["neighbours"][(_dir + 2) % 4] = [1,0,0]
     }
   }
 }
