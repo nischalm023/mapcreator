@@ -154,6 +154,9 @@ app.post(
       })
       
     }
+    else{
+      res.json(created.id);
+    }
     // send only id
     // res.json(created.id);
   })
