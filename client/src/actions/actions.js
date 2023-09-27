@@ -214,6 +214,17 @@ export const conveyorVersion = (getState) => {
   return state
 };
 
+export const exportFloorID = (getState) => {
+  const state = getState();
+  const dummyMap = state.normalizedMap.entities.map.dummy;
+  if(dummyMap.hasOwnProperty("exportFloorID")){
+    state.exportFloorID = dummyMap.exportFloorID
+  }else{
+    state.exportFloorID = true
+  }
+  return state
+};
+
 export const barcodeCordMapping = (getState) => {  
   const state = getState();
   const normalizedMap = state.normalizedMap;
@@ -391,6 +402,7 @@ export const fetchMap = (mapId, onSuccess) => (dispatch, getState) => {
     .then((map) => dispatch(newMap(map)))
     .then((map) => barcodeCordMapping(getState))
     .then((map) => conveyorVersion(getState))
+    .then((map) => exportFloorID(getState))
     .then(() => dispatch(setViewportClamp))
     .then(() => dispatch(fitToViewport))
     .then(() => getBarcodeDistance(dispatch,getState,parseInt(mapId)))
@@ -725,7 +737,7 @@ export const addHighwayQueue = () => (dispatch, getState) => {
 };
 
 export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
-  var { normalizedMap,conveyorVersion} = getState();
+  var { normalizedMap, conveyorVersion, exportFloorID} = getState();
   var  withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap)
   var withAdjacencyWorldCoordinate = addWorldCoordinateAndAdjacency(withWorldCoordinate)
   var checkChargerNeighbour = updateAndCheckChargerNeighbour(dispatch,getState)
@@ -737,6 +749,7 @@ export const saveMap = (onError, onSuccess) => (dispatch, getState) => {
   const mapObj = denormalizeMap(normalizedMap);
   let updatedMapObj = updateMapObj(mapObj, normalizedMap);
   updatedMapObj.map.conveyorVersion = conveyorVersion
+  updatedMapObj.map.exportFloorID = exportFloorID
   return updateMap(updatedMapObj.id, updatedMapObj.map)
     .then(handleErrors)
     .then((res) => res.json())
@@ -764,6 +777,7 @@ const validatePpsPoint = (entities) => {
 export const downloadMap = (singleFloor = false) => (dispatch, getState) => {
   var { normalizedMap } = getState();
   var converyor_version = getState().conveyorVersion
+  var export_floor_id = getState().exportFloorID
   setSectorsBarcodeMapping(dispatch, getState);
   if(Object.keys(normalizedMap.entities.conveyorTile).length !== 0){
     var error_text = validateConveyorEntity(normalizedMap.entities.ConnectedconveyorTile,normalizedMap.entities.conveyorTile)
@@ -777,7 +791,8 @@ export const downloadMap = (singleFloor = false) => (dispatch, getState) => {
      return dispatch(setErrorMessage(`PPS IDs ${nonactive_pps_list} are of the type TTP / RTP + TTP and do not have any associated conveyor active points. Please associate active points or change the PPS eligible agents`));
    }
   }
-  const exportedJson = exportMap(normalizedMap, singleFloor,converyor_version);
+  const exportedJson = exportMap(normalizedMap, singleFloor, converyor_version,
+    export_floor_id);
   var zip = new JSZip();
   Object.keys(exportedJson).forEach((fileName) => {
     if (fileName != "sector") {
@@ -800,8 +815,10 @@ export const copyJSONToClipboard = (fieldName, singleFloor = false) => (
   setSectorsBarcodeMapping(dispatch, getState);
   var { normalizedMap } = getState();
   var converyor_version = getState().conveyorVersion
+  var export_floor_id = getState().exportFloorID
   // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
-  const exportedJson = exportMap(normalizedMap, singleFloor,converyor_version);
+  const exportedJson = exportMap(normalizedMap, singleFloor, converyor_version,
+    export_floor_id);
   if(Object.keys(normalizedMap.entities.conveyorTile).length !== 0){
     var error_text = validateConveyorEntity(normalizedMap.entities.ConnectedconveyorTile,normalizedMap.entities.conveyorTile)
     if(error_text!==""){
@@ -871,7 +888,9 @@ export const requestValidation = (id, email, map_updated_time) => (
   // var withWorldCoordinate = addWorldCoordinateAndDenormalize(normalizedMap);
   setSectorsBarcodeMapping(dispatch, getState);
   var converyor_version = getState().conveyorVersion
-  const exportedJson = exportMap(normalizedMap, false,converyor_version);
+  var export_floor_id = getState().exportFloorID
+  const exportedJson = exportMap(normalizedMap, false, converyor_version,
+    export_floor_id);
   var payload = formatMapWithDataSuffix(id, exportedJson, map_updated_time);
   payload["email"] = email;
   const params = new URLSearchParams(window.location.search);
@@ -903,6 +922,8 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
   let id = getMapId(state);
   let { normalizedMap } = state;
   var converyor_version = state.conveyorVersion
+  var export_floor_id = getState().exportFloorID
+
   if(Object.keys(normalizedMap.entities.conveyorTile).length !== 0){
     var error_text = validateConveyorEntity(normalizedMap.entities.ConnectedconveyorTile,normalizedMap.entities.conveyorTile)
     if(error_text!==""){
@@ -920,7 +941,9 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
   const mapObj = denormalizeMap(normalizedMap);
   let updatedMapObj = updateMapObj(mapObj, normalizedMap);
   updatedMapObj.map.conveyorVersion = converyor_version
-  const exportedJson = exportMap(normalizedMap, false,converyor_version);
+  updatedMapObj.map.exportFloorID = export_floor_id
+  const exportedJson = exportMap(normalizedMap, false, converyor_version,
+    export_floor_id);
   let chargerDict = getParticularEntity(state, { entityName: "charger" });
   let chargers = Object.entries(chargerDict).map(([, val]) => val);
   let ppsDict = getParticularEntity(state, { entityName: "pps" });

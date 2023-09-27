@@ -15,6 +15,7 @@ import currentFloorReducer from "./currentFloor";
 import barcodeDistanceReducer from "./barcodeDistance";
 import mapReducer from "./map";
 import conveyorVersionReducer from "./conveyorVersion";
+import exportFloorIDReducer from "./exportFloorID";
 import elevatorReducer from "./elevator";
 import zoneReducer from "./zone";
 import sectorReducer from "./sector";
@@ -456,6 +457,7 @@ export default combineReducers({
   currentFloor: currentFloorReducer,
   barcodeDistance:barcodeDistanceReducer,
   conveyorVersion:conveyorVersionReducer,
+  exportFloorID: exportFloorIDReducer,
   selection: reduceReducers(selectionReducer, baseSelectionReducer),
   spritesheetLoaded: spritesheetLoadedReducer,
   selectedArea: selectedAreaReducer,

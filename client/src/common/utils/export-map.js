@@ -6,7 +6,8 @@ import conveyor_json_v1 from "common/utils/conveyor_json_v1";
 import toteStorage_json from "common/utils/tote_storage_json";
 import * as constants from "../../constants";
 
-export default (withWorldCoordinate, singleFloor = false,converyor_version="") => {
+export default (withWorldCoordinate, singleFloor=false, converyor_version="",
+    export_floor_id=true) => {
   if(Object.keys(withWorldCoordinate.entities.conveyorTile).length > 0){
     if(converyor_version === constants.DEFAULT_CONVEYOR_VERSION){
       var conveyorJson = conveyor_json_v2(withWorldCoordinate);
@@ -99,7 +100,13 @@ export default (withWorldCoordinate, singleFloor = false,converyor_version="") =
   // make single floor if required
   if (singleFloor) {
     ret.map = ret.map[0];
+    if(!export_floor_id){
+      ret.map = ret.map['map_values'];
+    }
+  } else if(!export_floor_id) {
+    ret.map = ret.map[0]['map_values'];
   }
+
   // merge things from all floors into respective files
   // don't forget dock_point.json and queue_data.json even though not used
   // charger and pps need to have id attached
