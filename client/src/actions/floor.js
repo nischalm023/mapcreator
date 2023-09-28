@@ -30,6 +30,13 @@ export const addFloor = ({
   if (intersection.length) {
     return dispatch(setErrorMessage("Existing barcodes detected in range."));
   }
+
+  // resetting the value of export_floor_id in state
+  dispatch({
+    type: "CHANGE-EXPORT-FLOOR-ID",
+    value: true
+  });
+
   return dispatch({
     type: "ADD-FLOOR",
     value: floorData

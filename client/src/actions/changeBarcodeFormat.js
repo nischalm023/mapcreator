@@ -54,16 +54,22 @@ export const changeBarcodeFormat = barcode_value => (dispatch, getState) => {
   if(barcode_value == TTP_BARCODE_FORMAT){
     const { error, reason } = validateBarcodesDistance(barcodesDict);
     if (error) {
-        dispatch({
-            type: "CHANGE-FLOOR-BARCODE-FORMAT-MODE",
-            value: {"barcode_value":DEFAULT_BARCODE_FORMAT,currentFloor}
-          });
-        dispatch({
-          type:"CHANGE-BARCODE-FORMAT-ON-BASIS-OF-MODE",
-          value:{"barcode_value":DEFAULT_BARCODE_FORMAT,"barcodesDict":barcodesDict,"barcodeOffset":current_offset}
-        })
-        return dispatch(setErrorMessage(reason));
-      }
+      dispatch({
+        type: "CHANGE-FLOOR-BARCODE-FORMAT-MODE",
+        value: {"barcode_value":DEFAULT_BARCODE_FORMAT,currentFloor}
+      });
+      dispatch({
+        type:"CHANGE-BARCODE-FORMAT-ON-BASIS-OF-MODE",
+        value:{"barcode_value":DEFAULT_BARCODE_FORMAT,"barcodesDict":barcodesDict,"barcodeOffset":current_offset}
+      });
+      return dispatch(setErrorMessage(reason));
+    }
+
+    // resetting the value of export_floor_id in state
+    dispatch({
+      type: "CHANGE-EXPORT-FLOOR-ID",
+      value: true
+    });
   }
   
   return Promise.resolve();

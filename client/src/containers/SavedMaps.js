@@ -88,7 +88,8 @@ class SavedMaps extends Component {
               });
               // setSectorsBarcodeMapping(this.props.dispatch, getState);
               const mapObj = denormalizeMap(globalState.normalizedMap);
-              const exportedJson = exportMap(globalState.normalizedMap, false,globalState.conveyorVersion);
+              const exportedJson = exportMap(globalState.normalizedMap, false,
+                globalState.conveyorVersion, globalState.exportFloorID);
               let chargerDict = globalState.normalizedMap.entities['charger'] || {};
               let chargers = Object.entries(chargerDict).map(([, val]) => val);
               let ppsDict = globalState.normalizedMap.entities['pps'] || {};

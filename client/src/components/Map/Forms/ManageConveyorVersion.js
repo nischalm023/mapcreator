@@ -112,15 +112,15 @@ class AddPPS extends Component {
                 </select>
               }
               <br/>
-              <label for="direction">Export map(floor-id)</label>
+              <label for="direction">Map JSON</label>
               <select
-                onChange={(e)=>this.setState({ export_floor_id: e.target.value })}
+                onChange={(e)=>this.setState({ export_floor_id: (e.target.value === 'true') })}
                 className="form-control"
                 defaultValue={exportFloorID}
                 disabled={isExportFloorIdDisabled ? true : false}
                 >
-                  <option value={true}>With Floor ID</option>
-                  <option value={false}>With-out Floor ID</option>
+                  <option value={false}>Single Floor(without floor ID)</option>
+                  <option value={true}>Multi Floor(with floor ID)</option>
               </select>
               <br/>
               <input type="submit" className="btn btn-outline-primary mr-1" value="Submit"></input>
