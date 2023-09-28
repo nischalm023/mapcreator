@@ -119,8 +119,8 @@ class AddPPS extends Component {
                 defaultValue={exportFloorID}
                 disabled={isExportFloorIdDisabled ? true : false}
                 >
-                  <option value={false}>Single Floor(without floor ID)</option>
-                  <option value={true}>Multi Floor(with floor ID)</option>
+                  <option value={false}>Single Floor (Without Floor ID)</option>
+                  <option value={true}>Multi Floor (With Floor ID)</option>
               </select>
               <br/>
               <input type="submit" className="btn btn-outline-primary mr-1" value="Submit"></input>
