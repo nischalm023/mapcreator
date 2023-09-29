@@ -71,7 +71,7 @@ export default (state = {}, action) => {
           io_point_ids.push(io_point.io_point_id);
         }
       })
-      if (io_point_ids.length>1) {
+      if (io_point_ids.length>=1) {
         newState.dummy.ioPointsIds.push(...io_point_ids);
       }
       return newState;
