@@ -966,9 +966,11 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
         if (keyName === "sectorBarcodeMapping"){
           data.append('files', new File([new Blob([JSON.stringify(exportedJson[keyName])], { type: 'application/json' })], 'sector.json', {type: "application/json"}));
         } else if (keyName === "map") {
-            let gsbExportedJson = exportedJson[keyName].map(({ floor_id, map_values }) => {
-            var barcode_val = map_values[0]["barcode"]
-              if(/^(\d{10})$/.test(barcode_val)){ 
+          let gsbExportedJson;
+          if(export_floor_id){
+            gsbExportedJson = exportedJson[keyName].map(({ floor_id, map_values }) => {
+              var barcode_val = map_values[0]["barcode"]
+              if(/^(\d{10})$/.test(barcode_val)){
                 var vda_data = ""
                 for(var i = 0; i < map_values.length; i++) {
                     if(map_values[i].world_coordinate_reference_neighbour=="0,0"){
@@ -990,7 +992,10 @@ export const requestMapUploadToGsb = (solutionId, agentId, functionalAreaId, uid
                   map_values:map_values,
                 })
               }
-          })
+            })
+          } else {
+            gsbExportedJson = exportedJson[keyName]
+          }
           mapData = gsbExportedJson;
           data.append('files', new File([new Blob([JSON.stringify(mapData)], { type: 'application/json' })], 'map.json', {type: "application/json"}));
         } else {
