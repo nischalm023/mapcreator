@@ -350,6 +350,7 @@ export const removeExtraVicinity = (state,tileIdMap) =>{
 export const createHaiPort = (formData) => (dispatch, getState) => {
   const state = getState();
   let barcodes
+  var converyor_version = state.conveyorVersion
   barcodes = state.normalizedMap.entities.barcode
   var currentFloor = state.currentFloor
   var map_values = state.normalizedMap.entities.floor[currentFloor].map_values
@@ -497,7 +498,12 @@ export const createHaiPort = (formData) => (dispatch, getState) => {
         type:"ADD-HAI-PORTS",
         value:formData.port_id
       })
-      
+      if(converyor_version !== DEFAULT_CONVEYOR_VERSION){
+        dispatch({
+        type: "CHANGE-CONVEYOR-VERSION",
+        value: DEFAULT_CONVEYOR_VERSION,
+        });  
+      }
       if(formData.entity_val =="entry"){
         dispatch({
               type: "CONVEYOR-TILES-ENTRY-HAI-PORT-STRIPES",
