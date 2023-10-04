@@ -159,6 +159,50 @@ export default (state = {}, action) => {
       }
       return Object.assign({}, state, newState);
     }
+  case "REMOVE-ENTRY-HAI-PORT": {
+      const conveyor_tile_hai_port = action.value.conveyor_tile_hai_port 
+      const conveyor_tile_io_point = action.value.conveyor_tile_io_point
+      let newState = { ...state };
+      var k = 0;
+      var l = 0
+      while (k < conveyor_tile_hai_port.length) {
+      if (newState[conveyor_tile_hai_port[k]]) {
+          newState[conveyor_tile_hai_port[k]] = { ...state[conveyor_tile_hai_port[k]], conveyorPortEntry: false};
+          delete newState[conveyor_tile_hai_port[k]].conveyorPortEntry;
+        }
+        k++;
+      }
+      while (l < conveyor_tile_io_point.length) {
+      if (newState[conveyor_tile_io_point[l]]) {
+          newState[conveyor_tile_io_point[l]] = { ...state[conveyor_tile_io_point[l]], conveyorEntryIO: false};
+          delete newState[conveyor_tile_io_point[l]].conveyorEntryIO;
+        }
+        l++;
+      }
+      return Object.assign({}, state, newState);
+    }
+    case "REMOVE-EXIT-HAI-PORT": {
+      const conveyor_tile_hai_port = action.value.conveyor_tile_hai_port 
+      const conveyor_tile_io_point = action.value.conveyor_tile_io_point
+      let newState = { ...state };
+      var k = 0;
+      var l = 0
+      while (k < conveyor_tile_hai_port.length) {
+      if (newState[conveyor_tile_hai_port[k]]) {
+          newState[conveyor_tile_hai_port[k]] = { ...state[conveyor_tile_hai_port[k]], conveyorPortExit: false};
+          delete newState[conveyor_tile_hai_port[k]].conveyorPortExit;
+        }
+        k++;
+      }
+      while (l < conveyor_tile_io_point.length) {
+      if (newState[conveyor_tile_io_point[l]]) {
+          newState[conveyor_tile_io_point[l]] = { ...state[conveyor_tile_io_point[l]], conveyorExitIO: false};
+          delete newState[conveyor_tile_io_point[l]].conveyorExitIO;
+        }
+        l++;
+      }
+      return Object.assign({}, state, newState);
+    }
     case "REMOVE-ENTRY-HAI-PORT-STRIPES": {
       const { hai_entry_port_list } = action.value;
       let newState = { ...state };

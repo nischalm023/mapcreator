@@ -557,26 +557,18 @@ export const removeHaiPort = (formData) => (dispatch, getState) => {
           value: {port_id_list} ,
   });
   if(data.port_type === "unloader"){
-    var diff_entry_io_point = [data.io_point]
-    var hai_entry_port_list = [data.port_coordinate]
+    var conveyor_tile_io_point = [data.io_point]
+    var conveyor_tile_hai_port = [data.port_coordinate]
     dispatch({
-          type: "REMOVE-ENTRY-HAI-PORT-STRIPES",
-          value: {hai_entry_port_list} ,
-      });
-    dispatch({
-          type: "REMOVE-CONVEYOR-ENTRY-IO-POINT-STRIPES",
-          value: {diff_entry_io_point} ,
+          type: "REMOVE-ENTRY-HAI-PORT",
+          value: {conveyor_tile_hai_port,conveyor_tile_io_point} ,
       });
   }else{
-    var diff_exit_io_point = [data.io_point]
-    var hai_exit_port_list = [data.port_coordinate]
+    var conveyor_tile_io_point = [data.io_point]
+    var conveyor_tile_hai_port = [data.port_coordinate]
     dispatch({
-          type: "REMOVE-EXIT-HAI-PORT-STRIPES",
-          value: {hai_exit_port_list} ,
-      });
-    dispatch({
-          type: "REMOVE-CONVEYOR-EXIT-IO-POINT-STRIPES",
-          value: {diff_exit_io_point} ,
+          type: "REMOVE-EXIT-HAI-PORT",
+          value: {conveyor_tile_hai_port,conveyor_tile_io_point} ,
       });
   }
   dispatch(setSuccessMessage(`Ranger Port (${data.port_id_value}) has been Deleted`)); 
