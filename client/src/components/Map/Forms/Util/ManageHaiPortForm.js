@@ -76,11 +76,22 @@ class ManageHaiPort extends Component {
         }
         this.setState({ schema: schema });
     };
-    onRemoveHandler = (onSubmit,port_info=null) => {
+    handleConveyorOKClick(onSubmit,port_info=null){
+        const {dispatch} = this.props;
         let formData = {
             "port_info":port_info
         }
+        this.setState({
+          warningModalShow : false
+        })
         onSubmit(formData,true);
+        this.toggle();
+
+    }
+    onRemoveHandler = (onSubmit,port_info=null,warningModalShow) => {
+        this.setState({
+            warningModalShow : true,
+            });
     };
   render() {
     const {
@@ -346,7 +357,7 @@ class ManageHaiPort extends Component {
                 className="btn btn-outline-danger"
                 style={{ float: "right" }}
                 onClick={() => {
-                    this.onRemoveHandler(onSubmit,port_info);
+                    this.onRemoveHandler(onSubmit,port_info,warningModalShow);
                     this.toggle();
                 }}
             >
@@ -358,6 +369,22 @@ class ManageHaiPort extends Component {
        </form>
         }
       </ButtonForm>
+       <Modal isOpen={this.state.warningModalShow} toggle = {() => {this.setState({warningModalShow: !this.state.warningModalShow})}} className = "confirmation-modal">
+                <div> Are you sure you want to delete Ranger Port ({port_info.port_id_value})?</div>
+                <br></br>
+                <div>
+                  <button onClick={() => {this.handleConveyorOKClick(onSubmit,port_info)}} className="btn btn-outline-primary mr-1">
+                    Confirm
+                    </button>
+                  <button className="btn btn-outline-danger" onClick={() => {
+                    this.setState({
+                      warningModalShow: false
+                    })
+                  }}
+                  >Cancel
+                  </button>
+                </div>
+        </Modal>  
     </div>
     );
   }

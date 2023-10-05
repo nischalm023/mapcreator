@@ -458,6 +458,7 @@ export const fetchMap = (mapId, onSuccess) => (dispatch, getState) => {
     .then(handleErrors)
     .then((res) => res.json())
     .then((map) => dispatch(newMap(map)))
+    .then(() => setGlobalHaiPortValue(dispatch,getState))
     .then((map) => barcodeCordMapping(getState))
     .then((map) => conveyorVersion(getState))
     .then((map) => exportFloorID(getState))
@@ -471,7 +472,6 @@ export const fetchMap = (mapId, onSuccess) => (dispatch, getState) => {
     .then(() => getBarcodeSpacing(dispatch,getState,parseInt(mapId)))
     .then(() => setIOPoints(getState))
     .then(() => setToteStorables(getState))
-    .then(() => setGlobalHaiPortValue(dispatch,getState))
     .then(() => setHaiPort(getState))
     .then(onSuccess)
     .catch((error) => console.warn(error)); // eslint-disable-line no-console

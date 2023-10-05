@@ -144,7 +144,9 @@ export const manageHaiTemplate = (formData) => (dispatch, getState) => {
     type: "MANAGE-HAI-TEMPLATE",
     value: template_data
   });
+  if(formData.is_updated){
   dispatch(setSuccessMessage(`All Port linked to this template have updated properties.`));
+  }
   return true
 }
 
@@ -571,7 +573,7 @@ export const removeHaiPort = (formData) => (dispatch, getState) => {
           value: {conveyor_tile_hai_port,conveyor_tile_io_point} ,
       });
   }
-  dispatch(setSuccessMessage(`Ranger Port (${data.port_id_value}) has been Deleted`)); 
+  dispatch(setSuccessMessage(`Ranger Port (${data.port_id_value}) has been Deleted.`)); 
   dispatch(clearTiles);
   return true
 }
