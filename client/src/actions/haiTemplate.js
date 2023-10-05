@@ -101,7 +101,7 @@ export const createHaiTemplate = (formData) => (dispatch, getState) => {
   const state = getState();
   var template_data = 
          {
-           "template_id":formData.template_id,
+           "template_id":parseInt(formData.schema.template_id.template_id),
            "template_display_name":formData.schema.template_display_name.display_name,
            "port_type":formData.schema.port_type.port_type,
            "tray_count":parseInt(formData.schema.tray_count.tray_count),
@@ -126,10 +126,11 @@ export const createHaiTemplate = (formData) => (dispatch, getState) => {
 export const manageHaiTemplate = (formData) => (dispatch, getState) => {
   const state = getState();
   var haiTemplates = state.normalizedMap.entities.haiPortsTemplate
+  var haiPortData = state.normalizedMap.entities.haiPortTile
   var clone = haiTemplates[formData.template_id]["clone"]
   var template_data = 
          {
-           "template_id":formData.template_id,
+           "template_id":parseInt(formData.schema.template_id.template_id),
            "template_display_name":formData.schema.template_display_name.display_name,
            "port_type":formData.schema.port_type.port_type,
            "tray_count":parseInt(formData.schema.tray_count.tray_count),
@@ -139,13 +140,33 @@ export const manageHaiTemplate = (formData) => (dispatch, getState) => {
            "height":parseInt(formData.schema.dimension.height),
            "clone":clone
        }
-  
-  dispatch({
-    type: "MANAGE-HAI-TEMPLATE",
-    value: template_data
-  });
+  if(formData.originalTemplateId === parseInt(formData.schema.template_id.template_id)){
+     dispatch({
+      type: "MANAGE-HAI-TEMPLATE",
+      value: template_data
+    });
+  }else{
+    dispatch({
+      type: "REMOVE-TEMPLATE",
+      value: formData.originalTemplateId
+    });
+    dispatch({
+      type: "REMOVE-HAI-TEMPLATE",
+      value: formData.originalTemplateId
+    });
+    dispatch({
+      type: "MANAGE-HAI-TEMPLATE",
+      value: template_data
+    });
+    for (const [key, value] of Object.entries(haiPortData)) {
+      if(value.template_id == formData.originalTemplateId){
+        value["template_id"] = parseInt(formData.schema.template_id.template_id)
+      }
+    }
+  }
+ 
   if(formData.is_updated){
-  dispatch(setSuccessMessage(`All Port linked to this template have updated properties.`));
+    dispatch(setSuccessMessage(`All Port linked to this template have updated properties.`));
   }
   return true
 }

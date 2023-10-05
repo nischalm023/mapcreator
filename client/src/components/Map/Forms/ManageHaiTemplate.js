@@ -111,6 +111,7 @@ class CreateHaiTemplate extends Component {
                 }else{
                     schema.template_id.edit = !schema.template_id.edit;
                     schema.template_id.error = '';
+                    document.getElementById('template-id').style.removeProperty('border');
                 }
                 
             }else{
@@ -139,6 +140,7 @@ class CreateHaiTemplate extends Component {
                 }else{
                     schema.template_display_name.edit = !schema.template_display_name.edit;
                     schema.template_display_name.error = '';
+                     document.getElementById('display-name').style.removeProperty('border');
                 }
                 
             }else{
@@ -151,7 +153,7 @@ class CreateHaiTemplate extends Component {
             
         }
         if(field==="tray_count"){
-            if(schema.tray_count.tray_count !="" || schema.tray_count.tray_count == 0){
+            if(!isNaN(schema.tray_count.tray_count) || schema.tray_count.tray_count == 0){
                 if(schema.tray_count.tray_count<1){
                     schema.tray_count.error = 'Value must be greater than or equal to 1';
                     schema.tray_count.edit = schema.tray_count.edit;
@@ -163,6 +165,7 @@ class CreateHaiTemplate extends Component {
                 else{
                     schema.tray_count.edit = !schema.tray_count.edit;
                     schema.tray_count.error = '';
+                     document.getElementById('tray-count').style.removeProperty('border');
                 }
             }else{
                 schema.tray_count.error = 'This is a mendatory field';
@@ -177,6 +180,7 @@ class CreateHaiTemplate extends Component {
             if(schema.port_type.port_type !=""){
                 schema.port_type.edit = !schema.port_type.edit;
                 schema.port_type.error = '';
+                document.getElementById('port-type').style.removeProperty('border');
             }else{
                 schema.port_type.error = 'This is a mendatory field';
                 setTimeout(() => {
@@ -245,6 +249,9 @@ class CreateHaiTemplate extends Component {
                 if(schema.dimension.error == ""){
                     schema.dimension.edit = !schema.dimension.edit;
                     schema.dimension.error = '';
+                    document.getElementById('breadth-val').style.removeProperty('border');
+                    document.getElementById('length-val').style.removeProperty('border');
+                    document.getElementById('height-val').style.removeProperty('border');
 
 
                 }
@@ -254,7 +261,7 @@ class CreateHaiTemplate extends Component {
         
         this.setState({ schema: schema });
     };
-    onSubmitHandler = (onSubmit, nextTemplateId,warningModalShow,port_data_list,template_name,port_type,tray_count,length,breadth,height) => {
+    onSubmitHandler = (onSubmit, nextTemplateId,warningModalShow,port_data_list,template_name,port_type,tray_count,length,breadth,height,template_id) => {
         var schema = { ...this.state.schema };
         var error = false;
         if(!error){
@@ -265,38 +272,79 @@ class CreateHaiTemplate extends Component {
                 }
             };
         }
-        
+         if(error){
+                    if(schema.template_id.error !== ""){
+                        setTimeout(() => {
+                            const element = document.getElementById("template-id");
+                            element.style.border = "2px solid red";;
+                         },0)
+                    }if(schema.template_display_name.error !==""){
+                        setTimeout(() => {
+                            const element = document.getElementById("display-name");
+                            element.style.border = "2px solid red";;
+                        },0)
+                    }
+                    if(schema.tray_count.error !==""){
+                        setTimeout(() => {
+                            const element = document.getElementById("tray-count");
+                            element.style.border = "2px solid red";;
+                        },0)
+                    }
+                    if(schema.port_type.error !==""){
+                        setTimeout(() => {
+                            const element = document.getElementById("port-type");
+                            element.style.border = "2px solid red";;
+                        },0)
+                    }
+                    if(schema.dimension.error !==""){
+                        setTimeout(() => {
+                            const element = document.getElementById("length-val");
+                            element.style.border = "2px solid red";;
+                        },0)
+                        setTimeout(() => {
+                            const element = document.getElementById("breadth-val");
+                            element.style.border = "2px solid red";;
+                        },0)
+                        setTimeout(() => {
+                            const element = document.getElementById("height-val");
+                            element.style.border = "2px solid red";;
+                    },0)
+                    }
+        }
         this.setState({ schema: schema });
-        var is_updated = false
-        if(template_name !== schema.template_display_name.display_name ||
-           port_type !== schema.port_type.port_type ||
-           tray_count !== schema.tray_count.tray_count ||
-           length !== schema.dimension.length ||
-           breadth !== schema.dimension.breadth ||
-           height !== schema.dimension.height
-           ){
-            is_updated = true
-            this.setState({
-                    is_updated : true,
-                })
-        }
-        if(port_data_list.length !==0 && is_updated){
-            if (!error) {
+        if (!error) {
+            var is_updated = false
+            if(parseInt(template_id) !== parseInt(schema.template_id.template_id) ||
+               template_name !== schema.template_display_name.display_name ||
+               port_type !== schema.port_type.port_type ||
+               tray_count !== schema.tray_count.tray_count ||
+               length !== schema.dimension.length ||
+               breadth !== schema.dimension.breadth ||
+               height !== schema.dimension.height
+               ){
+                is_updated = true
                 this.setState({
-                    warningModalShow : true,
-                })
+                        is_updated : true,
+                    })
+            }
+            if(port_data_list.length !==0 && is_updated){
+                if (!error) {
+                    this.setState({
+                        warningModalShow : true,
+                    })
+                }
+            }
+            else{
+                let data = {
+                    "schema": schema,
+                    "template_id":nextTemplateId,
+                    "originalTemplateId":parseInt(template_id),
+                    "is_updated":is_updated
+                }
+                onSubmit(data);
+                this.toggle();
             }
         }
-        else{
-            let data = {
-                "schema": schema,
-                "template_id":nextTemplateId,
-                "is_updated":is_updated
-            }
-            onSubmit(data);
-            this.toggle();
-        }
-        
     };
     handleConveyorOKClick(onSubmit,nextTemplateId,isRemoveModal,is_updated){
         const {dispatch} = this.props;
@@ -304,6 +352,7 @@ class CreateHaiTemplate extends Component {
         let data = {
                 "schema": schema,
                 "template_id":nextTemplateId,
+                "originalTemplateId":parseInt(nextTemplateId),
                 "is_updated":is_updated
             }
         this.setState({
@@ -558,7 +607,7 @@ class CreateHaiTemplate extends Component {
         <br/>
          <div style={{margin:"0px 10px"}}>
             <button type="button" style = {{width:"100px"}} onClick={() => {
-              this.onSubmitHandler(onSubmit,template_id,warningModalShow,port_data_list,template_name,port_type,tray_count,length,breadth,height);
+              this.onSubmitHandler(onSubmit,template_id,warningModalShow,port_data_list,template_name,port_type,tray_count,length,breadth,height,template_id);
             }}
               className="btn btn-outline-primary mr-1">
               Update
