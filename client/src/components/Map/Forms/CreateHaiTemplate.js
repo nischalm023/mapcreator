@@ -214,11 +214,8 @@ class CreateHaiTemplate extends Component {
                 document.getElementById('breadth-val').style.removeProperty('border');
                 document.getElementById('length-val').style.removeProperty('border');
             }
-            if(schema.dimension.height !=="" || !isNaN(schema.dimension.height) &&
-                schema.dimension.breadth !=="" || !isNaN(schema.dimension.breadth) &&
-                schema.dimension.length !=="" || !isNaN(schema.dimension.length)
-                ){
-                if(parseInt(schema.dimension.length)<1){
+            if(schema.dimension.error === ""){
+                if(schema.dimension.length<1){
                     schema.dimension.error = 'Value must be greater than or equal to 1';
                     schema.dimension.edit = schema.dimension.edit;
                     setTimeout(() => {
@@ -226,7 +223,7 @@ class CreateHaiTemplate extends Component {
                             element.style.border = "2px solid red";;
                     },0)
                 }
-                if(parseInt(schema.dimension.breadth) <1){
+                if(schema.dimension.breadth <1){
                     schema.dimension.error = 'Value must be greater than or equal to 1';
                     schema.dimension.edit = schema.dimension.edit;
                     setTimeout(() => {
@@ -234,7 +231,7 @@ class CreateHaiTemplate extends Component {
                             element.style.border = "2px solid red";;
                     },0)
                 }
-                if(parseInt(schema.dimension.height) <1){
+                if(schema.dimension.height <1){
                     schema.dimension.error = 'Value must be greater than or equal to 1';
                     schema.dimension.edit = schema.dimension.edit;
                     setTimeout(() => {
@@ -242,7 +239,7 @@ class CreateHaiTemplate extends Component {
                             element.style.border = "2px solid red";;
                     },0)
                 }
-                if(parseInt(schema.dimension.height) >= 1 && parseInt(schema.dimension.breadth) >= 1 && parseInt(schema.dimension.length) >= 1){
+                if(schema.dimension.error == ""){
                     schema.dimension.edit = !schema.dimension.edit;
                     schema.dimension.error = '';
                     document.getElementById('breadth-val').style.removeProperty('border');
